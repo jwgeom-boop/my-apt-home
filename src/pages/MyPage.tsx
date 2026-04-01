@@ -150,6 +150,38 @@ const MyPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* 알림 설정 다이얼로그 */}
+      <Dialog open={showNotification} onOpenChange={setShowNotification}>
+        <DialogContent className="max-w-[360px] rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">알림 설정</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-1 pt-2">
+            {[
+              { key: "defectStatus" as const, label: "하자 처리 현황", desc: "접수/처리중/완료 상태 변경 시" },
+              { key: "payment" as const, label: "납부 안내", desc: "납부 기한 및 완납 알림" },
+              { key: "moveIn" as const, label: "입주 일정", desc: "사전점검·입주 관련 공지" },
+              { key: "notice" as const, label: "공지사항", desc: "관리사무소 공지 알림" },
+              { key: "event" as const, label: "이벤트·혜택", desc: "입주민 이벤트 및 할인 정보" },
+            ].map((item) => (
+              <div
+                key={item.key}
+                className="flex items-center justify-between py-3 border-b border-border last:border-0"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.desc}</p>
+                </div>
+                <Switch
+                  checked={notifications[item.key]}
+                  onCheckedChange={() => toggleNotification(item.key)}
+                />
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
