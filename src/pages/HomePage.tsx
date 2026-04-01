@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, Megaphone } from "lucide-react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, Megaphone, WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 
 const noticeItems = [
   { tag: "중요", tagColor: "bg-destructive/15 text-destructive", title: "사전점검 기간 지하주차장 이용 안내", unread: true },
