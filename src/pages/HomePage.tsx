@@ -1,5 +1,6 @@
-import { CheckCircle2, Circle, QrCode, CreditCard } from "lucide-react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
