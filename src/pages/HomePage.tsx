@@ -210,7 +210,7 @@ const HomePage = () => {
       {/* Progress - 클릭하면 체크리스트 표시 */}
       <button
         onClick={() => setShowChecklist(true)}
-        className="w-full bg-card rounded-xl p-5 mb-4 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
+        className="w-full bg-card rounded-xl p-4 mb-3 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-foreground">입주 진행률</h3>
