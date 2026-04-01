@@ -132,38 +132,23 @@ const HomePage = () => {
         )}
       </div>
 
-      {/* Progress */}
-      <div className="bg-card rounded-xl p-5 mb-4 shadow-sm border border-border">
+      {/* Progress - 클릭하면 체크리스트 표시 */}
+      <button
+        onClick={() => setShowChecklist(true)}
+        className="w-full bg-card rounded-xl p-5 mb-4 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
+      >
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-foreground">입주 진행률</h3>
-          <span className="text-sm font-bold text-primary">{progressPercent}%</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-primary">{progressPercent}%</span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </div>
         </div>
         <Progress value={progressPercent} className="h-3" />
         <p className="text-xs text-muted-foreground mt-2">
           {completedCount}/{checklistItems.length}개 항목 완료
         </p>
-      </div>
-
-      {/* Checklist */}
-      <div className="bg-card rounded-xl p-5 mb-4 shadow-sm border border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-3">입주 체크리스트</h3>
-        <ul className="space-y-3">
-          {checklistItems.map((item) => (
-            <li key={item.id} className="flex items-center gap-3">
-              {item.done ? (
-                <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-              ) : (
-                <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-              )}
-              <span className={cn("text-sm", item.done ? "text-foreground" : "text-muted-foreground")}>
-                {item.label}
-              </span>
-              {item.done && <span className="ml-auto text-xs text-success font-medium">완료</span>}
-              {!item.done && <span className="ml-auto text-xs text-warning font-medium">미완료</span>}
-            </li>
-          ))}
-        </ul>
-      </div>
+      </button>
 
       {/* Quick Buttons */}
       <div className="grid grid-cols-2 gap-3">
