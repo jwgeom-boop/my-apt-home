@@ -159,13 +159,13 @@ const HomePage = () => {
       <div className="grid grid-cols-2 gap-2 mb-3">
         <button
           onClick={() => navigate("/defect")}
-          className="flex flex-col items-center gap-2 bg-card rounded-xl p-5 shadow-sm border border-border active:scale-[0.98] transition-transform"
+          className="flex flex-col items-center gap-1.5 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
         >
-          <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-            <ClipboardList className="w-6 h-6 text-destructive" />
+          <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+            <ClipboardList className="w-5 h-5 text-destructive" />
           </div>
           <span className="text-sm font-bold text-foreground">하자 접수</span>
-          <span className="text-[11px] text-muted-foreground">새 하자 신고하기</span>
+          <span className="text-[10px] text-muted-foreground">새 하자 신고하기</span>
         </button>
         <button
           onClick={() => setShowDefectList(true)}
