@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
@@ -38,6 +38,7 @@ const HomePage = () => {
 
   const [defects, setDefects] = useState<DefectRow[]>([]);
   const [loadingDefects, setLoadingDefects] = useState(true);
+  const [showDefectList, setShowDefectList] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -53,7 +54,7 @@ const HomePage = () => {
           .select("receipt_no, location, mid_category, status, is_urgent")
           .eq("resident_id", resident.id)
           .order("created_at", { ascending: false })
-          .limit(5);
+          .limit(10);
 
         if (data) setDefects(data);
       }
@@ -92,7 +93,7 @@ const HomePage = () => {
           <span className="text-[11px] text-muted-foreground">새 하자 신고하기</span>
         </button>
         <button
-          onClick={() => navigate("/defect")}
+          onClick={() => setShowDefectList(true)}
           className="flex flex-col items-center gap-2 bg-card rounded-xl p-5 shadow-sm border border-border active:scale-[0.98] transition-transform"
         >
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -127,37 +128,6 @@ const HomePage = () => {
               <p className="text-2xl font-bold text-success">{statusCounts.완료}</p>
               <p className="text-[11px] text-muted-foreground mt-1">완료</p>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* My Defect List */}
-      <div className="bg-card rounded-xl p-5 mb-4 shadow-sm border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-foreground">나의 하자 접수 내역</h3>
-          <button onClick={() => navigate("/defect")} className="text-xs text-primary flex items-center gap-0.5">
-            전체보기 <ChevronRight className="w-3 h-3" />
-          </button>
-        </div>
-        {loadingDefects ? (
-          <div className="flex justify-center py-4">
-            <Loader2 className="w-5 h-5 animate-spin text-primary" />
-          </div>
-        ) : defects.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">접수된 하자가 없습니다</p>
-        ) : (
-          <div className="space-y-2.5">
-            {defects.map((d) => (
-              <div key={d.receipt_no} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-foreground">{d.receipt_no}</p>
-                  <p className="text-[11px] text-muted-foreground">{d.mid_category || ""} · {d.location}</p>
-                </div>
-                <span className={cn("text-xs font-bold shrink-0", statusColorMap[d.status] || "text-muted-foreground")}>
-                  {d.status}
-                </span>
-              </div>
-            ))}
           </div>
         )}
       </div>
@@ -216,6 +186,59 @@ const HomePage = () => {
           <span className="text-sm font-semibold text-foreground">납부내역</span>
         </button>
       </div>
+
+      {/* 나의 접수 현황 슬라이드 패널 */}
+      {showDefectList && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowDefectList(false)} />
+          <div className="relative w-full max-w-[390px] bg-background rounded-t-2xl shadow-xl animate-slide-up max-h-[75vh] flex flex-col">
+            {/* 핸들바 */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+            {/* 헤더 */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+              <h3 className="text-base font-bold text-foreground">나의 하자 접수 내역</h3>
+              <button onClick={() => setShowDefectList(false)}>
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+            {/* 내역 리스트 */}
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              {loadingDefects ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                </div>
+              ) : defects.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">접수된 하자가 없습니다</p>
+              ) : (
+                <div className="space-y-3">
+                  {defects.map((d) => (
+                    <div key={d.receipt_no} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 border border-border">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-foreground">{d.receipt_no}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{d.mid_category || ""} · {d.location}</p>
+                      </div>
+                      <span className={cn("text-sm font-bold shrink-0", statusColorMap[d.status] || "text-muted-foreground")}>
+                        {d.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {/* 하단 버튼 */}
+            <div className="px-5 py-4 border-t border-border">
+              <button
+                onClick={() => { setShowDefectList(false); navigate("/defect"); }}
+                className="w-full bg-primary text-primary-foreground rounded-xl py-3 text-sm font-bold active:scale-[0.98] transition-transform"
+              >
+                새 하자 접수하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MobileLayout>
   );
 };
