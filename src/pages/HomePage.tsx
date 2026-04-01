@@ -40,7 +40,7 @@ const HomePage = () => {
   const [loadingDefects, setLoadingDefects] = useState(true);
   const [showDefectList, setShowDefectList] = useState(false);
 
-  useEffect(() => {
+  const [showChecklist, setShowChecklist] = useState(false);
     const load = async () => {
       const { data: resident } = await supabase
         .from("residents")
