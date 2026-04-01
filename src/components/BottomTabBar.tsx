@@ -1,4 +1,4 @@
-import { Home, CreditCard, QrCode, CalendarDays, Bell } from "lucide-react";
+import { Home, CreditCard, QrCode, CalendarDays, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -7,7 +7,7 @@ const tabs = [
   { path: "/payment", label: "납부", icon: CreditCard },
   { path: "/qr", label: "QR", icon: QrCode },
   { path: "/reservation", label: "예약", icon: CalendarDays },
-  { path: "/notice", label: "공지", icon: Bell },
+  { path: "/mypage", label: "마이", icon: User },
 ];
 
 const BottomTabBar = () => {

@@ -10,6 +10,10 @@ import ReservationPage from "./pages/ReservationPage";
 import NoticePage from "./pages/NoticePage";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./pages/LoginPage";
+import DefectReportPage from "./pages/DefectReportPage";
+import ConsentPage from "./pages/ConsentPage";
+import CertificatePage from "./pages/CertificatePage";
+import MyPage from "./pages/MyPage";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +30,10 @@ const App = () => (
           <Route path="/qr" element={<QRPage />} />
           <Route path="/reservation" element={<ReservationPage />} />
           <Route path="/notice" element={<NoticePage />} />
+          <Route path="/defect" element={<DefectReportPage />} />
+          <Route path="/consent" element={<ConsentPage />} />
+          <Route path="/certificate" element={<CertificatePage />} />
+          <Route path="/mypage" element={<MyPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
