@@ -81,12 +81,18 @@ const HomePage = () => {
   return (
     <MobileLayout>
       {/* Greeting */}
-      <div className="bg-accent text-accent-foreground rounded-xl p-5 mb-4">
-        <p className="text-sm font-medium opacity-80">101동 1202호</p>
-        <h2 className="text-xl font-bold mt-1">홍길동님, 환영합니다!</h2>
-        <span className="inline-block mt-2 text-xs bg-primary/20 text-primary-foreground px-3 py-1 rounded-full">
-          입주 예정
-        </span>
+      <div className="bg-accent text-accent-foreground rounded-xl p-4 mb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium opacity-80">101동 1202호</p>
+              <span className="text-[10px] bg-primary/20 text-primary-foreground px-2 py-0.5 rounded-full font-medium">
+                입주 예정
+              </span>
+            </div>
+            <h2 className="text-lg font-bold mt-1">홍길동님, 환영합니다!</h2>
+          </div>
+        </div>
       </div>
 
       {/* Offline drafts sync banner */}
