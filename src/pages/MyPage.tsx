@@ -1,20 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ChevronRight, X, Phone, MessageSquare } from "lucide-react";
+import { User, ChevronRight, Phone, MessageSquare, Loader2 } from "lucide-react";
 import BottomTabBar from "@/components/BottomTabBar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const MyPage = () => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // 알림 설정 상태
+  // DB에서 가져올 데이터
+  const [residentId, setResidentId] = useState<string | null>(null);
+  const [unitNumber, setUnitNumber] = useState("");
+  const [area, setArea] = useState("");
+  const [complexName, setComplexName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [carNumber, setCarNumber] = useState("");
+
   const [notifications, setNotifications] = useState({
     defectStatus: true,
     payment: true,
@@ -23,16 +33,100 @@ const MyPage = () => {
     event: false,
   });
 
-  const toggleNotification = (key: keyof typeof notifications) => {
-    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+  // DB에서 데이터 로드
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 첫 번째 입주자 데이터 가져오기 (데모용)
+        const { data: resident, error: resError } = await supabase
+          .from("residents")
+          .select("*")
+          .limit(1)
+          .single();
+
+        if (resError) throw resError;
+
+        if (resident) {
+          setResidentId(resident.id);
+          setUnitNumber(resident.unit_number);
+          setArea(resident.area);
+          setComplexName(resident.complex_name);
+          setPhone(resident.phone);
+          setCarNumber(resident.car_number || "");
+
+          // 알림 설정 가져오기
+          const { data: notifData } = await supabase
+            .from("notification_settings")
+            .select("*")
+            .eq("resident_id", resident.id)
+            .single();
+
+          if (notifData) {
+            setNotifications({
+              defectStatus: notifData.defect_status,
+              payment: notifData.payment,
+              moveIn: notifData.move_in,
+              notice: notifData.notice,
+              event: notifData.event,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("데이터 로드 실패:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // 알림 토글 → DB 업데이트
+  const toggleNotification = async (key: keyof typeof notifications) => {
+    const newValue = !notifications[key];
+    setNotifications(prev => ({ ...prev, [key]: newValue }));
+
+    const dbFieldMap: Record<string, string> = {
+      defectStatus: "defect_status",
+      payment: "payment",
+      moveIn: "move_in",
+      notice: "notice",
+      event: "event",
+    };
+
+    if (residentId) {
+      const { error } = await supabase
+        .from("notification_settings")
+        .update({ [dbFieldMap[key]]: newValue })
+        .eq("resident_id", residentId);
+
+      if (error) {
+        // 롤백
+        setNotifications(prev => ({ ...prev, [key]: !newValue }));
+        toast.error("알림 설정 변경에 실패했습니다.");
+        return;
+      }
+    }
     toast.success("알림 설정이 변경되었습니다.");
   };
 
-  // 개인정보 수정 상태
-  const [phone, setPhone] = useState("010-9876-5432");
-  const [carNumber, setCarNumber] = useState("34나5678");
+  // 개인정보 저장 → DB 업데이트
+  const handleProfileSave = async () => {
+    if (!residentId) return;
+    setSaving(true);
 
-  const handleProfileSave = () => {
+    const { error } = await supabase
+      .from("residents")
+      .update({ phone, car_number: carNumber })
+      .eq("id", residentId);
+
+    setSaving(false);
+
+    if (error) {
+      toast.error("저장에 실패했습니다. 다시 시도해주세요.");
+      return;
+    }
+
     toast.success("개인정보가 수정되었습니다.");
     setShowProfile(false);
   };
@@ -45,6 +139,14 @@ const MyPage = () => {
     { color: "bg-muted-foreground", label: "개인정보 수정", desc: "연락처·차량번호 변경", action: () => setShowProfile(true) },
     { color: "bg-purple-500", label: "입주지원센터 연락", desc: "전화 / 채팅 문의", action: () => setShowContact(true) },
   ];
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-[390px] min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
@@ -60,7 +162,7 @@ const MyPage = () => {
         <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
           <h2 className="text-sm font-bold text-foreground mb-1">세대 정보</h2>
           <p className="text-xs text-foreground">
-            101동 0102호 · 59㎡ · oo아파트 101현장
+            {unitNumber} · {area} · {complexName}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             연락처: {phone} · 등록차량: {carNumber}
@@ -110,7 +212,8 @@ const MyPage = () => {
               <label className="text-xs font-medium text-muted-foreground mb-1 block">등록 차량번호</label>
               <Input value={carNumber} onChange={(e) => setCarNumber(e.target.value)} placeholder="00가0000" />
             </div>
-            <Button onClick={handleProfileSave} className="w-full bg-primary text-primary-foreground">
+            <Button onClick={handleProfileSave} disabled={saving} className="w-full bg-primary text-primary-foreground">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               저장하기
             </Button>
           </div>
