@@ -192,7 +192,15 @@ const MyPage = () => {
 
       {/* Logout */}
       <div className="px-4 py-4 pb-24 text-center">
-        <button className="text-sm text-destructive font-medium">로그아웃</button>
+        <button
+          className="text-sm text-destructive font-medium"
+          onClick={() => {
+            localStorage.removeItem("isLoggedIn");
+            navigate("/login");
+          }}
+        >
+          로그아웃
+        </button>
       </div>
 
       <BottomTabBar />
