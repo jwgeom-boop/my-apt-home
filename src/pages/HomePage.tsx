@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X } from "lucide-react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, Megaphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+
+const noticeItems = [
+  { tag: "중요", tagColor: "bg-destructive/15 text-destructive", title: "사전점검 기간 지하주차장 이용 안내", unread: true },
+  { tag: "안내", tagColor: "bg-primary/15 text-primary", title: "입주증 발급 및 열람 가능 시간 변경 공지", unread: true },
+  { tag: "행사", tagColor: "bg-amber-100 text-amber-700", title: "입주민 환영 카페테리아 운영 안내", unread: false },
+];
 
 interface DefectRow {
   receipt_no: string;
@@ -79,6 +85,45 @@ const HomePage = () => {
         <span className="inline-block mt-2 text-xs bg-primary/20 text-primary-foreground px-3 py-1 rounded-full">
           입주 예정
         </span>
+      </div>
+
+      {/* 📢 공지사항 배너 */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate("/notice")}
+          className="w-full flex items-center justify-between mb-2"
+        >
+          <div className="flex items-center gap-1.5">
+            <Megaphone className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold text-foreground">공지사항</span>
+            {noticeItems.some(n => n.unread) && (
+              <span className="w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                N
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <span className="text-xs">더보기</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </div>
+        </button>
+        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          {noticeItems.map((n, i) => (
+            <button
+              key={i}
+              onClick={() => navigate("/notice")}
+              className="min-w-[260px] bg-card rounded-xl p-4 border border-border shadow-sm text-left shrink-0 active:scale-[0.98] transition-transform relative"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className={cn("text-[10px] px-2 py-0.5 rounded font-bold", n.tagColor)}>
+                  {n.tag}
+                </span>
+                {n.unread && <span className="w-2 h-2 rounded-full bg-destructive" />}
+              </div>
+              <p className="text-sm font-semibold text-foreground truncate">{n.title}</p>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Defect Quick Buttons */}
