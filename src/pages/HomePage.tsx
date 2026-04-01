@@ -156,7 +156,7 @@ const HomePage = () => {
       </div>
 
       {/* Defect Quick Buttons */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-3">
         <button
           onClick={() => navigate("/defect")}
           className="flex flex-col items-center gap-2 bg-card rounded-xl p-5 shadow-sm border border-border active:scale-[0.98] transition-transform"
