@@ -41,7 +41,7 @@ const MyPage = () => {
     { color: "bg-primary", label: "내 입주 현황", desc: "진행률·체크리스트 상세", action: () => navigate("/") },
     { color: "bg-green-500", label: "납부내역 조회", desc: "전체 납부 이력", action: () => navigate("/payment") },
     { color: "bg-navy", label: "하자 접수 이력", desc: "접수한 하자 목록·처리현황", action: () => navigate("/defect") },
-    { color: "bg-amber-500", label: "알림 설정", desc: "푸시알림 항목별 ON/OFF", action: () => toast.info("알림 설정은 준비 중입니다.") },
+    { color: "bg-amber-500", label: "알림 설정", desc: "푸시알림 항목별 ON/OFF", action: () => setShowNotification(true) },
     { color: "bg-muted-foreground", label: "개인정보 수정", desc: "연락처·차량번호 변경", action: () => setShowProfile(true) },
     { color: "bg-purple-500", label: "입주지원센터 연락", desc: "전화 / 채팅 문의", action: () => setShowContact(true) },
   ];
