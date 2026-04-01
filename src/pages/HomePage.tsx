@@ -40,6 +40,7 @@ const checklistItems = [
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { drafts, syncAll, syncing } = useOfflineDrafts();
   const completedCount = checklistItems.filter((i) => i.done).length;
   const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
 
