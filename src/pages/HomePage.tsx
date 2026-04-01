@@ -76,6 +76,30 @@ const HomePage = () => {
         </ul>
       </div>
 
+      {/* My Defect Status */}
+      <div className="bg-card rounded-xl p-5 mb-4 shadow-sm border border-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            나의 하자 처리 현황
+          </h3>
+          <button onClick={() => navigate("/defect")} className="text-xs text-primary flex items-center gap-0.5">
+            전체보기 <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+        <div className="space-y-2.5">
+          {myDefects.map((d) => (
+            <div key={d.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground">{d.id}</p>
+                <p className="text-[11px] text-muted-foreground">{d.type} · {d.location}</p>
+              </div>
+              <span className={cn("text-xs font-bold shrink-0", d.statusColor)}>{d.status}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Quick Buttons */}
       <div className="grid grid-cols-2 gap-3">
         <button
