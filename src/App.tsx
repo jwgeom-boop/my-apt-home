@@ -9,6 +9,7 @@ import QRPage from "./pages/QRPage";
 import ReservationPage from "./pages/ReservationPage";
 import NoticePage from "./pages/NoticePage";
 import NotFound from "./pages/NotFound";
+import LoginPage from "./pages/LoginPage";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<HomePage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/qr" element={<QRPage />} />
