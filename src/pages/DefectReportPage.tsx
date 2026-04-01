@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Home, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import CategorySelector from "@/components/defect/CategorySelector";
 import InspectionChecklist from "@/components/defect/InspectionChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
+import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 
 interface SubmittedDefect {
   id: string;
@@ -22,6 +23,7 @@ interface SubmittedDefect {
 const DefectReportPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { drafts, saveDraft, syncAll, syncing } = useOfflineDrafts();
 
   const [selectedMain, setSelectedMain] = useState("");
   const [selectedMid, setSelectedMid] = useState("");
@@ -35,10 +37,8 @@ const DefectReportPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [residentId, setResidentId] = useState<string | null>(null);
 
-  // 입주자 ID 및 기존 접수 내역 로드
   useEffect(() => {
     const loadData = async () => {
-      // 데모용: 첫 번째 입주자
       const { data: resident } = await supabase
         .from("residents")
         .select("id")
@@ -47,8 +47,6 @@ const DefectReportPage = () => {
 
       if (resident) {
         setResidentId(resident.id);
-
-        // 기존 접수 내역 로드
         const { data: defects } = await supabase
           .from("defects")
           .select("*")
@@ -113,13 +111,14 @@ const DefectReportPage = () => {
     });
   };
 
-  const addWatermark = useCallback((file: File): Promise<PhotoItem> => {
+  const addWatermark = useCallback((file: File, photoType: "far" | "close"): Promise<PhotoItem> => {
     return new Promise((resolve) => {
       const now = new Date();
       const ts = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
       const lat = (37.5 + Math.random() * 0.01).toFixed(6);
       const lng = (127.0 + Math.random() * 0.01).toFixed(6);
       const gpsText = `GPS ${lat}, ${lng}`;
+      const typeLabel = photoType === "far" ? "📍 원거리" : "🔍 근거리";
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -129,22 +128,22 @@ const DefectReportPage = () => {
         canvas.height = img.height * scale;
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const barH = 44;
+        const barH = 52;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillRect(0, canvas.height - barH, canvas.width, barH);
         ctx.fillStyle = "#fff";
         ctx.font = "bold 14px 'Noto Sans KR', sans-serif";
-        ctx.fillText(`📅 ${ts}`, 12, canvas.height - 24);
-        ctx.fillText(`📍 ${gpsText}`, 12, canvas.height - 8);
-        resolve({ id: crypto.randomUUID(), dataUrl: canvas.toDataURL("image/jpeg", 0.85), memo: "", timestamp: ts, gps: gpsText });
+        ctx.fillText(`${typeLabel} | 📅 ${ts}`, 12, canvas.height - 30);
+        ctx.fillText(`📍 ${gpsText}`, 12, canvas.height - 10);
+        const memo = photoType === "far" ? "[원거리]" : "[근거리]";
+        resolve({ id: crypto.randomUUID(), dataUrl: canvas.toDataURL("image/jpeg", 0.85), memo, timestamp: ts, gps: gpsText });
       };
       img.src = URL.createObjectURL(file);
     });
   }, []);
 
-  const handleCaptureGuidePhoto = async (guide: string, file: File) => {
-    const photo = await addWatermark(file);
-    photo.memo = guide;
+  const handleCaptureGuidePhoto = async (guide: string, file: File, photoType: "far" | "close") => {
+    const photo = await addWatermark(file, photoType);
     setGuidePhotos((prev) => ({
       ...prev,
       [guide]: [...(prev[guide] || []), photo],
@@ -153,62 +152,67 @@ const DefectReportPage = () => {
 
   const locationLabel = selectedMain && selectedSub ? `${selectedMain} > ${selectedMid} > ${selectedSub}` : "";
   const locationField = selectedMain && selectedSub ? `${selectedMain} - ${selectedSub}` : "";
-  const hasValidIssues = Array.from(issueGuides).some((g) => (guidePhotos[g]?.length || 0) > 0);
+  const hasValidIssues = Array.from(issueGuides).some((g) => (guidePhotos[g]?.length || 0) >= 2);
 
-  const handleSubmit = async () => {
-    setSubmitting(true);
+  const buildInsertData = () => {
     const receiptNo = `HD-${Date.now().toString().slice(-6)}`;
     const totalPhotos = Object.values(guidePhotos).reduce((s, arr) => s + arr.length, 0);
     const guideItemsArr = Array.from(issueGuides);
-
-    // 사진 메타데이터 (dataUrl은 용량이 크므로 메타만 저장)
     const photoMeta = Object.entries(guidePhotos).flatMap(([guide, photos]) =>
-      photos.map((p) => ({
-        guide,
-        memo: p.memo,
-        timestamp: p.timestamp,
-        gps: p.gps,
-      }))
+      photos.map((p) => ({ guide, memo: p.memo, timestamp: p.timestamp, gps: p.gps }))
     );
+    return {
+      receiptNo,
+      totalPhotos,
+      guideItemsArr,
+      insertData: {
+        resident_id: residentId,
+        receipt_no: receiptNo,
+        location: locationField,
+        mid_category: selectedMid,
+        guide_items: guideItemsArr,
+        photo_count: totalPhotos,
+        photo_data: photoMeta,
+        is_urgent: isUrgent,
+        status: "미배정",
+      },
+    };
+  };
 
-    const { error } = await supabase.from("defects").insert({
-      resident_id: residentId,
-      receipt_no: receiptNo,
-      location: locationField,
-      mid_category: selectedMid,
-      guide_items: guideItemsArr,
-      photo_count: totalPhotos,
-      photo_data: photoMeta,
-      is_urgent: isUrgent,
-      status: "미배정",
-    });
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    const { receiptNo, totalPhotos, guideItemsArr, insertData } = buildInsertData();
 
+    const { error } = await supabase.from("defects").insert(insertData);
     setSubmitting(false);
 
     if (error) {
-      console.error("하자 접수 저장 실패:", error);
+      // Offline fallback
+      saveDraft(insertData);
+      const defect: SubmittedDefect = {
+        id: receiptNo,
+        location: locationField,
+        guide: guideItemsArr.join(", "),
+        isUrgent,
+        photoCount: totalPhotos,
+        status: "임시저장",
+      };
+      setSubmittedDefects((prev) => [defect, ...prev]);
+    } else {
+      const defect: SubmittedDefect = {
+        id: receiptNo,
+        location: locationField,
+        guide: guideItemsArr.join(", "),
+        isUrgent,
+        photoCount: totalPhotos,
+        status: "미배정",
+      };
+      setSubmittedDefects((prev) => [defect, ...prev]);
       toast({
-        title: "❌ 접수 실패",
-        description: "저장 중 오류가 발생했습니다. 다시 시도해주세요.",
-        variant: "destructive",
+        title: isUrgent ? "🚨 긴급 하자 접수 완료!" : "✅ 하자 접수 완료!",
+        description: `접수번호 ${receiptNo} | ${locationField} | DB에 저장되었습니다.`,
       });
-      return;
     }
-
-    const defect: SubmittedDefect = {
-      id: receiptNo,
-      location: locationField,
-      guide: guideItemsArr.join(", "),
-      isUrgent,
-      photoCount: totalPhotos,
-      status: "미배정",
-    };
-    setSubmittedDefects((prev) => [defect, ...prev]);
-
-    toast({
-      title: isUrgent ? "🚨 긴급 하자 접수 완료!" : "✅ 하자 접수 완료!",
-      description: `접수번호 ${receiptNo} | ${locationField} | DB에 저장되었습니다.`,
-    });
 
     setCurrentSubCategory(null);
     setSelectedSub("");
@@ -232,6 +236,27 @@ const DefectReportPage = () => {
       </header>
 
       <div className="flex-1 px-4 pt-4 pb-24 flex flex-col gap-4 overflow-y-auto">
+        {/* Offline drafts banner */}
+        {drafts.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <WifiOff className="w-4 h-4 text-amber-600" />
+              <div>
+                <p className="text-xs font-bold text-amber-800">📱 임시 저장: {drafts.length}건</p>
+                <p className="text-[10px] text-amber-600">네트워크 연결 시 전송해주세요</p>
+              </div>
+            </div>
+            <button
+              onClick={syncAll}
+              disabled={syncing}
+              className="flex items-center gap-1 bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-50"
+            >
+              <Upload className="w-3 h-3" />
+              {syncing ? "전송 중..." : "일괄 전송"}
+            </button>
+          </div>
+        )}
+
         {/* Session count */}
         {submittedDefects.length > 0 && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
@@ -243,7 +268,7 @@ const DefectReportPage = () => {
           </div>
         )}
 
-        {/* Inline Category Selector */}
+        {/* Category Selector */}
         <CategorySelector
           categories={defectCategories}
           selectedMain={selectedMain}
@@ -265,6 +290,16 @@ const DefectReportPage = () => {
               guidePhotos={guidePhotos}
               onCaptureGuidePhoto={handleCaptureGuidePhoto}
             />
+
+            {/* 안내 문구 - 심리적 문턱 낮추기 */}
+            {issueGuides.size > 0 && (
+              <div className="mt-3 bg-muted/30 rounded-xl p-3 border border-border">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  💡 <strong>팁:</strong> 상세한 설명이 어려우면 <strong>"상태 이상"</strong>이라고만 적어주셔도 괜찮습니다.
+                  전문 기사가 방문하여 정확히 확인합니다.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -289,9 +324,10 @@ const DefectReportPage = () => {
                     <span className="text-[10px] text-muted-foreground">{d.status}</span>
                     <span className={cn(
                       "font-bold text-[10px] px-2 py-0.5 rounded-full",
+                      d.status === "임시저장" ? "bg-amber-100 text-amber-700" :
                       d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
                     )}>
-                      {d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
+                      {d.status === "임시저장" ? "📱 임시저장" : d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
                     </span>
                   </div>
                 </div>

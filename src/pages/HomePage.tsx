@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, Megaphone } from "lucide-react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, Megaphone, WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 
 const noticeItems = [
   { tag: "중요", tagColor: "bg-destructive/15 text-destructive", title: "사전점검 기간 지하주차장 이용 안내", unread: true },
@@ -39,6 +40,7 @@ const checklistItems = [
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { drafts, syncAll, syncing } = useOfflineDrafts();
   const completedCount = checklistItems.filter((i) => i.done).length;
   const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
 
@@ -86,6 +88,27 @@ const HomePage = () => {
           입주 예정
         </span>
       </div>
+
+      {/* Offline drafts sync banner */}
+      {drafts.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <WifiOff className="w-4 h-4 text-amber-600" />
+            <div>
+              <p className="text-xs font-bold text-amber-800">📱 임시 저장: {drafts.length}건</p>
+              <p className="text-[10px] text-amber-600">전송 대기 중인 하자 접수가 있습니다</p>
+            </div>
+          </div>
+          <button
+            onClick={syncAll}
+            disabled={syncing}
+            className="flex items-center gap-1 bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-50"
+          >
+            <Upload className="w-3 h-3" />
+            {syncing ? "전송 중..." : "일괄 전송"}
+          </button>
+        </div>
+      )}
 
       {/* 📢 공지사항 배너 */}
       <div className="mb-4">
