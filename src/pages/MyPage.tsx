@@ -5,12 +5,28 @@ import BottomTabBar from "@/components/BottomTabBar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 const MyPage = () => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+
+  // 알림 설정 상태
+  const [notifications, setNotifications] = useState({
+    defectStatus: true,
+    payment: true,
+    moveIn: true,
+    notice: false,
+    event: false,
+  });
+
+  const toggleNotification = (key: keyof typeof notifications) => {
+    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+    toast.success("알림 설정이 변경되었습니다.");
+  };
 
   // 개인정보 수정 상태
   const [phone, setPhone] = useState("010-9876-5432");
@@ -25,7 +41,7 @@ const MyPage = () => {
     { color: "bg-primary", label: "내 입주 현황", desc: "진행률·체크리스트 상세", action: () => navigate("/") },
     { color: "bg-green-500", label: "납부내역 조회", desc: "전체 납부 이력", action: () => navigate("/payment") },
     { color: "bg-navy", label: "하자 접수 이력", desc: "접수한 하자 목록·처리현황", action: () => navigate("/defect") },
-    { color: "bg-amber-500", label: "알림 설정", desc: "푸시알림 항목별 ON/OFF", action: () => toast.info("알림 설정은 준비 중입니다.") },
+    { color: "bg-amber-500", label: "알림 설정", desc: "푸시알림 항목별 ON/OFF", action: () => setShowNotification(true) },
     { color: "bg-muted-foreground", label: "개인정보 수정", desc: "연락처·차량번호 변경", action: () => setShowProfile(true) },
     { color: "bg-purple-500", label: "입주지원센터 연락", desc: "전화 / 채팅 문의", action: () => setShowContact(true) },
   ];
@@ -131,6 +147,38 @@ const MyPage = () => {
             <p className="text-[11px] text-muted-foreground text-center mt-1">
               운영시간: 평일 09:00 ~ 18:00 (주말·공휴일 휴무)
             </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 알림 설정 다이얼로그 */}
+      <Dialog open={showNotification} onOpenChange={setShowNotification}>
+        <DialogContent className="max-w-[360px] rounded-xl">
+          <DialogHeader>
+            <DialogTitle className="text-base">알림 설정</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-1 pt-2">
+            {[
+              { key: "defectStatus" as const, label: "하자 처리 현황", desc: "접수/처리중/완료 상태 변경 시" },
+              { key: "payment" as const, label: "납부 안내", desc: "납부 기한 및 완납 알림" },
+              { key: "moveIn" as const, label: "입주 일정", desc: "사전점검·입주 관련 공지" },
+              { key: "notice" as const, label: "공지사항", desc: "관리사무소 공지 알림" },
+              { key: "event" as const, label: "이벤트·혜택", desc: "입주민 이벤트 및 할인 정보" },
+            ].map((item) => (
+              <div
+                key={item.key}
+                className="flex items-center justify-between py-3 border-b border-border last:border-0"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-[11px] text-muted-foreground">{item.desc}</p>
+                </div>
+                <Switch
+                  checked={notifications[item.key]}
+                  onCheckedChange={() => toggleNotification(item.key)}
+                />
+              </div>
+            ))}
           </div>
         </DialogContent>
       </Dialog>
