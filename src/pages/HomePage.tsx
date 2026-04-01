@@ -81,12 +81,18 @@ const HomePage = () => {
   return (
     <MobileLayout>
       {/* Greeting */}
-      <div className="bg-accent text-accent-foreground rounded-xl p-5 mb-4">
-        <p className="text-sm font-medium opacity-80">101동 1202호</p>
-        <h2 className="text-xl font-bold mt-1">홍길동님, 환영합니다!</h2>
-        <span className="inline-block mt-2 text-xs bg-primary/20 text-primary-foreground px-3 py-1 rounded-full">
-          입주 예정
-        </span>
+      <div className="bg-accent text-accent-foreground rounded-xl p-4 mb-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium opacity-80">101동 1202호</p>
+              <span className="text-[10px] bg-primary/20 text-primary-foreground px-2 py-0.5 rounded-full font-medium">
+                입주 예정
+              </span>
+            </div>
+            <h2 className="text-lg font-bold mt-1">홍길동님, 환영합니다!</h2>
+          </div>
+        </div>
       </div>
 
       {/* Offline drafts sync banner */}
@@ -111,7 +117,7 @@ const HomePage = () => {
       )}
 
       {/* 📢 공지사항 배너 */}
-      <div className="mb-4">
+      <div className="mb-3">
         <button
           onClick={() => navigate("/notice")}
           className="w-full flex items-center justify-between mb-2"
@@ -135,7 +141,7 @@ const HomePage = () => {
             <button
               key={i}
               onClick={() => navigate("/notice")}
-              className="min-w-[260px] bg-card rounded-xl p-4 border border-border shadow-sm text-left shrink-0 active:scale-[0.98] transition-transform relative"
+              className="min-w-[240px] bg-card rounded-xl p-3 border border-border shadow-sm text-left shrink-0 active:scale-[0.98] transition-transform relative"
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className={cn("text-[10px] px-2 py-0.5 rounded font-bold", n.tagColor)}>
@@ -150,32 +156,32 @@ const HomePage = () => {
       </div>
 
       {/* Defect Quick Buttons */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-3">
         <button
           onClick={() => navigate("/defect")}
-          className="flex flex-col items-center gap-2 bg-card rounded-xl p-5 shadow-sm border border-border active:scale-[0.98] transition-transform"
+          className="flex flex-col items-center gap-1.5 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
         >
-          <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-            <ClipboardList className="w-6 h-6 text-destructive" />
+          <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+            <ClipboardList className="w-5 h-5 text-destructive" />
           </div>
           <span className="text-sm font-bold text-foreground">하자 접수</span>
-          <span className="text-[11px] text-muted-foreground">새 하자 신고하기</span>
+          <span className="text-[10px] text-muted-foreground">새 하자 신고하기</span>
         </button>
         <button
           onClick={() => setShowDefectList(true)}
-          className="flex flex-col items-center gap-2 bg-card rounded-xl p-5 shadow-sm border border-border active:scale-[0.98] transition-transform"
+          className="flex flex-col items-center gap-1.5 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
         >
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <ListChecks className="w-6 h-6 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <ListChecks className="w-5 h-5 text-primary" />
           </div>
           <span className="text-sm font-bold text-foreground">나의 접수 현황</span>
-          <span className="text-[11px] text-muted-foreground">처리 진행 확인</span>
+          <span className="text-[10px] text-muted-foreground">처리 진행 확인</span>
         </button>
       </div>
 
       {/* Realtime Defect Status Summary */}
-      <div className="bg-card rounded-xl p-5 mb-4 shadow-sm border border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+      <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
+        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-warning" />
           실시간 하자 처리 상태
         </h3>
@@ -204,7 +210,7 @@ const HomePage = () => {
       {/* Progress - 클릭하면 체크리스트 표시 */}
       <button
         onClick={() => setShowChecklist(true)}
-        className="w-full bg-card rounded-xl p-5 mb-4 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
+        className="w-full bg-card rounded-xl p-4 mb-3 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
       >
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-foreground">입주 진행률</h3>
@@ -220,7 +226,7 @@ const HomePage = () => {
       </button>
 
       {/* Quick Buttons */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => navigate("/qr")}
           className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
