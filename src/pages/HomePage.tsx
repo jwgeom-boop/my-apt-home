@@ -169,13 +169,13 @@ const HomePage = () => {
         </button>
         <button
           onClick={() => setShowDefectList(true)}
-          className="flex flex-col items-center gap-2 bg-card rounded-xl p-5 shadow-sm border border-border active:scale-[0.98] transition-transform"
+          className="flex flex-col items-center gap-1.5 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
         >
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <ListChecks className="w-6 h-6 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <ListChecks className="w-5 h-5 text-primary" />
           </div>
           <span className="text-sm font-bold text-foreground">나의 접수 현황</span>
-          <span className="text-[11px] text-muted-foreground">처리 진행 확인</span>
+          <span className="text-[10px] text-muted-foreground">처리 진행 확인</span>
         </button>
       </div>
 
