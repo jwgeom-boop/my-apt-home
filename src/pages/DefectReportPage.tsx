@@ -1,86 +1,84 @@
 import { useState, useCallback } from "react";
-import { ArrowLeft, Send, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Send, AlertTriangle, Home, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { defectCategories, checkUrgency, type SubCategory } from "@/data/defectCategories";
+import { defectCategories, checkUrgency, URGENT_KEYWORDS, type SubCategory } from "@/data/defectCategories";
 import CategorySelector from "@/components/defect/CategorySelector";
 import InspectionChecklist from "@/components/defect/InspectionChecklist";
-import PhotoCapture, { type PhotoItem } from "@/components/defect/PhotoCapture";
-import SignaturePad from "@/components/defect/SignaturePad";
+import type { PhotoItem } from "@/components/defect/PhotoCapture";
 
-const MAX_PHOTOS = 5;
-const steps = ["위치선택", "점검확인", "사진촬영", "상세내용", "서명", "완료"];
+// Submitted defect record
+interface SubmittedDefect {
+  id: string;
+  location: string;
+  guide: string;
+  isUrgent: boolean;
+  photoCount: number;
+}
 
 const DefectReportPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [currentStep, setCurrentStep] = useState(0);
 
-  // Step 0: Category
+  // Category
   const [selectedMain, setSelectedMain] = useState("");
   const [selectedMid, setSelectedMid] = useState("");
   const [selectedSub, setSelectedSub] = useState("");
   const [currentSubCategory, setCurrentSubCategory] = useState<SubCategory | null>(null);
 
-  // Step 1: Checklist
-  const [checkedGuides, setCheckedGuides] = useState<Set<string>>(new Set());
+  // Issue-based inspection
+  const [issueGuides, setIssueGuides] = useState<Set<string>>(new Set());
+  const [guidePhotos, setGuidePhotos] = useState<Record<string, PhotoItem[]>>({});
 
-  // Step 2: Photos
-  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  // Submitted defects in this session
+  const [submittedDefects, setSubmittedDefects] = useState<SubmittedDefect[]>([]);
+  const [submittedSubKeys, setSubmittedSubKeys] = useState<Set<string>>(new Set());
 
-  // Step 3: Description
-  const [defectDesc, setDefectDesc] = useState("");
-
-  // Step 4: Signature
-  const [hasSigned, setHasSigned] = useState(false);
+  // View state: "select" (category) | "inspect" (guide+photo)
+  const [view, setView] = useState<"select" | "inspect">("select");
 
   // Urgency
-  const [isUrgent, setIsUrgent] = useState(false);
+  const isUrgent = currentSubCategory
+    ? checkUrgency(currentSubCategory, Array.from(issueGuides))
+    : false;
 
   const handleSelectMain = (name: string) => {
     setSelectedMain(name);
     setSelectedMid("");
     setSelectedSub("");
     setCurrentSubCategory(null);
-    setCheckedGuides(new Set());
   };
 
   const handleSelectMid = (name: string) => {
     setSelectedMid(name);
     setSelectedSub("");
     setCurrentSubCategory(null);
-    setCheckedGuides(new Set());
   };
 
   const handleSelectSub = (sub: SubCategory, _midName: string) => {
     setSelectedSub(sub.name);
     setCurrentSubCategory(sub);
-    setCheckedGuides(new Set());
-    setIsUrgent(sub.isUrgent || false);
+    setIssueGuides(new Set());
+    setGuidePhotos({});
+    setView("inspect");
   };
 
-  const toggleGuide = (guide: string) => {
-    setCheckedGuides((prev) => {
+  const toggleIssue = (guide: string) => {
+    setIssueGuides((prev) => {
       const next = new Set(prev);
-      if (next.has(guide)) next.delete(guide);
-      else next.add(guide);
-
-      // Check urgency
-      if (currentSubCategory) {
-        setIsUrgent(checkUrgency(currentSubCategory, Array.from(next)));
+      if (next.has(guide)) {
+        next.delete(guide);
+        setGuidePhotos((p) => { const n = { ...p }; delete n[guide]; return n; });
+      } else {
+        next.add(guide);
       }
       return next;
     });
   };
 
-  const allGuidesChecked =
-    currentSubCategory != null &&
-    currentSubCategory.guides.length > 0 &&
-    currentSubCategory.guides.every((g) => checkedGuides.has(g));
-
-  // Photo watermark
+  // Watermark photo
   const addWatermark = useCallback((file: File): Promise<PhotoItem> => {
     return new Promise((resolve) => {
       const now = new Date();
@@ -88,7 +86,6 @@ const DefectReportPage = () => {
       const lat = (37.5 + Math.random() * 0.01).toFixed(6);
       const lng = (127.0 + Math.random() * 0.01).toFixed(6);
       const gpsText = `GPS ${lat}, ${lng}`;
-
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -98,7 +95,6 @@ const DefectReportPage = () => {
         canvas.height = img.height * scale;
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
         const barH = 44;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillRect(0, canvas.height - barH, canvas.width, barH);
@@ -106,56 +102,75 @@ const DefectReportPage = () => {
         ctx.font = "bold 14px 'Noto Sans KR', sans-serif";
         ctx.fillText(`📅 ${ts}`, 12, canvas.height - 24);
         ctx.fillText(`📍 ${gpsText}`, 12, canvas.height - 8);
-
         resolve({ id: crypto.randomUUID(), dataUrl: canvas.toDataURL("image/jpeg", 0.85), memo: "", timestamp: ts, gps: gpsText });
       };
       img.src = URL.createObjectURL(file);
     });
   }, []);
 
-  const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    const remaining = MAX_PHOTOS - photos.length;
-    const newPhotos = await Promise.all(Array.from(files).slice(0, remaining).map((f) => addWatermark(f)));
-    setPhotos((prev) => [...prev, ...newPhotos]);
-    e.target.value = "";
-  };
-
-  const canNext = () => {
-    if (currentStep === 0) return currentSubCategory != null;
-    if (currentStep === 1) return allGuidesChecked;
-    if (currentStep === 2) return photos.length > 0;
-    if (currentStep === 3) return defectDesc.trim().length > 0;
-    if (currentStep === 4) return hasSigned;
-    return false;
+  const handleCaptureGuidePhoto = async (guide: string, file: File) => {
+    const photo = await addWatermark(file);
+    photo.memo = guide; // auto-map guide text
+    setGuidePhotos((prev) => ({
+      ...prev,
+      [guide]: [...(prev[guide] || []), photo],
+    }));
   };
 
   const locationLabel = selectedMain && selectedSub ? `${selectedMain} > ${selectedMid} > ${selectedSub}` : "";
   const locationField = selectedMain && selectedSub ? `${selectedMain} - ${selectedSub}` : "";
-  const guidesText = Array.from(checkedGuides).join(", ");
+
+  // Has at least one issue with photo
+  const hasValidIssues = Array.from(issueGuides).some((g) => (guidePhotos[g]?.length || 0) > 0);
 
   const handleSubmit = () => {
     const receiptNo = `HD-${Date.now().toString().slice(-6)}`;
+    const totalPhotos = Object.values(guidePhotos).reduce((s, arr) => s + arr.length, 0);
+
+    // Record submission
+    const defect: SubmittedDefect = {
+      id: receiptNo,
+      location: locationField,
+      guide: Array.from(issueGuides).join(", "),
+      isUrgent,
+      photoCount: totalPhotos,
+    };
+    setSubmittedDefects((prev) => [...prev, defect]);
+    setSubmittedSubKeys((prev) => new Set(prev).add(`${selectedMain}-${selectedMid}-${selectedSub}`));
+
     toast({
-      title: isUrgent ? "🚨 긴급 하자 접수 완료" : "하자 접수 완료",
-      description: `접수번호 ${receiptNo} | 위치: ${locationField} | 상태: ${isUrgent ? "긴급" : "미배정"}`,
+      title: isUrgent ? "🚨 긴급 하자 접수 완료!" : "✅ 하자 접수 완료!",
+      description: `접수번호 ${receiptNo} | ${locationField} | 다른 곳도 더 점검하시겠습니까?`,
     });
-    setCurrentStep(5);
+
+    // Reset to category selection (stay on page, don't go home)
+    setCurrentSubCategory(null);
+    setSelectedSub("");
+    setIssueGuides(new Set());
+    setGuidePhotos({});
+    setView("select");
   };
 
-  const now = new Date();
-  const timestamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} KST`;
+  const handleBackFromInspect = () => {
+    setView("select");
+    setCurrentSubCategory(null);
+    setSelectedSub("");
+    setIssueGuides(new Set());
+    setGuidePhotos({});
+  };
 
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-accent text-accent-foreground flex items-center h-12 px-4">
-        <button onClick={() => (currentStep > 0 && currentStep < 5 ? setCurrentStep((s) => s - 1) : navigate(-1))} className="mr-2">
+        <button
+          onClick={() => view === "inspect" ? handleBackFromInspect() : navigate(-1)}
+          className="mr-2"
+        >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="flex-1 text-center text-base font-semibold pr-8">하자 접수</h1>
-        {isUrgent && currentStep < 5 && (
+        {isUrgent && view === "inspect" && (
           <span className="absolute right-4 flex items-center gap-1 text-destructive text-xs font-bold">
             <AlertTriangle className="w-4 h-4" /> 긴급
           </span>
@@ -163,156 +178,113 @@ const DefectReportPage = () => {
       </header>
 
       <div className="flex-1 px-4 pt-4 pb-24 flex flex-col gap-4 overflow-y-auto">
-        {/* Step Bar */}
-        <div className="flex items-center justify-between px-1">
-          {steps.map((step, i) => (
-            <div key={step} className="flex flex-col items-center gap-1">
-              <div
-                className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold",
-                  i < currentStep ? "bg-primary text-primary-foreground" :
-                  i === currentStep ? "bg-primary text-primary-foreground ring-2 ring-primary/30 ring-offset-1" :
-                  "bg-muted text-muted-foreground"
-                )}
-              >
-                {i < currentStep ? "✓" : i + 1}
-              </div>
-              <span className={cn("text-[9px]", i <= currentStep ? "text-primary font-semibold" : "text-muted-foreground")}>
-                {step}
-              </span>
+        {/* Session submitted count */}
+        {submittedDefects.length > 0 && view === "select" && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-foreground">📋 이번 점검 접수: {submittedDefects.length}건</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">접수된 항목은 표시됩니다</p>
             </div>
-          ))}
-        </div>
-
-        {/* Step 0: Category Selection */}
-        {currentStep === 0 && (
-          <CategorySelector
-            categories={defectCategories}
-            selectedMain={selectedMain}
-            selectedMid={selectedMid}
-            selectedSub={selectedSub}
-            onSelectMain={handleSelectMain}
-            onSelectMid={handleSelectMid}
-            onSelectSub={handleSelectSub}
-          />
+            <span className="text-lg font-bold text-primary">{submittedDefects.length}</span>
+          </div>
         )}
 
-        {/* Step 1: Inspection Checklist */}
-        {currentStep === 1 && currentSubCategory && (
+        {/* View: Category Selection */}
+        {view === "select" && (
+          <>
+            <CategorySelector
+              categories={defectCategories}
+              selectedMain={selectedMain}
+              selectedMid={selectedMid}
+              selectedSub={selectedSub}
+              onSelectMain={handleSelectMain}
+              onSelectMid={handleSelectMid}
+              onSelectSub={handleSelectSub}
+            />
+
+            {/* Submitted defects list */}
+            {submittedDefects.length > 0 && (
+              <div className="bg-card rounded-xl border border-border p-4">
+                <h3 className="text-sm font-bold text-foreground mb-2">📝 접수 내역</h3>
+                <div className="space-y-2">
+                  {submittedDefects.map((d) => (
+                    <div
+                      key={d.id}
+                      className={cn(
+                        "flex items-center justify-between p-2.5 rounded-lg border text-xs",
+                        d.isUrgent
+                          ? "bg-destructive/5 border-destructive/20"
+                          : "bg-primary/5 border-primary/20"
+                      )}
+                    >
+                      <div>
+                        <span className="font-bold text-foreground">{d.location}</span>
+                        <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
+                      </div>
+                      <span className={cn(
+                        "font-bold text-[10px] px-2 py-0.5 rounded-full",
+                        d.isUrgent
+                          ? "bg-destructive/10 text-destructive"
+                          : "bg-primary/10 text-primary"
+                      )}>
+                        {d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* View: Inspection */}
+        {view === "inspect" && currentSubCategory && (
           <InspectionChecklist
             guides={currentSubCategory.guides}
-            checkedGuides={checkedGuides}
-            onToggle={toggleGuide}
+            issueGuides={issueGuides}
+            onToggleIssue={toggleIssue}
             locationLabel={locationLabel}
+            guidePhotos={guidePhotos}
+            onCaptureGuidePhoto={handleCaptureGuidePhoto}
           />
-        )}
-
-        {/* Step 2: Photo Capture */}
-        {currentStep === 2 && (
-          <PhotoCapture
-            photos={photos}
-            maxPhotos={MAX_PHOTOS}
-            onCapture={handleCapture}
-            onRemove={(id) => setPhotos((prev) => prev.filter((p) => p.id !== id))}
-            onUpdateMemo={(id, memo) => setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, memo } : p)))}
-            disabled={!allGuidesChecked}
-          />
-        )}
-
-        {/* Step 3: Description */}
-        {currentStep === 3 && (
-          <div className="bg-card rounded-xl border border-border p-4 flex flex-col gap-3">
-            <h3 className="text-sm font-bold text-foreground">하자 상세 내용</h3>
-            <div className="bg-muted/30 rounded-lg p-3 space-y-1">
-              <p className="text-xs text-muted-foreground">📍 위치: {locationField}</p>
-              <p className="text-xs text-muted-foreground">📷 사진: {photos.length}장</p>
-              <p className="text-xs text-muted-foreground">✅ 점검: {guidesText}</p>
-              {isUrgent && (
-                <p className="text-xs text-destructive font-bold">🚨 긴급 하자</p>
-              )}
-            </div>
-            <textarea
-              value={defectDesc}
-              onChange={(e) => setDefectDesc(e.target.value)}
-              placeholder="하자 상태를 자세히 설명해 주세요..."
-              rows={5}
-              className="w-full text-sm bg-muted/20 border border-border rounded-lg px-3 py-2.5 placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none"
-            />
-          </div>
-        )}
-
-        {/* Step 4: Signature */}
-        {currentStep === 4 && (
-          <div className="flex flex-col gap-4">
-            <div className={cn(
-              "rounded-xl p-4 border",
-              isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
-            )}>
-              <h3 className="text-sm font-bold text-foreground mb-1">접수 내용 요약</h3>
-              <p className="text-xs text-muted-foreground">
-                위치: {locationField} | 사진 {photos.length}장 | {isUrgent ? "🚨 긴급" : "일반"}
-              </p>
-            </div>
-            <SignaturePad hasSigned={hasSigned} onSignChange={setHasSigned} timestamp={timestamp} />
-          </div>
-        )}
-
-        {/* Step 5: Complete */}
-        {currentStep === 5 && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-4 py-10">
-            <div className={cn(
-              "w-20 h-20 rounded-full flex items-center justify-center",
-              isUrgent ? "bg-destructive/10" : "bg-primary/10"
-            )}>
-              <Send className={cn("w-10 h-10", isUrgent ? "text-destructive" : "text-primary")} />
-            </div>
-            <h2 className="text-lg font-bold text-foreground">접수 완료!</h2>
-            <p className="text-sm text-muted-foreground text-center">
-              하자 접수가 완료되었습니다.<br />
-              위치: <span className="font-bold text-foreground">{locationField}</span><br />
-              상태: <span className={cn("font-bold", isUrgent ? "text-destructive" : "text-warning")}>
-                {isUrgent ? "🚨 긴급" : "미배정"}
-              </span><br />
-              {isUrgent ? "긴급 하자로 분류되어 즉시 처리됩니다." : "관리자 확인 후 업체가 배정됩니다."}
-            </p>
-            <Button onClick={() => navigate("/")} className="mt-4 w-full h-12 rounded-xl">
-              홈으로 돌아가기
-            </Button>
-          </div>
         )}
       </div>
 
-      {/* Floating Bottom Button */}
-      {currentStep < 5 && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 flex gap-3 z-50">
-          {currentStep > 0 && (
-            <Button variant="outline" onClick={() => setCurrentStep((s) => s - 1)} className="flex-1 h-14 rounded-xl text-base">
-              이전
-            </Button>
-          )}
-          {currentStep < 4 && (
+      {/* Bottom Actions */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 flex gap-3 z-50">
+        {view === "inspect" ? (
+          <>
             <Button
-              disabled={!canNext()}
-              onClick={() => setCurrentStep((s) => s + 1)}
-              className="flex-1 h-14 rounded-xl text-base font-bold"
+              variant="outline"
+              onClick={handleBackFromInspect}
+              className="flex-1 h-14 rounded-xl text-base"
             >
-              다음
+              ← 목록으로
             </Button>
-          )}
-          {currentStep === 4 && (
-            <Button
-              disabled={!hasSigned}
-              onClick={handleSubmit}
-              className={cn(
-                "flex-1 h-14 rounded-xl text-base font-bold",
-                isUrgent && "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              )}
-            >
-              {isUrgent ? "🚨 긴급 접수하기" : "서명 완료 → 접수하기"}
-            </Button>
-          )}
-        </div>
-      )}
+            {issueGuides.size > 0 && (
+              <Button
+                disabled={!hasValidIssues}
+                onClick={handleSubmit}
+                className={cn(
+                  "flex-1 h-14 rounded-xl text-base font-bold",
+                  isUrgent && "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                )}
+              >
+                {isUrgent ? "🚨 긴급 접수" : "접수하기"}
+              </Button>
+            )}
+          </>
+        ) : (
+          <Button
+            onClick={() => navigate("/")}
+            variant="outline"
+            className="flex-1 h-14 rounded-xl text-base font-bold"
+          >
+            <Home className="w-5 h-5 mr-2" />
+            전체 점검 종료 및 홈으로
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
