@@ -5,12 +5,28 @@ import BottomTabBar from "@/components/BottomTabBar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 const MyPage = () => {
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+
+  // 알림 설정 상태
+  const [notifications, setNotifications] = useState({
+    defectStatus: true,
+    payment: true,
+    moveIn: true,
+    notice: false,
+    event: false,
+  });
+
+  const toggleNotification = (key: keyof typeof notifications) => {
+    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+    toast.success("알림 설정이 변경되었습니다.");
+  };
 
   // 개인정보 수정 상태
   const [phone, setPhone] = useState("010-9876-5432");
