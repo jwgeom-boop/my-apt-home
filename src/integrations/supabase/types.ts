@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notification_settings: {
+        Row: {
+          created_at: string
+          defect_status: boolean
+          event: boolean
+          id: string
+          move_in: boolean
+          notice: boolean
+          payment: boolean
+          resident_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          defect_status?: boolean
+          event?: boolean
+          id?: string
+          move_in?: boolean
+          notice?: boolean
+          payment?: boolean
+          resident_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          defect_status?: boolean
+          event?: boolean
+          id?: string
+          move_in?: boolean
+          notice?: boolean
+          payment?: boolean
+          resident_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_settings_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      residents: {
+        Row: {
+          area: string
+          car_number: string | null
+          complex_name: string
+          created_at: string
+          id: string
+          phone: string
+          unit_number: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          area?: string
+          car_number?: string | null
+          complex_name?: string
+          created_at?: string
+          id?: string
+          phone?: string
+          unit_number?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          area?: string
+          car_number?: string | null
+          complex_name?: string
+          created_at?: string
+          id?: string
+          phone?: string
+          unit_number?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
