@@ -1,9 +1,14 @@
 import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+
+const myDefects = [
+  { id: "HD-2025-0012", type: "도배·도장", location: "안방 벽면", status: "처리중", statusColor: "text-warning" },
+  { id: "HD-2025-0009", type: "설비·배관", location: "주방 싱크대", status: "처리완료", statusColor: "text-success" },
+  { id: "HD-2025-0015", type: "창호·유리", location: "거실 창문", status: "접수완료", statusColor: "text-primary" },
+];
 
 const checklistItems = [
   { id: 1, label: "잔금 납부", done: true },
