@@ -141,7 +141,7 @@ const HomePage = () => {
             <button
               key={i}
               onClick={() => navigate("/notice")}
-              className="min-w-[260px] bg-card rounded-xl p-4 border border-border shadow-sm text-left shrink-0 active:scale-[0.98] transition-transform relative"
+              className="min-w-[240px] bg-card rounded-xl p-3 border border-border shadow-sm text-left shrink-0 active:scale-[0.98] transition-transform relative"
             >
               <div className="flex items-center gap-2 mb-2">
                 <span className={cn("text-[10px] px-2 py-0.5 rounded font-bold", n.tagColor)}>
