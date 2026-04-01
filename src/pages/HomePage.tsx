@@ -180,8 +180,8 @@ const HomePage = () => {
       </div>
 
       {/* Realtime Defect Status Summary */}
-      <div className="bg-card rounded-xl p-5 mb-4 shadow-sm border border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+      <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
+        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-warning" />
           실시간 하자 처리 상태
         </h3>
