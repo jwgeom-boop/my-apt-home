@@ -1,15 +1,14 @@
 import { useState, useCallback } from "react";
-import { ArrowLeft, Send, AlertTriangle, Home, ChevronRight } from "lucide-react";
+import { ArrowLeft, Home, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { defectCategories, checkUrgency, URGENT_KEYWORDS, type SubCategory } from "@/data/defectCategories";
+import { defectCategories, checkUrgency, type SubCategory } from "@/data/defectCategories";
 import CategorySelector from "@/components/defect/CategorySelector";
 import InspectionChecklist from "@/components/defect/InspectionChecklist";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 
-// Submitted defect record
 interface SubmittedDefect {
   id: string;
   location: string;
@@ -22,24 +21,16 @@ const DefectReportPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Category
   const [selectedMain, setSelectedMain] = useState("");
   const [selectedMid, setSelectedMid] = useState("");
   const [selectedSub, setSelectedSub] = useState("");
   const [currentSubCategory, setCurrentSubCategory] = useState<SubCategory | null>(null);
 
-  // Issue-based inspection
   const [issueGuides, setIssueGuides] = useState<Set<string>>(new Set());
   const [guidePhotos, setGuidePhotos] = useState<Record<string, PhotoItem[]>>({});
 
-  // Submitted defects in this session
   const [submittedDefects, setSubmittedDefects] = useState<SubmittedDefect[]>([]);
-  const [submittedSubKeys, setSubmittedSubKeys] = useState<Set<string>>(new Set());
 
-  // View state: "select" (category) | "inspect" (guide+photo)
-  const [view, setView] = useState<"select" | "inspect">("select");
-
-  // Urgency
   const isUrgent = currentSubCategory
     ? checkUrgency(currentSubCategory, Array.from(issueGuides))
     : false;
@@ -49,20 +40,23 @@ const DefectReportPage = () => {
     setSelectedMid("");
     setSelectedSub("");
     setCurrentSubCategory(null);
+    setIssueGuides(new Set());
+    setGuidePhotos({});
   };
 
   const handleSelectMid = (name: string) => {
     setSelectedMid(name);
     setSelectedSub("");
     setCurrentSubCategory(null);
+    setIssueGuides(new Set());
+    setGuidePhotos({});
   };
 
-  const handleSelectSub = (sub: SubCategory, _midName: string) => {
+  const handleSelectSub = (sub: SubCategory) => {
     setSelectedSub(sub.name);
     setCurrentSubCategory(sub);
     setIssueGuides(new Set());
     setGuidePhotos({});
-    setView("inspect");
   };
 
   const toggleIssue = (guide: string) => {
@@ -78,7 +72,6 @@ const DefectReportPage = () => {
     });
   };
 
-  // Watermark photo
   const addWatermark = useCallback((file: File): Promise<PhotoItem> => {
     return new Promise((resolve) => {
       const now = new Date();
@@ -110,7 +103,7 @@ const DefectReportPage = () => {
 
   const handleCaptureGuidePhoto = async (guide: string, file: File) => {
     const photo = await addWatermark(file);
-    photo.memo = guide; // auto-map guide text
+    photo.memo = guide;
     setGuidePhotos((prev) => ({
       ...prev,
       [guide]: [...(prev[guide] || []), photo],
@@ -119,15 +112,12 @@ const DefectReportPage = () => {
 
   const locationLabel = selectedMain && selectedSub ? `${selectedMain} > ${selectedMid} > ${selectedSub}` : "";
   const locationField = selectedMain && selectedSub ? `${selectedMain} - ${selectedSub}` : "";
-
-  // Has at least one issue with photo
   const hasValidIssues = Array.from(issueGuides).some((g) => (guidePhotos[g]?.length || 0) > 0);
 
   const handleSubmit = () => {
     const receiptNo = `HD-${Date.now().toString().slice(-6)}`;
     const totalPhotos = Object.values(guidePhotos).reduce((s, arr) => s + arr.length, 0);
 
-    // Record submission
     const defect: SubmittedDefect = {
       id: receiptNo,
       location: locationField,
@@ -136,23 +126,13 @@ const DefectReportPage = () => {
       photoCount: totalPhotos,
     };
     setSubmittedDefects((prev) => [...prev, defect]);
-    setSubmittedSubKeys((prev) => new Set(prev).add(`${selectedMain}-${selectedMid}-${selectedSub}`));
 
     toast({
       title: isUrgent ? "🚨 긴급 하자 접수 완료!" : "✅ 하자 접수 완료!",
       description: `접수번호 ${receiptNo} | ${locationField} | 다른 곳도 더 점검하시겠습니까?`,
     });
 
-    // Reset to category selection (stay on page, don't go home)
-    setCurrentSubCategory(null);
-    setSelectedSub("");
-    setIssueGuides(new Set());
-    setGuidePhotos({});
-    setView("select");
-  };
-
-  const handleBackFromInspect = () => {
-    setView("select");
+    // Reset sub selection but keep main/mid for continuous inspection
     setCurrentSubCategory(null);
     setSelectedSub("");
     setIssueGuides(new Set());
@@ -163,14 +143,11 @@ const DefectReportPage = () => {
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-accent text-accent-foreground flex items-center h-12 px-4">
-        <button
-          onClick={() => view === "inspect" ? handleBackFromInspect() : navigate(-1)}
-          className="mr-2"
-        >
+        <button onClick={() => navigate(-1)} className="mr-2">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="flex-1 text-center text-base font-semibold pr-8">하자 접수</h1>
-        {isUrgent && view === "inspect" && (
+        {isUrgent && (
           <span className="absolute right-4 flex items-center gap-1 text-destructive text-xs font-bold">
             <AlertTriangle className="w-4 h-4" /> 긴급
           </span>
@@ -178,101 +155,93 @@ const DefectReportPage = () => {
       </header>
 
       <div className="flex-1 px-4 pt-4 pb-24 flex flex-col gap-4 overflow-y-auto">
-        {/* Session submitted count */}
-        {submittedDefects.length > 0 && view === "select" && (
+        {/* Session count */}
+        {submittedDefects.length > 0 && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-foreground">📋 이번 점검 접수: {submittedDefects.length}건</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">접수된 항목은 표시됩니다</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">접수된 항목은 아래에 표시됩니다</p>
             </div>
             <span className="text-lg font-bold text-primary">{submittedDefects.length}</span>
           </div>
         )}
 
-        {/* View: Category Selection */}
-        {view === "select" && (
-          <>
-            <CategorySelector
-              categories={defectCategories}
-              selectedMain={selectedMain}
-              selectedMid={selectedMid}
-              selectedSub={selectedSub}
-              onSelectMain={handleSelectMain}
-              onSelectMid={handleSelectMid}
-              onSelectSub={handleSelectSub}
-            />
+        {/* Inline Category Selector — all steps on one screen */}
+        <CategorySelector
+          categories={defectCategories}
+          selectedMain={selectedMain}
+          selectedMid={selectedMid}
+          selectedSub={selectedSub}
+          onSelectMain={handleSelectMain}
+          onSelectMid={handleSelectMid}
+          onSelectSub={handleSelectSub}
+        />
 
-            {/* Submitted defects list */}
-            {submittedDefects.length > 0 && (
-              <div className="bg-card rounded-xl border border-border p-4">
-                <h3 className="text-sm font-bold text-foreground mb-2">📝 접수 내역</h3>
-                <div className="space-y-2">
-                  {submittedDefects.map((d) => (
-                    <div
-                      key={d.id}
-                      className={cn(
-                        "flex items-center justify-between p-2.5 rounded-lg border text-xs",
-                        d.isUrgent
-                          ? "bg-destructive/5 border-destructive/20"
-                          : "bg-primary/5 border-primary/20"
-                      )}
-                    >
-                      <div>
-                        <span className="font-bold text-foreground">{d.location}</span>
-                        <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
-                      </div>
-                      <span className={cn(
-                        "font-bold text-[10px] px-2 py-0.5 rounded-full",
-                        d.isUrgent
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-primary/10 text-primary"
-                      )}>
-                        {d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
+        {/* Inspection checklist appears inline after sub selection */}
+        {currentSubCategory && (
+          <div className="animate-fade-in">
+            <InspectionChecklist
+              guides={currentSubCategory.guides}
+              issueGuides={issueGuides}
+              onToggleIssue={toggleIssue}
+              locationLabel={locationLabel}
+              guidePhotos={guidePhotos}
+              onCaptureGuidePhoto={handleCaptureGuidePhoto}
+            />
+          </div>
         )}
 
-        {/* View: Inspection */}
-        {view === "inspect" && currentSubCategory && (
-          <InspectionChecklist
-            guides={currentSubCategory.guides}
-            issueGuides={issueGuides}
-            onToggleIssue={toggleIssue}
-            locationLabel={locationLabel}
-            guidePhotos={guidePhotos}
-            onCaptureGuidePhoto={handleCaptureGuidePhoto}
-          />
+        {/* Submitted defects */}
+        {submittedDefects.length > 0 && (
+          <div className="bg-card rounded-xl border border-border p-4">
+            <h3 className="text-sm font-bold text-foreground mb-2">📝 접수 내역</h3>
+            <div className="space-y-2">
+              {submittedDefects.map((d) => (
+                <div
+                  key={d.id}
+                  className={cn(
+                    "flex items-center justify-between p-2.5 rounded-lg border text-xs",
+                    d.isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
+                  )}
+                >
+                  <div>
+                    <span className="font-bold text-foreground">{d.location}</span>
+                    <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
+                  </div>
+                  <span className={cn(
+                    "font-bold text-[10px] px-2 py-0.5 rounded-full",
+                    d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+                  )}>
+                    {d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
       {/* Bottom Actions */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 flex gap-3 z-50">
-        {view === "inspect" ? (
+        {issueGuides.size > 0 && currentSubCategory ? (
           <>
             <Button
               variant="outline"
-              onClick={handleBackFromInspect}
+              onClick={() => { setCurrentSubCategory(null); setSelectedSub(""); setIssueGuides(new Set()); setGuidePhotos({}); }}
               className="flex-1 h-14 rounded-xl text-base"
             >
               ← 목록으로
             </Button>
-            {issueGuides.size > 0 && (
-              <Button
-                disabled={!hasValidIssues}
-                onClick={handleSubmit}
-                className={cn(
-                  "flex-1 h-14 rounded-xl text-base font-bold",
-                  isUrgent && "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                )}
-              >
-                {isUrgent ? "🚨 긴급 접수" : "접수하기"}
-              </Button>
-            )}
+            <Button
+              disabled={!hasValidIssues}
+              onClick={handleSubmit}
+              className={cn(
+                "flex-1 h-14 rounded-xl text-base font-bold",
+                isUrgent && "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              )}
+            >
+              {isUrgent ? "🚨 긴급 접수" : "접수하기"}
+            </Button>
           </>
         ) : (
           <Button
