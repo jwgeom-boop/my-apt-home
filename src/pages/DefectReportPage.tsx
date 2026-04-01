@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, Home, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { defectCategories, checkUrgency, type SubCategory } from "@/data/defectCategories";
 import CategorySelector from "@/components/defect/CategorySelector";
 import InspectionChecklist from "@/components/defect/InspectionChecklist";
+import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 
 interface SubmittedDefect {
@@ -15,6 +16,7 @@ interface SubmittedDefect {
   guide: string;
   isUrgent: boolean;
   photoCount: number;
+  status: string;
 }
 
 const DefectReportPage = () => {
@@ -30,6 +32,45 @@ const DefectReportPage = () => {
   const [guidePhotos, setGuidePhotos] = useState<Record<string, PhotoItem[]>>({});
 
   const [submittedDefects, setSubmittedDefects] = useState<SubmittedDefect[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [residentId, setResidentId] = useState<string | null>(null);
+
+  // 입주자 ID 및 기존 접수 내역 로드
+  useEffect(() => {
+    const loadData = async () => {
+      // 데모용: 첫 번째 입주자
+      const { data: resident } = await supabase
+        .from("residents")
+        .select("id")
+        .limit(1)
+        .single();
+
+      if (resident) {
+        setResidentId(resident.id);
+
+        // 기존 접수 내역 로드
+        const { data: defects } = await supabase
+          .from("defects")
+          .select("*")
+          .eq("resident_id", resident.id)
+          .order("created_at", { ascending: false });
+
+        if (defects) {
+          setSubmittedDefects(
+            defects.map((d) => ({
+              id: d.receipt_no,
+              location: d.location,
+              guide: d.guide_items.join(", "),
+              isUrgent: d.is_urgent,
+              photoCount: d.photo_count,
+              status: d.status,
+            }))
+          );
+        }
+      }
+    };
+    loadData();
+  }, []);
 
   const isUrgent = currentSubCategory
     ? checkUrgency(currentSubCategory, Array.from(issueGuides))
@@ -114,25 +155,61 @@ const DefectReportPage = () => {
   const locationField = selectedMain && selectedSub ? `${selectedMain} - ${selectedSub}` : "";
   const hasValidIssues = Array.from(issueGuides).some((g) => (guidePhotos[g]?.length || 0) > 0);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setSubmitting(true);
     const receiptNo = `HD-${Date.now().toString().slice(-6)}`;
     const totalPhotos = Object.values(guidePhotos).reduce((s, arr) => s + arr.length, 0);
+    const guideItemsArr = Array.from(issueGuides);
+
+    // 사진 메타데이터 (dataUrl은 용량이 크므로 메타만 저장)
+    const photoMeta = Object.entries(guidePhotos).flatMap(([guide, photos]) =>
+      photos.map((p) => ({
+        guide,
+        memo: p.memo,
+        timestamp: p.timestamp,
+        gps: p.gps,
+      }))
+    );
+
+    const { error } = await supabase.from("defects").insert({
+      resident_id: residentId,
+      receipt_no: receiptNo,
+      location: locationField,
+      mid_category: selectedMid,
+      guide_items: guideItemsArr,
+      photo_count: totalPhotos,
+      photo_data: photoMeta,
+      is_urgent: isUrgent,
+      status: "미배정",
+    });
+
+    setSubmitting(false);
+
+    if (error) {
+      console.error("하자 접수 저장 실패:", error);
+      toast({
+        title: "❌ 접수 실패",
+        description: "저장 중 오류가 발생했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const defect: SubmittedDefect = {
       id: receiptNo,
       location: locationField,
-      guide: Array.from(issueGuides).join(", "),
+      guide: guideItemsArr.join(", "),
       isUrgent,
       photoCount: totalPhotos,
+      status: "미배정",
     };
-    setSubmittedDefects((prev) => [...prev, defect]);
+    setSubmittedDefects((prev) => [defect, ...prev]);
 
     toast({
       title: isUrgent ? "🚨 긴급 하자 접수 완료!" : "✅ 하자 접수 완료!",
-      description: `접수번호 ${receiptNo} | ${locationField} | 다른 곳도 더 점검하시겠습니까?`,
+      description: `접수번호 ${receiptNo} | ${locationField} | DB에 저장되었습니다.`,
     });
 
-    // Reset sub selection but keep main/mid for continuous inspection
     setCurrentSubCategory(null);
     setSelectedSub("");
     setIssueGuides(new Set());
@@ -159,14 +236,14 @@ const DefectReportPage = () => {
         {submittedDefects.length > 0 && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-foreground">📋 이번 점검 접수: {submittedDefects.length}건</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">접수된 항목은 아래에 표시됩니다</p>
+              <p className="text-xs font-bold text-foreground">📋 전체 접수: {submittedDefects.length}건</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">DB에 저장된 접수 내역입니다</p>
             </div>
             <span className="text-lg font-bold text-primary">{submittedDefects.length}</span>
           </div>
         )}
 
-        {/* Inline Category Selector — all steps on one screen */}
+        {/* Inline Category Selector */}
         <CategorySelector
           categories={defectCategories}
           selectedMain={selectedMain}
@@ -177,7 +254,7 @@ const DefectReportPage = () => {
           onSelectSub={handleSelectSub}
         />
 
-        {/* Inspection checklist appears inline after sub selection */}
+        {/* Inspection checklist */}
         {currentSubCategory && (
           <div className="animate-fade-in">
             <InspectionChecklist
@@ -208,12 +285,15 @@ const DefectReportPage = () => {
                     <span className="font-bold text-foreground">{d.location}</span>
                     <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
                   </div>
-                  <span className={cn(
-                    "font-bold text-[10px] px-2 py-0.5 rounded-full",
-                    d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
-                  )}>
-                    {d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-muted-foreground">{d.status}</span>
+                    <span className={cn(
+                      "font-bold text-[10px] px-2 py-0.5 rounded-full",
+                      d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+                    )}>
+                      {d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -233,14 +313,14 @@ const DefectReportPage = () => {
               ← 목록으로
             </Button>
             <Button
-              disabled={!hasValidIssues}
+              disabled={!hasValidIssues || submitting}
               onClick={handleSubmit}
               className={cn(
                 "flex-1 h-14 rounded-xl text-base font-bold",
                 isUrgent && "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               )}
             >
-              {isUrgent ? "🚨 긴급 접수" : "접수하기"}
+              {submitting ? "저장 중..." : isUrgent ? "🚨 긴급 접수" : "접수하기"}
             </Button>
           </>
         ) : (

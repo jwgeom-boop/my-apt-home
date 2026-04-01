@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      defects: {
+        Row: {
+          assigned_company: string | null
+          created_at: string
+          guide_items: string[]
+          id: string
+          is_urgent: boolean
+          location: string
+          mid_category: string | null
+          notes: string | null
+          photo_count: number
+          photo_data: Json | null
+          receipt_no: string
+          resident_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_company?: string | null
+          created_at?: string
+          guide_items?: string[]
+          id?: string
+          is_urgent?: boolean
+          location: string
+          mid_category?: string | null
+          notes?: string | null
+          photo_count?: number
+          photo_data?: Json | null
+          receipt_no: string
+          resident_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_company?: string | null
+          created_at?: string
+          guide_items?: string[]
+          id?: string
+          is_urgent?: boolean
+          location?: string
+          mid_category?: string | null
+          notes?: string | null
+          photo_count?: number
+          photo_data?: Json | null
+          receipt_no?: string
+          resident_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "defects_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_settings: {
         Row: {
           created_at: string
