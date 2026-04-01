@@ -117,7 +117,7 @@ const HomePage = () => {
       )}
 
       {/* 📢 공지사항 배너 */}
-      <div className="mb-4">
+      <div className="mb-3">
         <button
           onClick={() => navigate("/notice")}
           className="w-full flex items-center justify-between mb-2"
