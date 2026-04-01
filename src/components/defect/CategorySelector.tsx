@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { MainCategory, MidCategory, SubCategory } from "@/data/defectCategories";
 import { Check, ChevronDown } from "lucide-react";
+import FloorPlanSelector from "./FloorPlanSelector";
 
 interface CategorySelectorProps {
   categories: MainCategory[];
@@ -45,37 +46,14 @@ const CategorySelector = ({
         </div>
       )}
 
-      {/* Step 1: 공간 선택 (Main) */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-          📍 공간 선택
-          {selectedMain && <Check className="w-4 h-4 text-primary" />}
-        </h3>
-        <div className="grid grid-cols-3 gap-2">
-          {categories.map((cat) => {
-            const isSelected = selectedMain === cat.name;
-            const isDimmed = selectedMain && !isSelected;
-            return (
-              <button
-                key={cat.name}
-                onClick={() => onSelectMain(cat.name)}
-                className={cn(
-                  "text-xs py-3 rounded-xl border font-medium transition-all flex flex-col items-center gap-1.5 active:scale-[0.97]",
-                  isSelected
-                    ? "bg-primary text-primary-foreground border-primary shadow-md"
-                    : "bg-muted/30 text-foreground border-border hover:border-primary/40",
-                  isDimmed && "opacity-40"
-                )}
-              >
-                <span className="text-xl">{cat.icon}</span>
-                <span>{cat.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* Step 1: 평면도 기반 공간 선택 */}
+      <FloorPlanSelector
+        selectedRoom={selectedMain}
+        onSelectRoom={onSelectMain}
+        categories={categories.map((c) => ({ name: c.name, icon: c.icon }))}
+      />
 
-      {/* Step 2: 시설 선택 (Mid) - expands below */}
+      {/* Step 2: 시설 선택 (Mid) - slide up animation */}
       {mainCat && (
         <div className="bg-card rounded-xl border border-border p-4 animate-fade-in">
           <h3 className="text-sm font-bold text-foreground mb-1 flex items-center gap-2">
@@ -111,7 +89,7 @@ const CategorySelector = ({
         </div>
       )}
 
-      {/* Step 3: 상세 위치 선택 (Sub) - expands below */}
+      {/* Step 3: 상세 위치 선택 (Sub) */}
       {midCat && (
         <div className="bg-card rounded-xl border border-border p-4 animate-fade-in">
           <h3 className="text-sm font-bold text-foreground mb-1 flex items-center gap-2">
