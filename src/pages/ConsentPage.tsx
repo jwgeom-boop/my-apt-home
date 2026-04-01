@@ -8,7 +8,9 @@ const ConsentPage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSigned, setHasSigned] = useState(false);
-  const [agreed, setAgreed] = useState(false);
+
+  const now = new Date();
+  const timestamp = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")} KST`;
 
   const getPos = (e: React.TouchEvent | React.MouseEvent) => {
     const canvas = canvasRef.current;
@@ -53,50 +55,43 @@ const ConsentPage = () => {
     }
   };
 
-  const consentItems = [
-    { title: "개인정보 수집·이용 동의", desc: "입주 절차 진행을 위해 성명, 연락처, 세대정보를 수집합니다." },
-    { title: "관리규약 준수 동의", desc: "입주 후 아파트 관리규약을 준수할 것에 동의합니다." },
-    { title: "사전점검 결과 확인", desc: "사전점검 시 발견된 하자에 대해 보수 일정을 확인합니다." },
-    { title: "이사 일정 및 주차 배정 동의", desc: "배정된 이사 일정과 주차 구역을 확인하고 동의합니다." },
-  ];
-
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-navy text-white flex items-center h-12 px-4">
-        <button onClick={() => navigate(-1)} className="mr-2">
+        <button onClick={() => navigate("/notice")} className="mr-2 flex items-center gap-1">
           <ArrowLeft className="w-5 h-5" />
+          <span className="text-xs text-white/70">공지 목록</span>
         </button>
-        <h1 className="flex-1 text-center text-base font-semibold pr-6">동의서 서명</h1>
+        <h1 className="flex-1 text-center text-base font-semibold pr-16">동의서 서명</h1>
       </header>
 
       <div className="flex-1 px-4 pt-4 pb-6 flex flex-col gap-4 overflow-y-auto">
-        {/* Consent Items */}
-        <div className="space-y-3">
-          {consentItems.map((item, i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-4">
-              <h3 className="text-sm font-bold text-foreground mb-1">
-                {i + 1}. {item.title}
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
+        {/* Title Card */}
+        <div className="bg-card border border-amber-300 rounded-xl p-4">
+          <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-300 font-semibold">
+            동의서
+          </span>
+          <h2 className="text-base font-bold text-foreground mt-2">층간소음 준수 확약서</h2>
         </div>
 
-        {/* Agree All */}
-        <label className="flex items-center gap-2 px-1">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="w-5 h-5 rounded border-border text-primary accent-primary"
-          />
-          <span className="text-sm font-semibold text-foreground">위 내용을 모두 확인하고 동의합니다</span>
-        </label>
+        {/* Content */}
+        <div className="bg-card border border-border rounded-xl p-4">
+          <h3 className="text-sm font-bold text-foreground mb-3">동의서 내용</h3>
+          <div className="text-xs text-muted-foreground leading-relaxed space-y-3">
+            <p>본인은 입주 후 아래 사항을 준수할 것을 확약합니다.</p>
+            <p>1. 야간(22시~익일 06시)에는 소음 발생 행위를 금지한다.</p>
+            <p>2. 이웃 세대에 피해를 주는 행위를 하지 않는다.</p>
+            <p>3. 위반 시 관리규약에 따른 제재를 수용한다.</p>
+            <div className="pt-2 border-t border-border mt-3">
+              <p>본 확약서는 전자적 방식으로 서명하며</p>
+              <p>동일한 법적 효력을 가집니다.</p>
+            </div>
+          </div>
+        </div>
 
         {/* Signature */}
-        <div className="bg-background border border-border rounded-xl p-4 flex flex-col gap-3">
-          <h3 className="text-sm font-bold text-foreground">전자 서명</h3>
+        <div className="bg-background border border-border rounded-xl p-4 flex flex-col gap-2">
           <div className="relative border border-border rounded-lg bg-muted/20 overflow-hidden">
             <canvas
               ref={canvasRef}
@@ -113,21 +108,22 @@ const ConsentPage = () => {
             />
             {!hasSigned && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <span className="text-sm text-muted-foreground">여기에 서명하세요</span>
+                <span className="text-sm text-muted-foreground">서명 영역 (터치)</span>
               </div>
             )}
           </div>
-          <div className="flex justify-end">
-            <button onClick={clearSignature} className="text-xs text-primary underline">초기화</button>
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-muted-foreground">서명일시: {timestamp}</span>
+            <button onClick={clearSignature} className="text-xs text-primary">서명 지우기</button>
           </div>
         </div>
 
         {/* Submit */}
         <Button
-          disabled={!hasSigned || !agreed}
+          disabled={!hasSigned}
           className="w-full h-14 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-base font-bold"
         >
-          서명 완료
+          동의 및 서명 완료
         </Button>
       </div>
     </div>

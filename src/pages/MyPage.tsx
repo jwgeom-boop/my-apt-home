@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { User, FileText, Shield, Phone, Bell, HelpCircle, LogOut, ChevronRight } from "lucide-react";
+import { User, ChevronRight } from "lucide-react";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const menuItems = [
-  { icon: FileText, label: "입주증 보기", path: "/certificate" },
-  { icon: Shield, label: "동의서 서명", path: "/consent" },
-  { icon: FileText, label: "하자접수 내역", path: "/defect" },
-  { icon: Phone, label: "관리사무소 연락처", path: "#" },
-  { icon: Bell, label: "알림 설정", path: "#" },
-  { icon: HelpCircle, label: "자주 묻는 질문", path: "#" },
+  { color: "bg-primary", label: "내 입주 현황", desc: "진행률·체크리스트 상세", path: "/" },
+  { color: "bg-green-500", label: "납부내역 조회", desc: "전체 납부 이력", path: "/payment" },
+  { color: "bg-navy", label: "하자 접수 이력", desc: "접수한 하자 목록·처리현황", path: "/defect" },
+  { color: "bg-amber-500", label: "알림 설정", desc: "푸시알림 항목별 ON/OFF", path: "#" },
+  { color: "bg-muted-foreground", label: "개인정보 수정", desc: "연락처·차량번호 변경", path: "#" },
+  { color: "bg-purple-500", label: "입주지원센터 연락", desc: "전화 / 채팅 문의", path: "#" },
 ];
 
 const MyPage = () => {
@@ -16,65 +17,51 @@ const MyPage = () => {
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Profile Header */}
-      <div className="bg-navy text-white px-6 pt-14 pb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-            <User className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold">홍길동</h1>
-            <p className="text-sm text-white/70">101동 0102호</p>
-          </div>
+      <div className="bg-navy text-white px-6 pt-14 pb-10 flex flex-col items-center">
+        <div className="w-20 h-20 rounded-full border-[3px] border-primary bg-white/10 flex items-center justify-center mb-3">
+          <User className="w-10 h-10 text-white" />
         </div>
       </div>
 
-      {/* Info Card */}
-      <div className="px-4 -mt-3">
+      {/* Info Card - overlapping header */}
+      <div className="px-4 -mt-6">
         <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-          <div className="grid grid-cols-3 text-center divide-x divide-border">
-            <div>
-              <p className="text-xs text-muted-foreground">입주상태</p>
-              <p className="text-sm font-bold text-primary mt-1">진행중</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">진행률</p>
-              <p className="text-sm font-bold text-foreground mt-1">60%</p>
-            </div>
-            <div>
-              <p className="text-xs text-muted-foreground">동의서</p>
-              <p className="text-sm font-bold text-foreground mt-1">2/4</p>
-            </div>
-          </div>
+          <h2 className="text-sm font-bold text-foreground mb-1">세대 정보</h2>
+          <p className="text-xs text-foreground">
+            101동 0102호 · 59㎡ · oo아파트 101현장
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            연락처: 010-9876-5432 · 등록차량: 34나5678
+          </p>
         </div>
       </div>
 
       {/* Menu List */}
       <div className="px-4 mt-4 flex-1">
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          {menuItems.map((item, i) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={i}
-                onClick={() => item.path !== "#" && navigate(item.path)}
-                className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-border last:border-0 hover:bg-muted/30 transition-colors text-left"
-              >
-                <Icon className="w-5 h-5 text-muted-foreground" />
-                <span className="flex-1 text-sm font-medium text-foreground">{item.label}</span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </button>
-            );
-          })}
+        <div className="space-y-2">
+          {menuItems.map((item, i) => (
+            <button
+              key={i}
+              onClick={() => item.path !== "#" && navigate(item.path)}
+              className="w-full flex items-center gap-3 bg-card border border-border rounded-xl px-4 py-3.5 hover:bg-muted/30 transition-colors text-left"
+            >
+              <div className={`w-3 h-3 rounded-full ${item.color} shrink-0`} />
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-semibold text-foreground block">{item.label}</span>
+                <span className="text-[11px] text-muted-foreground">{item.desc}</span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Logout */}
-      <div className="px-4 py-6">
-        <button className="w-full flex items-center justify-center gap-2 h-12 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
-          <LogOut className="w-4 h-4" />
-          <span className="text-sm font-medium">로그아웃</span>
-        </button>
+      <div className="px-4 py-4 pb-24 text-center">
+        <button className="text-sm text-destructive font-medium">로그아웃</button>
       </div>
+
+      <BottomTabBar />
     </div>
   );
 };

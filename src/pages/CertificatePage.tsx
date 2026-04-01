@@ -1,6 +1,15 @@
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+
+const infoRows = [
+  { label: "단 지 명", value: "oo아파트 101현장" },
+  { label: "세 대 번 호", value: "101동 0102호" },
+  { label: "전 용 면 적", value: "59㎡" },
+  { label: "입 주 자", value: "홍길동" },
+  { label: "발 급 일", value: "2026.04.01" },
+  { label: "유 효 기 간", value: "2026.12.31" },
+];
 
 const CertificatePage = () => {
   const navigate = useNavigate();
@@ -15,63 +24,66 @@ const CertificatePage = () => {
         <h1 className="flex-1 text-center text-base font-semibold pr-6">입주증</h1>
       </header>
 
-      <div className="flex-1 px-4 pt-6 pb-6 flex flex-col gap-5">
+      <div className="flex-1 px-4 pt-4 pb-6 flex flex-col gap-4">
         {/* Banner */}
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
-          <span className="text-green-600 text-2xl">🎉</span>
-          <h2 className="text-base font-bold text-green-700 mt-1">입주증이 발급되었습니다</h2>
-          <p className="text-xs text-green-600 mt-1">아래 입주증을 저장하여 입주 시 제시해 주세요</p>
+        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-2">
+          <span className="text-green-600 font-bold">✔</span>
+          <span className="text-sm font-semibold text-green-700">입주증 발급 완료</span>
         </div>
 
-        {/* Certificate Card */}
-        <div className="bg-card border-2 border-primary rounded-2xl overflow-hidden shadow-lg">
-          {/* Card Header */}
-          <div className="bg-navy text-white p-5 text-center">
-            <p className="text-xs text-white/70 mb-1">○○아파트</p>
-            <h2 className="text-xl font-bold">입 주 증</h2>
-            <p className="text-xs text-white/60 mt-1">RESIDENT CERTIFICATE</p>
+        {/* Certificate Card - formal document style */}
+        <div className="bg-card border-2 border-navy rounded-xl overflow-hidden shadow-lg">
+          {/* Title */}
+          <div className="bg-navy text-white py-4 text-center">
+            <h2 className="text-xl font-bold tracking-[0.3em]">입 주 증</h2>
           </div>
 
-          {/* Card Body */}
-          <div className="p-5 space-y-4">
-            {/* QR */}
-            <div className="flex justify-center">
-              <div className="w-32 h-32 bg-muted rounded-xl flex items-center justify-center border border-border">
-                <div className="w-24 h-24 bg-foreground/10 rounded-lg grid grid-cols-5 grid-rows-5 gap-0.5 p-1">
-                  {Array.from({ length: 25 }).map((_, i) => (
-                    <div key={i} className={`rounded-sm ${[0,1,2,4,5,6,10,12,14,18,19,20,22,23,24].includes(i) ? 'bg-foreground' : 'bg-transparent'}`} />
-                  ))}
+          {/* Info Table */}
+          <div className="p-5">
+            <div className="divide-y divide-border">
+              {infoRows.map((row, i) => (
+                <div key={i} className="flex py-3 text-sm">
+                  <span className="w-24 text-muted-foreground shrink-0">{row.label}</span>
+                  <span className="font-semibold text-foreground">{row.value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* QR + Stamp area */}
+            <div className="mt-4 flex items-end justify-between">
+              <p className="text-[10px] text-muted-foreground">시행사</p>
+              <div className="flex items-center gap-3">
+                {/* Stamp placeholder */}
+                <div className="w-12 h-12 rounded-full border-2 border-destructive/40 flex items-center justify-center">
+                  <span className="text-[8px] text-destructive/60">직인</span>
+                </div>
+                {/* QR placeholder */}
+                <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center border border-border">
+                  <div className="w-12 h-12 bg-foreground/10 rounded grid grid-cols-4 grid-rows-4 gap-0.5 p-0.5">
+                    {Array.from({ length: 16 }).map((_, i) => (
+                      <div key={i} className={`rounded-sm ${[0,1,3,4,6,9,11,12,13,15].includes(i) ? 'bg-foreground' : 'bg-transparent'}`} />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Info */}
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between border-b border-border pb-2">
-                <span className="text-muted-foreground">세대번호</span>
-                <span className="font-semibold text-foreground">101동 0102호</span>
-              </div>
-              <div className="flex justify-between border-b border-border pb-2">
-                <span className="text-muted-foreground">입주자명</span>
-                <span className="font-semibold text-foreground">홍길동</span>
-              </div>
-              <div className="flex justify-between border-b border-border pb-2">
-                <span className="text-muted-foreground">입주예정일</span>
-                <span className="font-semibold text-foreground">2026.04.15</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">발급일</span>
-                <span className="font-semibold text-foreground">2026.04.01</span>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Save Button */}
-        <Button className="w-full h-14 rounded-xl bg-navy hover:bg-navy/90 text-white text-base font-bold flex items-center justify-center gap-2">
-          <Download className="w-5 h-5" />
-          PDF 저장하기
-        </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 h-12 rounded-xl border-border text-foreground font-medium flex items-center justify-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            PDF로 저장
+          </Button>
+          <Button className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium flex items-center justify-center gap-2">
+            <Camera className="w-4 h-4" />
+            화면 캡처
+          </Button>
+        </div>
       </div>
     </div>
   );
