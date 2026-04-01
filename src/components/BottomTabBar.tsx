@@ -7,7 +7,7 @@ const tabs = [
   { path: "/payment", label: "납부", icon: CreditCard },
   { path: "/qr", label: "QR", icon: QrCode },
   { path: "/reservation", label: "예약", icon: CalendarDays },
-  { path: "/mypage", label: "마이", icon: User },
+  { path: "/mypage", label: "공지/마이", icon: User },
 ];
 
 const BottomTabBar = () => {
