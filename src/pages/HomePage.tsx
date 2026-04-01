@@ -1,14 +1,27 @@
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
-const myDefects = [
-  { id: "HD-2025-0012", type: "도배·도장", location: "안방 벽면", status: "처리중", statusColor: "text-warning" },
-  { id: "HD-2025-0009", type: "설비·배관", location: "주방 싱크대", status: "처리완료", statusColor: "text-success" },
-  { id: "HD-2025-0015", type: "창호·유리", location: "거실 창문", status: "접수완료", statusColor: "text-primary" },
-];
+interface DefectRow {
+  receipt_no: string;
+  location: string;
+  mid_category: string | null;
+  status: string;
+  is_urgent: boolean;
+}
+
+const statusColorMap: Record<string, string> = {
+  "미배정": "text-muted-foreground",
+  "접수완료": "text-primary",
+  "배정완료": "text-primary",
+  "처리중": "text-warning",
+  "처리완료": "text-success",
+  "완료": "text-success",
+};
 
 const checklistItems = [
   { id: 1, label: "잔금 납부", done: true },
@@ -18,16 +31,42 @@ const checklistItems = [
   { id: 5, label: "동의서 서명", done: false },
 ];
 
-const statusCounts = {
-  접수완료: myDefects.filter((d) => d.status === "접수완료").length,
-  처리중: myDefects.filter((d) => d.status === "처리중").length,
-  완료: myDefects.filter((d) => d.status === "처리완료").length,
-};
-
 const HomePage = () => {
   const navigate = useNavigate();
   const completedCount = checklistItems.filter((i) => i.done).length;
   const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
+
+  const [defects, setDefects] = useState<DefectRow[]>([]);
+  const [loadingDefects, setLoadingDefects] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data: resident } = await supabase
+        .from("residents")
+        .select("id")
+        .limit(1)
+        .single();
+
+      if (resident) {
+        const { data } = await supabase
+          .from("defects")
+          .select("receipt_no, location, mid_category, status, is_urgent")
+          .eq("resident_id", resident.id)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (data) setDefects(data);
+      }
+      setLoadingDefects(false);
+    };
+    load();
+  }, []);
+
+  const statusCounts = {
+    접수완료: defects.filter((d) => ["미배정", "접수완료", "배정완료"].includes(d.status)).length,
+    처리중: defects.filter((d) => d.status === "처리중").length,
+    완료: defects.filter((d) => ["처리완료", "완료"].includes(d.status)).length,
+  };
 
   return (
     <MobileLayout>
@@ -70,20 +109,26 @@ const HomePage = () => {
           <AlertTriangle className="w-4 h-4 text-warning" />
           실시간 하자 처리 상태
         </h3>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="bg-primary/10 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-primary">{statusCounts.접수완료}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">접수완료</p>
+        {loadingDefects ? (
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
           </div>
-          <div className="bg-warning/10 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-warning">{statusCounts.처리중}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">처리중</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-primary/10 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-primary">{statusCounts.접수완료}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">접수완료</p>
+            </div>
+            <div className="bg-warning/10 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-warning">{statusCounts.처리중}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">처리중</p>
+            </div>
+            <div className="bg-success/10 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold text-success">{statusCounts.완료}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">완료</p>
+            </div>
           </div>
-          <div className="bg-success/10 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold text-success">{statusCounts.완료}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">완료</p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* My Defect List */}
@@ -94,17 +139,27 @@ const HomePage = () => {
             전체보기 <ChevronRight className="w-3 h-3" />
           </button>
         </div>
-        <div className="space-y-2.5">
-          {myDefects.map((d) => (
-            <div key={d.id} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2.5">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-foreground">{d.id}</p>
-                <p className="text-[11px] text-muted-foreground">{d.type} · {d.location}</p>
+        {loadingDefects ? (
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
+          </div>
+        ) : defects.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-4">접수된 하자가 없습니다</p>
+        ) : (
+          <div className="space-y-2.5">
+            {defects.map((d) => (
+              <div key={d.receipt_no} className="flex items-center justify-between bg-muted/30 rounded-lg px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-foreground">{d.receipt_no}</p>
+                  <p className="text-[11px] text-muted-foreground">{d.mid_category || ""} · {d.location}</p>
+                </div>
+                <span className={cn("text-xs font-bold shrink-0", statusColorMap[d.status] || "text-muted-foreground")}>
+                  {d.status}
+                </span>
               </div>
-              <span className={cn("text-xs font-bold shrink-0", d.statusColor)}>{d.status}</span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Progress */}
