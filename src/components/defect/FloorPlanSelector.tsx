@@ -1,39 +1,36 @@
-import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 import floorplanImg from "@/assets/floorplan-extended.png";
 
 interface FloorPlanRoom {
   id: string;
   label: string;
-  // SVG polygon points as percentage of image dimensions
   points: string;
 }
 
 const EXTENDED_ROOMS: FloorPlanRoom[] = [
-  { id: "거실", label: "거실", points: "5,52 5,95 42,95 42,52" },
-  { id: "주방", label: "주방", points: "42,52 42,95 62,95 62,52" },
-  { id: "안방", label: "안방", points: "5,5 5,50 25,50 25,5" },
-  { id: "욕실", label: "욕실", points: "25,5 25,35 48,35 48,5" },
-  { id: "현관", label: "현관", points: "48,5 48,35 62,35 62,20" },
-  { id: "베란다", label: "베란다", points: "62,5 62,95 95,95 95,5" },
+  { id: "드레스룸",    label: "드레스룸",    points: "0,32 14,32 14,58 0,58" },
+  { id: "욕실2",       label: "욕실2",       points: "0,58 14,58 14,82 0,82" },
+  { id: "침실1(안방)", label: "침실1(안방)", points: "14,45 50,45 50,90 14,90" },
+  { id: "발코니(하)",  label: "발코니(하)",  points: "14,90 65,90 65,100 14,100" },
+  { id: "욕실1",       label: "욕실1",       points: "30,22 50,22 50,45 30,45" },
+  { id: "현관",        label: "현관",        points: "30,45 52,45 52,65 30,65" },
+  { id: "거실",        label: "거실",        points: "50,45 68,45 68,90 50,90" },
+  { id: "침실3",       label: "침실3",       points: "52,0 100,0 100,42 52,42" },
+  { id: "침실2",       label: "침실2",       points: "52,42 88,42 88,68 52,68" },
+  { id: "주방/식당",   label: "주방/식당",   points: "68,42 100,42 100,75 68,75" },
+  { id: "알파룸",      label: "알파룸",      points: "68,75 88,75 88,92 68,92" },
+  { id: "발코니(우)",  label: "발코니(우)",  points: "88,58 100,58 100,92 88,92" },
 ];
 
-const OPTION_ROOMS: FloorPlanRoom[] = [
-  { id: "거실", label: "거실", points: "5,52 5,95 42,95 42,52" },
-  { id: "주방", label: "주방", points: "42,52 42,95 62,95 62,52" },
-  { id: "안방", label: "안방", points: "5,5 5,50 25,50 25,5" },
-  { id: "욕실", label: "욕실", points: "25,5 25,35 48,35 48,5" },
-  { id: "현관", label: "현관", points: "48,5 48,35 62,35 62,20" },
-  { id: "베란다", label: "베란다", points: "62,5 62,95 95,95 95,5" },
-];
+const OPTION_ROOMS: FloorPlanRoom[] = [...EXTENDED_ROOMS];
 
 interface FloorPlanSelectorProps {
   selectedRoom: string;
   onSelectRoom: (roomId: string) => void;
-  categories: { name: string; icon: string }[];
 }
 
-const FloorPlanSelector = ({ selectedRoom, onSelectRoom, categories }: FloorPlanSelectorProps) => {
+const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProps) => {
   const [planType, setPlanType] = useState<"extended" | "option">("extended");
   const rooms = planType === "extended" ? EXTENDED_ROOMS : OPTION_ROOMS;
 
@@ -69,7 +66,7 @@ const FloorPlanSelector = ({ selectedRoom, onSelectRoom, categories }: FloorPlan
       </div>
 
       {/* Floor plan with SVG overlay */}
-      <div className="relative w-full mb-3">
+      <div className="relative w-full">
         <img
           src={floorplanImg}
           alt="평면도"
@@ -105,29 +102,6 @@ const FloorPlanSelector = ({ selectedRoom, onSelectRoom, categories }: FloorPlan
             📍 {selectedRoom}
           </div>
         )}
-      </div>
-
-      {/* Text buttons synced with image */}
-      <div className="grid grid-cols-3 gap-2">
-        {categories.map((cat) => {
-          const isSelected = selectedRoom === cat.name;
-          return (
-            <button
-              key={cat.name}
-              onClick={() => onSelectRoom(cat.name)}
-              className={cn(
-                "text-xs py-2.5 rounded-xl border font-medium transition-all flex flex-col items-center gap-1 active:scale-[0.97]",
-                isSelected
-                  ? "bg-primary text-primary-foreground border-primary shadow-md"
-                  : "bg-muted/30 text-foreground border-border hover:border-primary/40",
-                selectedRoom && !isSelected && "opacity-40"
-              )}
-            >
-              <span className="text-lg">{cat.icon}</span>
-              <span>{cat.name}</span>
-            </button>
-          );
-        })}
       </div>
     </div>
   );

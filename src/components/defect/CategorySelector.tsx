@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
-import { MainCategory, MidCategory, SubCategory } from "@/data/defectCategories";
-import { Check, ChevronDown } from "lucide-react";
+import { MainCategory, SubCategory } from "@/data/defectCategories";
+import { Check } from "lucide-react";
 import FloorPlanSelector from "./FloorPlanSelector";
 
 interface CategorySelectorProps {
@@ -50,76 +50,51 @@ const CategorySelector = ({
       <FloorPlanSelector
         selectedRoom={selectedMain}
         onSelectRoom={onSelectMain}
-        categories={categories.map((c) => ({ name: c.name, icon: c.icon }))}
       />
 
-      {/* Step 2: 시설 선택 (Mid) - slide up animation */}
+      {/* Step 2: 시설 선택 (Mid) - 가로 스크롤 탭 */}
       {mainCat && (
-        <div className="bg-card rounded-xl border border-border p-4 animate-fade-in">
-          <h3 className="text-sm font-bold text-foreground mb-1 flex items-center gap-2">
-            🔧 시설 선택
-            {selectedMid && <Check className="w-4 h-4 text-primary" />}
-          </h3>
-          <p className="text-[11px] text-muted-foreground mb-3">{selectedMain} 내 점검할 시설을 선택하세요</p>
-          <div className="flex flex-col gap-2">
-            {mainCat.mids.map((mid) => {
-              const isSelected = selectedMid === mid.name;
-              const isDimmed = selectedMid && !isSelected;
-              return (
-                <button
-                  key={mid.name}
-                  onClick={() => onSelectMid(mid.name)}
-                  className={cn(
-                    "flex items-center justify-between px-4 py-3 rounded-xl border font-medium text-sm transition-all active:scale-[0.98]",
-                    isSelected
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted/20 text-foreground border-border hover:border-primary/30",
-                    isDimmed && "opacity-40"
-                  )}
-                >
-                  <span>{mid.name}</span>
-                  <div className="flex items-center gap-1 text-xs opacity-70">
-                    <span>{mid.subs.length}개</span>
-                    <ChevronDown className={cn("w-4 h-4 transition-transform", isSelected && "rotate-180")} />
-                  </div>
-                </button>
-              );
-            })}
+        <div className="bg-card rounded-xl border border-border px-4 py-3 animate-fade-in">
+          <p className="text-xs font-bold text-muted-foreground mb-2">시설 선택</p>
+          <div className="overflow-x-auto flex gap-2 pb-1 scrollbar-hide">
+            {mainCat.mids.map((mid) => (
+              <button
+                key={mid.name}
+                onClick={() => onSelectMid(mid.name)}
+                className={cn(
+                  "shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+                  selectedMid === mid.name
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted/30 text-foreground border-border"
+                )}
+              >
+                {mid.name}
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Step 3: 상세 위치 선택 (Sub) */}
+      {/* Step 3: 상세 위치 선택 (Sub) - 가로 스크롤 칩 */}
       {midCat && (
-        <div className="bg-card rounded-xl border border-border p-4 animate-fade-in">
-          <h3 className="text-sm font-bold text-foreground mb-1 flex items-center gap-2">
-            📋 상세 위치
-            {selectedSub && <Check className="w-4 h-4 text-primary" />}
-          </h3>
-          <p className="text-[11px] text-muted-foreground mb-3">점검할 상세 위치를 선택하세요</p>
-          <div className="flex flex-wrap gap-2">
-            {midCat.subs.map((sub) => {
-              const isSelected = selectedSub === sub.name;
-              const isDimmed = selectedSub && !isSelected;
-              return (
-                <button
-                  key={sub.name}
-                  onClick={() => onSelectSub(sub, midCat.name)}
-                  className={cn(
-                    "text-xs px-4 py-2.5 rounded-lg border font-medium transition-all active:scale-[0.97]",
-                    isSelected
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted/30 text-foreground border-border hover:border-primary/40",
-                    isDimmed && "opacity-40",
-                    sub.isUrgent && "ring-1 ring-destructive/40"
-                  )}
-                >
-                  {isSelected && <Check className="w-3 h-3 inline mr-1" />}
-                  {sub.name}
-                  {sub.isUrgent && <span className="ml-1 text-[10px]">⚠️</span>}
-                </button>
-              );
-            })}
+        <div className="bg-card rounded-xl border border-border px-4 py-3 animate-fade-in">
+          <p className="text-xs font-bold text-muted-foreground mb-2">상세 위치</p>
+          <div className="overflow-x-auto flex gap-2 pb-1 scrollbar-hide">
+            {midCat.subs.map((sub) => (
+              <button
+                key={sub.name}
+                onClick={() => onSelectSub(sub, midCat.name)}
+                className={cn(
+                  "shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+                  selectedSub === sub.name
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted/30 text-foreground border-border",
+                  sub.isUrgent && "ring-1 ring-destructive/40"
+                )}
+              >
+                {sub.name}{sub.isUrgent ? " ⚠️" : ""}
+              </button>
+            ))}
           </div>
         </div>
       )}
