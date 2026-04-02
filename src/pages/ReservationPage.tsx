@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
 import MobileLayout from "@/components/MobileLayout";
 import { ChevronLeft, ChevronRight, ClipboardList, Truck, Check, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,27 @@ const ReservationPage = () => {
   const [moveInDate, setMoveInDate] = useState<number | null>(null);
   const [moveInTime, setMoveInTime] = useState<string | null>(null);
   const [moveInConfirmed, setMoveInConfirmed] = useState(false);
+
+  const inspectionQrRef = useRef<HTMLCanvasElement>(null);
+  const moveInQrRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (inspectionConfirmed && inspectionQrRef.current) {
+      QRCode.toCanvas(inspectionQrRef.current,
+        `INSPECTION-101-1202-${inspectionDate}-${inspectionTime}`,
+        { width: 120, margin: 1 }
+      );
+    }
+  }, [inspectionConfirmed]);
+
+  useEffect(() => {
+    if (moveInConfirmed && moveInQrRef.current) {
+      QRCode.toCanvas(moveInQrRef.current,
+        `MOVEIN-101-1202-${moveInDate}-${moveInTime}`,
+        { width: 120, margin: 1 }
+      );
+    }
+  }, [moveInConfirmed]);
 
   const daysInMonth = 30;
   const firstDayOfWeek = 2;
@@ -143,6 +165,10 @@ const ReservationPage = () => {
                 <p className="text-sm font-bold text-success">사전점검 예약 완료</p>
               </div>
               <p className="text-sm text-foreground">2026.04.{String(inspectionDate).padStart(2, "0")} {inspectionTime}</p>
+              <div className="flex flex-col items-center mt-3 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">사전점검 입장 QR</p>
+                <canvas ref={inspectionQrRef} className="rounded-lg" />
+              </div>
               <button
                 onClick={() => {
                   setInspectionConfirmed(false);
@@ -214,6 +240,10 @@ const ReservationPage = () => {
               </div>
               <p className="text-sm text-foreground">2026.04.{String(moveInDate).padStart(2, "0")} {moveInTime}</p>
               <p className="text-xs text-muted-foreground mt-1">엘리베이터: 1호기 배정 / 주차구역: A-08</p>
+              <div className="flex flex-col items-center mt-3 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">이사 차량 출입 QR</p>
+                <canvas ref={moveInQrRef} className="rounded-lg" />
+              </div>
               <button
                 onClick={() => {
                   setMoveInConfirmed(false);
