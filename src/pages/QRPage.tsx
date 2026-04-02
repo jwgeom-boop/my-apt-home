@@ -1,6 +1,7 @@
 import MobileLayout from "@/components/MobileLayout";
-import { QrCode, Car, Clock, Copy, Check, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Car, Clock, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -11,6 +12,20 @@ const QRPage = () => {
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
   const [vehicleQR, setVehicleQR] = useState(false);
+  const qrRef = useRef<HTMLCanvasElement>(null);
+  const vehicleQrRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (qrRef.current) {
+      QRCode.toCanvas(qrRef.current, "APT-101-1202-홍길동-20260402", { width: 192, margin: 1 });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (vehicleQR && vehicleQrRef.current) {
+      QRCode.toCanvas(vehicleQrRef.current, `VEHICLE-101-1202-${startTime}-${endTime}`, { width: 112, margin: 1 });
+    }
+  }, [vehicleQR, startTime, endTime]);
 
   const handleIssue = () => {
     setVehicleQR(true);
@@ -27,8 +42,8 @@ const QRPage = () => {
 
       {/* QR 코드 카드 */}
       <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col items-center">
-        <div className="w-48 h-48 bg-muted rounded-xl flex items-center justify-center mb-4">
-          <QrCode className="w-32 h-32 text-accent" />
+        <div className="w-48 h-48 rounded-xl flex items-center justify-center mb-4">
+          <canvas ref={qrRef} />
         </div>
         <p className="text-base font-bold text-foreground">101동 1202호 | 홍길동</p>
         <div className="flex items-center gap-1.5 mt-2">
@@ -68,8 +83,8 @@ const QRPage = () => {
             <h4 className="text-sm font-semibold text-foreground">방문 차량 출입 QR</h4>
           </div>
           <div className="flex items-center justify-center py-3">
-            <div className="w-28 h-28 bg-muted rounded-lg flex items-center justify-center">
-              <QrCode className="w-20 h-20 text-primary" />
+            <div className="w-28 h-28 rounded-lg flex items-center justify-center">
+              <canvas ref={vehicleQrRef} />
             </div>
           </div>
           <div className="space-y-1.5 mt-2">
