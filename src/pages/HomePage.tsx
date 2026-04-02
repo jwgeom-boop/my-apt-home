@@ -248,6 +248,22 @@ const HomePage = () => {
         </button>
       </div>
 
+      {/* 입주 당일 가이드 */}
+      <button
+        onClick={() => setShowMoveInGuide(true)}
+        className="w-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4 text-left active:scale-[0.99] transition-transform mt-3"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+            <span className="text-lg">🏠</span>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-foreground">입주 당일 가이드</p>
+            <p className="text-[10px] text-muted-foreground">준비할 것들을 확인하세요</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
+        </div>
+      </button>
       {/* 나의 접수 현황 슬라이드 패널 */}
       {showDefectList && (
         <div className="fixed inset-0 z-50 flex items-end justify-center">
