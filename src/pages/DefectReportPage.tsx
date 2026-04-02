@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload } from "lucide-react";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
