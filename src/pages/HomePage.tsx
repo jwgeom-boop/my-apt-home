@@ -230,7 +230,7 @@ const HomePage = () => {
       {/* Quick Buttons */}
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => navigate("/services")}
+          onClick={() => navigate("/loan")}
           className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-amber-300/40 active:scale-[0.98] transition-transform"
         >
           <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
