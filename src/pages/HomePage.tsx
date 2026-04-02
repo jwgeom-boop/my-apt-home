@@ -333,7 +333,7 @@ const HomePage = () => {
                 <X className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-5 py-4">
+            <div className="flex-1 overflow-y-auto px-5 pt-4 pb-24">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm text-muted-foreground">{completedCount}/{checklistItems.length}개 완료</span>
                 <span className="text-lg font-bold text-primary">{progressPercent}%</span>
