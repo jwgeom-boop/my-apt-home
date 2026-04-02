@@ -4,22 +4,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
-const PURPOSE_OPTIONS = ["이사", "가전·가구 배송", "인테리어 공사", "단순 방문"] as const;
-
 const hours = Array.from({ length: 25 }, (_, i) => i.toString().padStart(2, "0") + ":00");
 
 const QRPage = () => {
   const [showVehicleForm, setShowVehicleForm] = useState(false);
-  const [purpose, setPurpose] = useState<string>("");
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("18:00");
   const [vehicleQR, setVehicleQR] = useState(false);
 
   const handleIssue = () => {
-    if (!purpose) {
-      toast.error("방문 목적을 선택해주세요");
-      return;
-    }
     setVehicleQR(true);
     setShowVehicleForm(false);
     toast.success("방문 차량 출입 QR이 발급되었습니다");
@@ -81,10 +74,6 @@ const QRPage = () => {
           </div>
           <div className="space-y-1.5 mt-2">
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">방문 목적</span>
-              <span className="text-foreground font-medium">{purpose}</span>
-            </div>
-            <div className="flex justify-between text-xs">
               <span className="text-muted-foreground">허용 시간</span>
               <span className="text-foreground font-medium">{startTime} ~ {endTime}</span>
             </div>
@@ -96,26 +85,6 @@ const QRPage = () => {
       {showVehicleForm && (
         <div className="bg-card rounded-xl p-4 border border-border shadow-sm mt-4 space-y-4">
           <h4 className="text-sm font-semibold text-foreground">방문 차량 출입 QR 발급</h4>
-
-          {/* 방문 목적 */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-2 block">방문 목적</label>
-            <div className="grid grid-cols-2 gap-2">
-              {PURPOSE_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => setPurpose(opt)}
-                  className={`text-xs py-2.5 px-3 rounded-lg border transition-colors font-medium ${
-                    purpose === opt
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background text-foreground border-border hover:border-primary/50"
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* 시간 설정 */}
           <div>
