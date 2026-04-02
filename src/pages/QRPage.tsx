@@ -83,8 +83,8 @@ const QRPage = () => {
             <h4 className="text-sm font-semibold text-foreground">방문 차량 출입 QR</h4>
           </div>
           <div className="flex items-center justify-center py-3">
-            <div className="w-28 h-28 bg-muted rounded-lg flex items-center justify-center">
-              <QrCode className="w-20 h-20 text-primary" />
+            <div className="w-28 h-28 rounded-lg flex items-center justify-center">
+              <canvas ref={vehicleQrRef} />
             </div>
           </div>
           <div className="space-y-1.5 mt-2">
