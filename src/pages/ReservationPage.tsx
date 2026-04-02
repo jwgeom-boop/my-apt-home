@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
 import MobileLayout from "@/components/MobileLayout";
 import { ChevronLeft, ChevronRight, ClipboardList, Truck, Check, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
