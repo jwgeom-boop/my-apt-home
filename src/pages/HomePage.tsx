@@ -350,9 +350,19 @@ const HomePage = () => {
                     <span className={cn("text-sm flex-1", item.done ? "text-foreground" : "text-muted-foreground")}>
                       {item.label}
                     </span>
-                    <span className={cn("text-xs font-bold", item.done ? "text-success" : "text-warning")}>
-                      {item.done ? "완료" : "미완료"}
-                    </span>
+                    {item.done ? (
+                      <span className="text-xs font-bold text-success">완료</span>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setShowChecklist(false);
+                          navigate(item.path);
+                        }}
+                        className="text-xs font-bold text-primary border border-primary/40 bg-primary/10 px-2.5 py-1 rounded-lg active:scale-95 transition-transform"
+                      >
+                        바로가기 →
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
