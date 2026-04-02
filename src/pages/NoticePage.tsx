@@ -2,18 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { cn } from "@/lib/utils";
+import { notices } from "@/data/notices";
 
 type NoticeType = "전체" | "안내문" | "공지" | "동의서";
 
 const filters: NoticeType[] = ["전체", "안내문", "공지", "동의서"];
-
-const notices = [
-  { type: "안내문" as const, title: "잔금 납부 기한 안내", desc: "2026.04.07까지 납부 계좌로 이체해 주세요", date: "오늘 09:00", unread: true },
-  { type: "공지" as const, title: "사전점검 일정 안내", desc: "4월 1일~5일, 09:00~17:00 운영", date: "03.30", unread: false },
-  { type: "동의서" as const, title: "층간소음 동의서 서명 요청", desc: "서명 미완료 — 탭하여 바로 서명", date: "03.28", unread: true },
-  { type: "안내문" as const, title: "이사 차량 사전 등록 안내", desc: "이사 1주일 전까지 차량번호 등록", date: "03.25", unread: false },
-  { type: "공지" as const, title: "입주지원센터 운영시간", desc: "평일 09:00~17:00 / 주말 휴무", date: "03.20", unread: false },
-];
 
 const badgeColors: Record<string, string> = {
   안내문: "bg-destructive/15 text-destructive border-destructive/30",
@@ -35,6 +28,8 @@ const NoticePage = () => {
   const handleCardClick = (notice: typeof notices[0]) => {
     if (notice.type === "동의서") {
       navigate("/consent");
+    } else {
+      navigate(`/notice/${notice.id}`);
     }
   };
 
@@ -60,9 +55,9 @@ const NoticePage = () => {
 
       {/* Notice Cards */}
       <div className="space-y-3">
-        {filtered.map((n, i) => (
+        {filtered.map((n) => (
           <button
-            key={i}
+            key={n.id}
             onClick={() => handleCardClick(n)}
             className={cn(
               "w-full text-left bg-card rounded-xl p-4 border shadow-sm relative",
