@@ -55,8 +55,10 @@ const CategorySelector = ({
       {/* Step 2: 시설 선택 (Mid) - 가로 스크롤 탭 */}
       {mainCat && (
         <div className="bg-card rounded-xl border border-border px-4 py-3 animate-fade-in">
+
+          {/* 시설 선택 탭 */}
           <p className="text-xs font-bold text-muted-foreground mb-2">시설 선택</p>
-          <div className="overflow-x-auto flex gap-2 pb-1 scrollbar-hide">
+          <div className="overflow-x-auto flex gap-2 pb-2 scrollbar-hide">
             {mainCat.mids.map((mid) => (
               <button
                 key={mid.name}
@@ -72,30 +74,31 @@ const CategorySelector = ({
               </button>
             ))}
           </div>
-        </div>
-      )}
 
-      {/* Step 3: 상세 위치 선택 (Sub) - 가로 스크롤 칩 */}
-      {midCat && (
-        <div className="bg-card rounded-xl border border-border px-4 py-3 animate-fade-in">
-          <p className="text-xs font-bold text-muted-foreground mb-2">상세 위치</p>
-          <div className="overflow-x-auto flex gap-2 pb-1 scrollbar-hide">
-            {midCat.subs.map((sub) => (
-              <button
-                key={sub.name}
-                onClick={() => onSelectSub(sub, midCat.name)}
-                className={cn(
-                  "shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
-                  selectedSub === sub.name
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted/30 text-foreground border-border",
-                  sub.isUrgent && "ring-1 ring-destructive/40"
-                )}
-              >
-                {sub.name}{sub.isUrgent ? " ⚠️" : ""}
-              </button>
-            ))}
-          </div>
+          {/* 상세 위치 - 시설 선택 시 바로 아래 펼쳐짐 */}
+          {midCat && (
+            <div className="mt-3 pt-3 border-t border-border animate-fade-in">
+              <p className="text-xs font-bold text-muted-foreground mb-2">상세 위치</p>
+              <div className="overflow-x-auto flex gap-2 pb-1 scrollbar-hide">
+                {midCat.subs.map((sub) => (
+                  <button
+                    key={sub.name}
+                    onClick={() => onSelectSub(sub, midCat.name)}
+                    className={cn(
+                      "shrink-0 px-4 py-2 rounded-full border text-sm font-medium transition-all whitespace-nowrap",
+                      selectedSub === sub.name
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted/30 text-foreground border-border",
+                      sub.isUrgent && "ring-1 ring-destructive/40"
+                    )}
+                  >
+                    {sub.name}{sub.isUrgent ? " ⚠️" : ""}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       )}
     </div>
