@@ -309,10 +309,11 @@ const DefectReportPage = () => {
             <h3 className="text-sm font-bold text-foreground mb-2">📝 접수 내역</h3>
             <div className="space-y-2">
               {submittedDefects.map((d) => (
-                <div
+                <button
                   key={d.id}
+                  onClick={() => navigate(`/defect/${d.id}`)}
                   className={cn(
-                    "flex items-center justify-between p-2.5 rounded-lg border text-xs",
+                    "flex items-center justify-between p-2.5 rounded-lg border text-xs w-full text-left",
                     d.isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
                   )}
                 >
@@ -329,8 +330,9 @@ const DefectReportPage = () => {
                     )}>
                       {d.status === "임시저장" ? "📱 임시저장" : d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
                     </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
