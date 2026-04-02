@@ -240,6 +240,10 @@ const ReservationPage = () => {
               </div>
               <p className="text-sm text-foreground">2026.04.{String(moveInDate).padStart(2, "0")} {moveInTime}</p>
               <p className="text-xs text-muted-foreground mt-1">엘리베이터: 1호기 배정 / 주차구역: A-08</p>
+              <div className="flex flex-col items-center mt-3 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">이사 차량 출입 QR</p>
+                <canvas ref={moveInQrRef} className="rounded-lg" />
+              </div>
               <button
                 onClick={() => {
                   setMoveInConfirmed(false);
