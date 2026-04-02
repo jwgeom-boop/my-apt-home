@@ -32,11 +32,6 @@ const BottomTabBar = () => {
             >
               <div className="relative">
                 <Icon className={cn("w-5 h-5", isActive && "stroke-[2.5]")} />
-                {tab.path === "/notice" && unreadCount > 0 && (
-                  <div className="absolute top-0 right-0 w-4 h-4 rounded-full bg-destructive text-white text-[9px] font-bold flex items-center justify-center -translate-y-1/2 translate-x-1/2">
-                    {unreadCount}
-                  </div>
-                )}
               </div>
               <span className={cn("text-[10px]", isActive ? "font-semibold" : "font-medium")}>
                 {tab.label}
