@@ -28,6 +28,27 @@ const ReservationPage = () => {
   const [moveInTime, setMoveInTime] = useState<string | null>(null);
   const [moveInConfirmed, setMoveInConfirmed] = useState(false);
 
+  const inspectionQrRef = useRef<HTMLCanvasElement>(null);
+  const moveInQrRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (inspectionConfirmed && inspectionQrRef.current) {
+      QRCode.toCanvas(inspectionQrRef.current,
+        `INSPECTION-101-1202-${inspectionDate}-${inspectionTime}`,
+        { width: 120, margin: 1 }
+      );
+    }
+  }, [inspectionConfirmed]);
+
+  useEffect(() => {
+    if (moveInConfirmed && moveInQrRef.current) {
+      QRCode.toCanvas(moveInQrRef.current,
+        `MOVEIN-101-1202-${moveInDate}-${moveInTime}`,
+        { width: 120, margin: 1 }
+      );
+    }
+  }, [moveInConfirmed]);
+
   const daysInMonth = 30;
   const firstDayOfWeek = 2;
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
