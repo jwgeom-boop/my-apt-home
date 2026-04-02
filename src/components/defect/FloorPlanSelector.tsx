@@ -109,6 +109,11 @@ const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProp
             📍 {selectedRoom}
           </div>
         )}
+        {debugXY && (
+          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono z-10">
+            x: {debugXY.x}, y: {debugXY.y}
+          </div>
+        )}
       </div>
     </div>
   );
