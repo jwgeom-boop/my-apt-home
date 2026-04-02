@@ -15,7 +15,8 @@ interface PaymentItem {
 
 const initialItems: PaymentItem[] = [
   { label: "분양 잔금 (30%)", description: "분양가의 30%", amount: 150000000, paid: false, account: "신한 110-382-456789" },
-  { label: "중도금 대출 (60%)", description: "대출 상환 또는 잔금대출 전환", amount: 300000000, paid: false, account: "신한 110-382-456789" },
+  { label: "중도금 1차 (30%)", description: "대출 상환 또는 잔금대출 전환", amount: 150000000, paid: false, account: "신한 110-382-456789" },
+  { label: "중도금 2차 (30%)", description: "대출 상환 또는 잔금대출 전환", amount: 150000000, paid: false, account: "신한 110-382-456789" },
   { label: "중도금 후불 이자", description: "연 4.5% 기준 산정", amount: 18700000, paid: false, account: "신한 110-382-456789" },
   { label: "발코니 확장비", amount: 15000000, paid: false, account: "신한 110-382-456789" },
   { label: "옵션비 (시스템에어컨)", amount: 4200000, paid: true },
