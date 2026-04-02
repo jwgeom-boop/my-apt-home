@@ -42,8 +42,8 @@ const QRPage = () => {
 
       {/* QR 코드 카드 */}
       <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col items-center">
-        <div className="w-48 h-48 bg-muted rounded-xl flex items-center justify-center mb-4">
-          <QrCode className="w-32 h-32 text-accent" />
+        <div className="w-48 h-48 rounded-xl flex items-center justify-center mb-4">
+          <canvas ref={qrRef} />
         </div>
         <p className="text-base font-bold text-foreground">101동 1202호 | 홍길동</p>
         <div className="flex items-center gap-1.5 mt-2">
