@@ -16,6 +16,7 @@ import ConsentPage from "./pages/ConsentPage";
 import CertificatePage from "./pages/CertificatePage";
 import MyPage from "./pages/MyPage";
 import DefectDetailPage from "./pages/DefectDetailPage";
+import NoticeDetailPage from "./pages/NoticeDetailPage";
 
 const queryClient = new QueryClient();
 
