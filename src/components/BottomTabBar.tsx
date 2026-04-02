@@ -1,20 +1,19 @@
-import { Home, CreditCard, QrCode, CalendarDays, Bell, User } from "lucide-react";
+import { Home, CreditCard, ClipboardList, CalendarDays, ShoppingBag, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { path: "/", label: "홈", icon: Home },
   { path: "/payment", label: "납부", icon: CreditCard },
-  { path: "/qr", label: "QR", icon: QrCode },
+  { path: "/defect", label: "하자", icon: ClipboardList },
   { path: "/reservation", label: "예약", icon: CalendarDays },
-  { path: "/notice", label: "공지", icon: Bell },
+  { path: "/services", label: "서비스", icon: ShoppingBag },
   { path: "/mypage", label: "마이", icon: User },
 ];
 
 const BottomTabBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const unreadCount = 2;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
@@ -33,11 +32,6 @@ const BottomTabBar = () => {
             >
               <div className="relative">
                 <Icon className={cn("w-5 h-5", isActive && "stroke-[2.5]")} />
-                {tab.path === "/notice" && unreadCount > 0 && (
-                  <div className="absolute top-0 right-0 w-4 h-4 rounded-full bg-destructive text-white text-[9px] font-bold flex items-center justify-center -translate-y-1/2 translate-x-1/2">
-                    {unreadCount}
-                  </div>
-                )}
               </div>
               <span className={cn("text-[10px]", isActive ? "font-semibold" : "font-medium")}>
                 {tab.label}
