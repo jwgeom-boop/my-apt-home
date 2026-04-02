@@ -7,11 +7,6 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 
-const noticeItems = [
-  { tag: "중요", tagColor: "bg-destructive/15 text-destructive", title: "사전점검 기간 지하주차장 이용 안내", unread: true },
-  { tag: "안내", tagColor: "bg-primary/15 text-primary", title: "입주증 발급 및 열람 가능 시간 변경 공지", unread: true },
-  { tag: "행사", tagColor: "bg-amber-100 text-amber-700", title: "입주민 환영 카페테리아 운영 안내", unread: false },
-];
 
 interface DefectRow {
   receipt_no: string;
