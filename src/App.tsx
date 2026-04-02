@@ -18,6 +18,7 @@ import MyPage from "./pages/MyPage";
 import DefectDetailPage from "./pages/DefectDetailPage";
 import NoticeDetailPage from "./pages/NoticeDetailPage";
 import LoanPage from "./pages/LoanPage";
+import RegistryPage from "./pages/RegistryPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/consent" element={<ProtectedRoute><ConsentPage /></ProtectedRoute>} />
           <Route path="/certificate" element={<ProtectedRoute><CertificatePage /></ProtectedRoute>} />
           <Route path="/loan" element={<ProtectedRoute><LoanPage /></ProtectedRoute>} />
+          <Route path="/registry" element={<ProtectedRoute><RegistryPage /></ProtectedRoute>} />
           <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
