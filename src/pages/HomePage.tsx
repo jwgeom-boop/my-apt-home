@@ -157,36 +157,22 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Defect Quick Buttons */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
-        <button
-          onClick={() => navigate("/defect")}
-          className="flex flex-col items-center gap-1.5 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
-        >
-          <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
-            <ClipboardList className="w-5 h-5 text-destructive" />
-          </div>
-          <span className="text-sm font-bold text-foreground">하자 접수</span>
-          <span className="text-[10px] text-muted-foreground">새 하자 신고하기</span>
-        </button>
-        <button
-          onClick={() => setShowDefectList(true)}
-          className="flex flex-col items-center gap-1.5 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
-        >
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <ListChecks className="w-5 h-5 text-primary" />
-          </div>
-          <span className="text-sm font-bold text-foreground">나의 접수 현황</span>
-          <span className="text-[10px] text-muted-foreground">처리 진행 확인</span>
-        </button>
-      </div>
-
-      {/* Realtime Defect Status Summary */}
+      {/* 하자 현황 통합 카드 */}
       <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
-        <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-warning" />
-          실시간 하자 처리 상태
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            <h3 className="text-sm font-semibold text-foreground">하자 현황</h3>
+          </div>
+          <button
+            onClick={() => navigate("/defect")}
+            className="flex items-center gap-1 bg-destructive/10 text-destructive text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
+          >
+            <ClipboardList className="w-3 h-3" />
+            접수하기
+          </button>
+        </div>
+
         {loadingDefects ? (
           <div className="flex justify-center py-4">
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -207,6 +193,15 @@ const HomePage = () => {
             </div>
           </div>
         )}
+
+        <button
+          onClick={() => setShowDefectList(true)}
+          className="w-full flex items-center justify-center gap-1 mt-3 pt-3 border-t border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ListChecks className="w-3.5 h-3.5" />
+          나의 접수 내역 보기
+          <ChevronRight className="w-3 h-3" />
+        </button>
       </div>
 
       {/* Progress - 클릭하면 체크리스트 표시 */}
