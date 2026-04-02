@@ -79,6 +79,12 @@ const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProp
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full"
           style={{ pointerEvents: "none" }}
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+            const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+            setDebugXY({ x: Number(x), y: Number(y) });
+          }}
         >
           {rooms.map((room) => {
             const isSelected = selectedRoom === room.id;
