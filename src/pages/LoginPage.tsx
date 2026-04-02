@@ -13,7 +13,8 @@ const LoginPage = () => {
     if (userId === "132" && password === "1234") {
       localStorage.setItem("isLoggedIn", "true");
       toast.success("로그인 성공!");
-      navigate("/");
+      const onboarded = localStorage.getItem("onboarding_done");
+      navigate(onboarded ? "/" : "/onboarding");
     } else {
       toast.error("아이디 또는 비밀번호가 올바르지 않습니다.");
     }

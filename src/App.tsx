@@ -23,6 +23,7 @@ import ServicesPage from "./pages/ServicesPage";
 import InteriorPage from "./pages/InteriorPage";
 import MovingPage from "./pages/MovingPage";
 import FaqPage from "./pages/FaqPage";
+import OnboardingPage from "./pages/OnboardingPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
           <Route path="/qr" element={<ProtectedRoute><QRPage /></ProtectedRoute>} />
