@@ -359,6 +359,50 @@ const HomePage = () => {
           </div>
         </div>
       )}
+
+      {/* 입주 당일 가이드 슬라이드 패널 */}
+      {showMoveInGuide && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowMoveInGuide(false)} />
+          <div className="relative w-full max-w-[390px] bg-background rounded-t-2xl shadow-xl animate-slide-up max-h-[85vh] flex flex-col">
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+              <h3 className="text-base font-bold text-foreground">🏠 입주 당일 가이드</h3>
+              <button onClick={() => setShowMoveInGuide(false)}>
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <div className="space-y-3">
+                {[
+                  { step: "01", icon: "🔑", title: "열쇠 수령", desc: "입주지원센터 방문 → 신분증 + 입주증 지참" },
+                  { step: "02", icon: "🚗", title: "주차 배정 확인", desc: "배정 주차구역 확인 후 차량 이동" },
+                  { step: "03", icon: "🔥", title: "가스 개통 신청", desc: "도시가스 앱 또는 전화 신청 (당일 가능)" },
+                  { step: "04", icon: "💡", title: "전기·수도 명의 변경", desc: "한전 고객센터 123 / 수도사업소 연락" },
+                  { step: "05", icon: "📦", title: "이사 완료 후 공용부 확인", desc: "엘리베이터·복도 파손 여부 확인" },
+                  { step: "06", icon: "💰", title: "관리비 예치금 납부", desc: "미납 시 앱 납부 탭에서 확인" },
+                ].map((item) => (
+                  <div key={item.step} className="flex items-start gap-3 bg-muted/30 rounded-xl px-4 py-3 border border-border">
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-base">{item.icon}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-medium shrink-0">{item.step}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
+                <p className="text-xs text-muted-foreground">💡 문의: 입주지원센터 1588-0000 (평일 09~18시)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </MobileLayout>
   );
 };
