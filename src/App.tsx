@@ -49,6 +49,7 @@ const App = () => (
           <Route path="/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
           <Route path="/interior" element={<ProtectedRoute><InteriorPage /></ProtectedRoute>} />
           <Route path="/moving" element={<ProtectedRoute><MovingPage /></ProtectedRoute>} />
+          <Route path="/faq" element={<ProtectedRoute><FaqPage /></ProtectedRoute>} />
           <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
           <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />

@@ -133,6 +133,7 @@ const MyPage = () => {
 
   const menuItems = [
     { color: "bg-blue-500", label: "공지·안내문", desc: "안내문 · 공지 · 동의서 목록", action: () => navigate("/notice") },
+    { color: "bg-cyan-500", label: "자주 묻는 질문", desc: "입주 관련 FAQ 모음", action: () => navigate("/faq") },
     { color: "bg-primary", label: "내 입주 현황", desc: "진행률·체크리스트 상세", action: () => navigate("/") },
     { color: "bg-green-500", label: "납부내역 조회", desc: "전체 납부 이력", action: () => navigate("/payment") },
     { color: "bg-navy", label: "하자 접수 이력", desc: "접수한 하자 목록·처리현황", action: () => navigate("/defect") },
