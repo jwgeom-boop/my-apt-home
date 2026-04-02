@@ -1,6 +1,9 @@
-import { ArrowLeft, Download, Camera } from "lucide-react";
+import { useRef, useState } from "react";
+import { ArrowLeft, Download, Camera, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const infoRows = [
   { label: "단 지 명", value: "oo아파트 101현장" },
@@ -13,6 +16,39 @@ const infoRows = [
 
 const CertificatePage = () => {
   const navigate = useNavigate();
+  const certRef = useRef<HTMLDivElement>(null);
+  const [saving, setSaving] = useState(false);
+  const [capturing, setCapturing] = useState(false);
+
+  const handleSavePDF = async () => {
+    if (!certRef.current) return;
+    setSaving(true);
+    try {
+      const canvas = await html2canvas(certRef.current, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 10, pdfWidth, pdfHeight);
+      pdf.save("입주증.pdf");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCapture = async () => {
+    if (!certRef.current) return;
+    setCapturing(true);
+    try {
+      const canvas = await html2canvas(certRef.current, { scale: 2, useCORS: true });
+      const link = document.createElement("a");
+      link.download = "입주증.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } finally {
+      setCapturing(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
@@ -32,7 +68,7 @@ const CertificatePage = () => {
         </div>
 
         {/* Certificate Card - formal document style */}
-        <div className="bg-card border-2 border-navy rounded-xl overflow-hidden shadow-lg">
+        <div ref={certRef} className="bg-card border-2 border-navy rounded-xl overflow-hidden shadow-lg">
           {/* Title */}
           <div className="bg-navy text-white py-4 text-center">
             <h2 className="text-xl font-bold tracking-[0.3em]">입 주 증</h2>
@@ -75,13 +111,19 @@ const CertificatePage = () => {
           <Button
             variant="outline"
             className="flex-1 h-12 rounded-xl border-border text-foreground font-medium flex items-center justify-center gap-2"
+            onClick={handleSavePDF}
+            disabled={saving}
           >
-            <Download className="w-4 h-4" />
-            PDF로 저장
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            {saving ? "저장 중..." : "PDF로 저장"}
           </Button>
-          <Button className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium flex items-center justify-center gap-2">
-            <Camera className="w-4 h-4" />
-            화면 캡처
+          <Button
+            className="flex-1 h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-medium flex items-center justify-center gap-2"
+            onClick={handleCapture}
+            disabled={capturing}
+          >
+            {capturing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+            {capturing ? "저장 중..." : "화면 캡처"}
           </Button>
         </div>
       </div>
