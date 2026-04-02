@@ -32,6 +32,7 @@ interface FloorPlanSelectorProps {
 
 const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProps) => {
   const [planType, setPlanType] = useState<"extended" | "option">("extended");
+  const [debugXY, setDebugXY] = useState<{x:number, y:number} | null>(null);
   const rooms = planType === "extended" ? EXTENDED_ROOMS : OPTION_ROOMS;
 
   return (
@@ -78,6 +79,12 @@ const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProp
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full"
           style={{ pointerEvents: "none" }}
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+            const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+            setDebugXY({ x: Number(x), y: Number(y) });
+          }}
         >
           {rooms.map((room) => {
             const isSelected = selectedRoom === room.id;
@@ -100,6 +107,11 @@ const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProp
         {selectedRoom && (
           <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-sm font-bold px-3 py-1 rounded-lg shadow-md animate-fade-in">
             📍 {selectedRoom}
+          </div>
+        )}
+        {debugXY && (
+          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded font-mono z-10">
+            x: {debugXY.x}, y: {debugXY.y}
           </div>
         )}
       </div>
