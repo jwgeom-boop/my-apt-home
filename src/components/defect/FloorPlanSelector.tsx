@@ -32,6 +32,7 @@ interface FloorPlanSelectorProps {
 
 const FloorPlanSelector = ({ selectedRoom, onSelectRoom }: FloorPlanSelectorProps) => {
   const [planType, setPlanType] = useState<"extended" | "option">("extended");
+  const [debugXY, setDebugXY] = useState<{x:number, y:number} | null>(null);
   const rooms = planType === "extended" ? EXTENDED_ROOMS : OPTION_ROOMS;
 
   return (
