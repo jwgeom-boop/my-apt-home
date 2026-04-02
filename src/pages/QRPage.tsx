@@ -1,6 +1,7 @@
 import MobileLayout from "@/components/MobileLayout";
-import { QrCode, Car, Clock, Copy, Check, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Car, Clock, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
