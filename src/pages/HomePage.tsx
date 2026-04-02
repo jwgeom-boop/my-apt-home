@@ -113,44 +113,6 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* 📢 공지사항 배너 */}
-      <div className="mb-3">
-        <button
-          onClick={() => navigate("/notice")}
-          className="w-full flex items-center justify-between mb-2"
-        >
-          <div className="flex items-center gap-1.5">
-            <Megaphone className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">공지사항</span>
-            {noticeItems.some(n => n.unread) && (
-              <span className="w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
-                N
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <span className="text-xs">더보기</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </div>
-        </button>
-        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-          {noticeItems.map((n, i) => (
-            <button
-              key={i}
-              onClick={() => navigate("/notice")}
-              className="min-w-[240px] bg-card rounded-xl p-3 border border-border shadow-sm text-left shrink-0 active:scale-[0.98] transition-transform relative"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className={cn("text-[10px] px-2 py-0.5 rounded font-bold", n.tagColor)}>
-                  {n.tag}
-                </span>
-                {n.unread && <span className="w-2 h-2 rounded-full bg-destructive" />}
-              </div>
-              <p className="text-sm font-semibold text-foreground truncate">{n.title}</p>
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* 하자 현황 통합 카드 */}
       <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
