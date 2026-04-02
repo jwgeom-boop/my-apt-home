@@ -18,6 +18,7 @@ import MyPage from "./pages/MyPage";
 import DefectDetailPage from "./pages/DefectDetailPage";
 import NoticeDetailPage from "./pages/NoticeDetailPage";
 import LoanPage from "./pages/LoanPage";
+import RegistryPage from "./pages/RegistryPage";
 
 const queryClient = new QueryClient();
 
