@@ -55,28 +55,38 @@ const NoticePage = () => {
 
       {/* Notice Cards */}
       <div className="space-y-3">
-        {filtered.map((n) => (
-          <button
-            key={n.id}
-            onClick={() => handleCardClick(n)}
-            className={cn(
-              "w-full text-left bg-card rounded-xl p-4 border shadow-sm relative",
-              cardBorder[n.type]
-            )}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className={cn("text-[10px] px-2 py-0.5 rounded border font-semibold", badgeColors[n.type])}>
-                {n.type}
-              </span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-muted-foreground">{n.date}</span>
-                {n.unread && <span className="w-2.5 h-2.5 rounded-full bg-destructive" />}
-              </div>
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+              <span className="text-2xl">📭</span>
             </div>
-            <h4 className="text-sm font-semibold text-foreground">{n.title}</h4>
-            <p className="text-xs text-muted-foreground mt-1">{n.desc}</p>
-          </button>
-        ))}
+            <p className="text-sm font-semibold text-foreground mb-1">공지사항이 없습니다</p>
+            <p className="text-xs text-muted-foreground">해당 카테고리의 공지가 없어요</p>
+          </div>
+        ) : (
+          filtered.map((n) => (
+            <button
+              key={n.id}
+              onClick={() => handleCardClick(n)}
+              className={cn(
+                "w-full text-left bg-card rounded-xl p-4 border shadow-sm relative",
+                cardBorder[n.type]
+              )}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className={cn("text-[10px] px-2 py-0.5 rounded border font-semibold", badgeColors[n.type])}>
+                  {n.type}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-muted-foreground">{n.date}</span>
+                  {n.unread && <span className="w-2.5 h-2.5 rounded-full bg-destructive" />}
+                </div>
+              </div>
+              <h4 className="text-sm font-semibold text-foreground">{n.title}</h4>
+              <p className="text-xs text-muted-foreground mt-1">{n.desc}</p>
+            </button>
+          ))
+        )}
       </div>
     </MobileLayout>
   );
