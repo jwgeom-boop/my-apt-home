@@ -30,17 +30,18 @@ const statusColorMap: Record<string, string> = {
   "완료": "text-success",
 };
 
-const checklistItems = [
+const getChecklistItems = () => [
   { id: 1, label: "잔금 납부", done: true },
   { id: 2, label: "사전점검 예약", done: true },
   { id: 3, label: "QR 입장코드 발급", done: true },
-  { id: 4, label: "이사 예약", done: false },
-  { id: 5, label: "동의서 서명", done: false },
+  { id: 4, label: "이사 예약", done: localStorage.getItem("moveInReserved") === "true" },
+  { id: 5, label: "동의서 서명", done: localStorage.getItem("consentSigned") === "true" },
 ];
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { drafts, syncAll, syncing } = useOfflineDrafts();
+  const checklistItems = getChecklistItems();
   const completedCount = checklistItems.filter((i) => i.done).length;
   const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
 

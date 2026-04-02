@@ -93,6 +93,7 @@ const ReservationPage = () => {
     if (!moveInDate || !moveInTime) return;
     toast.success(`이사 예약 완료: 4월 ${moveInDate}일 ${moveInTime}`);
     setMoveInConfirmed(true);
+    localStorage.setItem("moveInReserved", "true");
   };
 
   return (

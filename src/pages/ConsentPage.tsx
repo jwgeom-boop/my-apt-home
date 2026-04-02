@@ -121,6 +121,10 @@ const ConsentPage = () => {
         {/* Submit */}
         <Button
           disabled={!hasSigned}
+          onClick={() => {
+            localStorage.setItem("consentSigned", "true");
+            navigate("/");
+          }}
           className="w-full h-14 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-base font-bold"
         >
           동의 및 서명 완료
