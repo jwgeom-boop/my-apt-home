@@ -49,6 +49,7 @@ const HomePage = () => {
   const [loadingDefects, setLoadingDefects] = useState(true);
   const [showDefectList, setShowDefectList] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
+  const [showMoveInGuide, setShowMoveInGuide] = useState(false);
 
   useEffect(() => {
     const load = async () => {
