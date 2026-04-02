@@ -23,6 +23,7 @@ import ServicesPage from "./pages/ServicesPage";
 import InteriorPage from "./pages/InteriorPage";
 import MovingPage from "./pages/MovingPage";
 import FaqPage from "./pages/FaqPage";
+import OnboardingPage from "./pages/OnboardingPage";
 
 const queryClient = new QueryClient();
 
