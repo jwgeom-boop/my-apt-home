@@ -165,6 +165,10 @@ const ReservationPage = () => {
                 <p className="text-sm font-bold text-success">사전점검 예약 완료</p>
               </div>
               <p className="text-sm text-foreground">2026.04.{String(inspectionDate).padStart(2, "0")} {inspectionTime}</p>
+              <div className="flex flex-col items-center mt-3 pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground mb-2">사전점검 입장 QR</p>
+                <canvas ref={inspectionQrRef} className="rounded-lg" />
+              </div>
               <button
                 onClick={() => {
                   setInspectionConfirmed(false);
