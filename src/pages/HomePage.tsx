@@ -230,22 +230,28 @@ const HomePage = () => {
       {/* Quick Buttons */}
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={() => navigate("/qr")}
-          className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
+          onClick={() => navigate("/services")}
+          className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-amber-300/40 active:scale-[0.98] transition-transform"
         >
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <QrCode className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
+            <span className="text-lg">🏦</span>
           </div>
-          <span className="text-sm font-semibold text-foreground">QR 보기</span>
+          <div className="text-left">
+            <span className="text-sm font-semibold text-foreground block">잔금대출</span>
+            <span className="text-[10px] text-muted-foreground">금리 비교</span>
+          </div>
         </button>
         <button
-          onClick={() => navigate("/payment")}
-          className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-border active:scale-[0.98] transition-transform"
+          onClick={() => navigate("/services")}
+          className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-amber-300/40 active:scale-[0.98] transition-transform"
         >
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <CreditCard className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
+            <span className="text-lg">⚖️</span>
           </div>
-          <span className="text-sm font-semibold text-foreground">납부내역</span>
+          <div className="text-left">
+            <span className="text-sm font-semibold text-foreground block">스마트등기</span>
+            <span className="text-[10px] text-muted-foreground">등기 대행</span>
+          </div>
         </button>
       </div>
 
