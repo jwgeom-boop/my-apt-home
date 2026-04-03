@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, WifiOff, Upload } from "lucide-react";
+import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, WifiOff, Upload, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
@@ -75,8 +75,89 @@ const HomePage = () => {
     완료: defects.filter((d) => ["처리완료", "완료"].includes(d.status)).length,
   };
 
+  const targetDate = new Date("2026-04-26");
+  const today = new Date();
+  const diffDays = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const dday = diffDays > 0 ? `D-${diffDays}` : diffDays === 0 ? "D-Day" : `D+${Math.abs(diffDays)}`;
+
+  const readinessPercent = 45;
+  const circumference = 2 * Math.PI * 34; // ~213.6
+  const dashoffset = circumference * (1 - readinessPercent / 100);
+
+  const steps = [
+    { label: "계약", status: "completed" as const },
+    { label: "납부", status: "completed" as const },
+    { label: "사전점검", status: "completed" as const },
+    { label: "이사예약", status: "current" as const },
+    { label: "입주", status: "pending" as const },
+  ];
+
   return (
     <MobileLayout>
+      {/* D-Day Banner */}
+      <div className="bg-gradient-to-r from-[#0f1923] to-[#2e86c1] rounded-2xl p-5 mx-0 mt-1 mb-3 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+              입주 예정일
+            </span>
+            <p className="text-4xl font-black text-white mt-1">{dday}</p>
+            <p className="text-xs text-white/70 mt-0.5">2026년 4월 26일 입주</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="w-20 h-20 relative">
+              <svg width="80" height="80" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)" strokeWidth="6" fill="none" />
+                <circle
+                  cx="40" cy="40" r="34"
+                  stroke="white" strokeWidth="6" fill="none"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={dashoffset}
+                  strokeLinecap="round"
+                  transform="rotate(-90 40 40)"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-lg font-black text-white">{readinessPercent}%</span>
+                <span className="text-[9px] text-white/70">준비완료</span>
+              </div>
+            </div>
+            <span className="text-[10px] text-white/60 text-center mt-1">입주 준비율</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 진행 단계 표시 */}
+      <div className="px-0 mt-0 mb-3">
+        <div className="flex items-start">
+          {steps.map((step, i) => (
+            <div key={step.label} className="flex items-start flex-1">
+              <div className="flex flex-col items-center">
+                {step.status === "completed" ? (
+                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                    <Check className="w-3 h-3 text-primary-foreground" />
+                  </div>
+                ) : step.status === "current" ? (
+                  <div className="w-6 h-6 rounded-full bg-white border-2 border-primary flex items-center justify-center">
+                    <div className="w-2 h-2 bg-primary rounded-full" />
+                  </div>
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-muted" />
+                )}
+                <span className="text-[10px] text-muted-foreground mt-1 text-center w-10">{step.label}</span>
+              </div>
+              {i < steps.length - 1 && (
+                <div className={cn(
+                  "flex-1 h-0.5 self-center mb-4 mx-1",
+                  step.status === "completed" && steps[i + 1].status !== "pending" ? "bg-primary" :
+                  step.status === "completed" ? "bg-primary" : "bg-muted"
+                )} />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Greeting */}
       <div className="bg-accent text-accent-foreground rounded-xl p-4 mb-3">
         <div className="flex items-center justify-between">
