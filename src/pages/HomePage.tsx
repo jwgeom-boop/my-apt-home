@@ -289,33 +289,6 @@ const HomePage = () => {
         </p>
       </button>
 
-      {/* Quick Buttons */}
-      <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => navigate("/loan")}
-          className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-amber-300/40 active:scale-[0.98] transition-transform"
-        >
-          <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
-            <span className="text-lg">🏦</span>
-          </div>
-          <div className="text-left">
-            <span className="text-sm font-semibold text-foreground block">잔금대출</span>
-            <span className="text-[10px] text-muted-foreground">금리 비교</span>
-          </div>
-        </button>
-        <button
-          onClick={() => navigate("/registry")}
-          className="flex items-center gap-3 bg-card rounded-xl p-4 shadow-sm border border-amber-300/40 active:scale-[0.98] transition-transform"
-        >
-          <div className="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center">
-            <span className="text-lg">⚖️</span>
-          </div>
-          <div className="text-left">
-            <span className="text-sm font-semibold text-foreground block">스마트등기</span>
-            <span className="text-[10px] text-muted-foreground">등기 대행</span>
-          </div>
-        </button>
-      </div>
 
       {/* 입주 당일 가이드 */}
       <button
