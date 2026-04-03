@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Info } from "lucide-react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -20,56 +21,83 @@ const LoginPage = () => {
     }
   };
 
+  // Window lit/unlit pattern (true = lit)
+  const windowPattern = [
+    true, false, true, true,
+    false, true, false, true,
+    true, true, false, false,
+  ];
+
   return (
-    <div className="mx-auto max-w-[390px] min-h-screen bg-navy flex flex-col">
-      {/* Logo Area */}
-      <div className="flex flex-col items-center pt-16 pb-8">
-        <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-3">
-          <span className="text-white text-2xl font-bold">ON</span>
+    <div className="bg-gradient-to-b from-[#0f1923] to-[#1a3c5e] flex flex-col items-center justify-between min-h-screen px-6">
+      {/* Top Section */}
+      <div className="flex-1 flex flex-col items-center justify-center pt-16 pb-8">
+        {/* Building illustration */}
+        <div className="w-32 h-32 bg-white/10 rounded-3xl flex items-center justify-center mb-8 border border-white/20 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="grid grid-cols-4 gap-1.5">
+              {windowPattern.map((lit, i) => (
+                <div
+                  key={i}
+                  className={`w-4 h-3 rounded-sm ${lit ? "bg-yellow-300/80" : "bg-white/20"}`}
+                />
+              ))}
+            </div>
+            <div className="w-5 h-6 bg-white/30 rounded-t-md mt-1" />
+          </div>
         </div>
-        <h1 className="text-white text-xl font-bold">입주ON</h1>
+
+        {/* Brand text */}
+        <h1 className="text-4xl font-black text-white tracking-tight">입주ON</h1>
+        <p className="text-sm text-white/60 mt-2">아파트 입주 관리 플랫폼</p>
       </div>
 
-      {/* Form Area */}
-      <div className="flex-1 bg-background rounded-t-3xl px-6 pt-8 pb-6 flex flex-col">
-        <div className="space-y-5 flex-1">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">아이디</label>
+      {/* Bottom Section */}
+      <div className="w-full max-w-[390px] bg-white rounded-t-3xl px-6 pt-8 pb-12">
+        <h2 className="text-lg font-bold text-gray-900 mb-6">세대주 로그인</h2>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">아이디</label>
             <Input
               placeholder="아이디를 입력하세요"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="h-12 rounded-xl border-border bg-muted/30"
+              className="h-14 rounded-2xl border-gray-200 bg-gray-50 px-4 text-base focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">비밀번호</label>
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block">비밀번호</label>
             <Input
               type="password"
               placeholder="비밀번호를 입력하세요"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="h-12 rounded-xl border-border bg-muted/30"
+              className="h-14 rounded-2xl border-gray-200 bg-gray-50 px-4 text-base focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
             />
           </div>
-
-          <Button
-            onClick={handleLogin}
-            className="w-full h-14 rounded-xl bg-navy hover:bg-navy/90 text-white text-base font-bold mt-2"
-          >
-            로그인
-          </Button>
         </div>
 
-        <div className="mt-6 bg-primary/10 border border-primary/20 rounded-xl p-4">
-          <h3 className="text-sm font-bold text-navy mb-2">입주자 본인 인증 안내</h3>
-          <ul className="text-xs text-muted-foreground space-y-1">
-            <li>· 초기 아이디: 132 / 비밀번호: 1234</li>
-            <li>· 최초 1회 가입 후 자동 로그인 유지</li>
-            <li>· 세대 정보는 시행사에서 등록한 기준 적용</li>
-          </ul>
+        <Button
+          onClick={handleLogin}
+          className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#0f1923] to-[#2e86c1] text-white font-bold text-base shadow-lg shadow-blue-900/30 active:scale-[0.98] transition-transform mt-6"
+        >
+          로그인
+        </Button>
+
+        <div className="bg-blue-50 rounded-2xl p-4 mt-6">
+          <div className="flex items-center gap-1.5">
+            <Info className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-bold text-blue-700">입주자 인증 안내</span>
+          </div>
+          <p className="text-xs text-blue-500 mt-1">
+            세대주 휴대폰 번호로 등록된 아이디로 로그인하세요.
+          </p>
+          <p className="text-xs text-gray-400 mt-2">
+            데모 아이디: 132 / 비밀번호: 1234
+          </p>
         </div>
       </div>
     </div>
