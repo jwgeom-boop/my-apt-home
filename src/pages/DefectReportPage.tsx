@@ -150,6 +150,15 @@ const DefectReportPage = () => {
     }));
   };
 
+  const handleRemoveGuidePhoto = (guide: string, photoId: string) => {
+    setGuidePhotos((prev) => {
+      const updated = { ...prev };
+      updated[guide] = (updated[guide] || []).filter((p) => p.id !== photoId);
+      if (updated[guide].length === 0) delete updated[guide];
+      return updated;
+    });
+  };
+
   const locationLabel = selectedMain && selectedSub ? `${selectedMain} > ${selectedMid} > ${selectedSub}` : "";
   const locationField = selectedMain && selectedSub ? `${selectedMain} - ${selectedSub}` : "";
   const hasValidIssues = Array.from(issueGuides).some((g) => (guidePhotos[g]?.length || 0) >= 2);
