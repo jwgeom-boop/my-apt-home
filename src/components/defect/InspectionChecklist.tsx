@@ -279,6 +279,42 @@ const InspectionChecklist = ({
           onCancel={() => setMarkingImage(null)}
         />
       )}
+
+      {/* Hidden retake file input */}
+      <input
+        ref={retakeInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleRetakeFile}
+      />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>사진을 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              삭제된 사진은 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  onRemoveGuidePhoto?.(deleteTarget.guide, deleteTarget.photoId);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
