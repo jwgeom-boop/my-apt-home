@@ -277,6 +277,25 @@ const DefectReportPage = () => {
     navigate("/");
   };
 
+  const handleListPdfDownload = async () => {
+    setGeneratingPdf(true);
+    try {
+      await generateDefectListPdf({
+        complexName: "OO아파트",
+        unitNumber: "101동 1202호",
+        residentName: "홍길동",
+        items: submittedDefects,
+      });
+      toast({
+        title: "✅ PDF 다운로드 완료",
+        description: "하자 접수 전체 내역서가 저장되었습니다.",
+      });
+    } catch {
+      toast({ title: "❌ PDF 생성 실패", variant: "destructive" });
+    }
+    setGeneratingPdf(false);
+  };
+
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Header */}
