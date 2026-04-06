@@ -7,10 +7,24 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useStage } from "@/hooks/useStage";
 
-const INSPECTION_AVAILABLE = [1, 2, 3, 4, 5];
-const INSPECTION_CLOSED = [6, 7, 12, 13, 14, 20, 21];
-const MOVE_AVAILABLE = [10, 11, 15, 16, 17, 22, 23, 24];
-const MOVE_CLOSED = [13, 14, 20, 21];
+const INSPECTION_AVAILABLE = [1, 2, 4, 5];
+const INSPECTION_CLOSED = [3, 7, 10];
+const MOVE_AVAILABLE = [11, 15, 16, 17, 22, 23, 24];
+const MOVE_CLOSED = [3, 7, 10];
+
+// 2026년 4월: firstDayOfWeek=2 (수요일 시작)
+// 주말 날짜 계산: 일=(5,12,19,26), 토=(4,11,18,25)
+const getWeekendDays = (): number[] => {
+  const weekends: number[] = [];
+  for (let day = 1; day <= 30; day++) {
+    const dow = (2 + day - 1) % 7; // 0=일, 6=토
+    if (dow === 0 || dow === 6) weekends.push(day);
+  }
+  return weekends;
+};
+const WEEKEND_DAYS = getWeekendDays();
+
+const TODAY_DAY = 6; // 4월 6일을 오늘로 설정
 
 const TIME_SLOTS = [
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
@@ -80,19 +94,30 @@ const ReservationPage = () => {
         <div className="grid grid-cols-7 gap-1">
           {blanks.map((b) => <div key={`b-${b}`} />)}
           {days.map((day) => {
+            const dow = (firstDayOfWeek + day - 1) % 7;
+            const isWeekend = WEEKEND_DAYS.includes(day);
             const isClosed = closedDates.includes(day);
             const isAvailable = availableDates.includes(day);
             const isSelected = day === selectedDate;
+            const isPast = day < TODAY_DAY;
+            const isToday = day === TODAY_DAY;
+            const isDisabled = isClosed || isWeekend || isPast || !isAvailable;
+
             return (
               <button
                 key={day}
-                onClick={() => isAvailable && onSelect(day)}
+                disabled={isDisabled}
+                onClick={() => !isDisabled && onSelect(day)}
                 className={cn(
-                  "w-9 h-9 mx-auto rounded-full text-xs font-medium flex items-center justify-center transition-colors",
-                  isSelected && "bg-accent text-accent-foreground",
-                  !isSelected && isAvailable && "border border-success text-success",
-                  !isSelected && isClosed && "border border-destructive/40 text-destructive/60",
-                  !isSelected && !isAvailable && !isClosed && "text-muted-foreground"
+                  "w-9 h-9 mx-auto rounded-full text-xs font-medium flex items-center justify-center transition-colors relative",
+                  isSelected && "bg-accent text-accent-foreground ring-2 ring-primary",
+                  isToday && !isSelected && "ring-2 ring-primary",
+                  !isSelected && isAvailable && !isDisabled && "border border-success text-success",
+                  isClosed && !isSelected && "text-destructive line-through",
+                  isWeekend && !isClosed && !isSelected && "text-destructive/50",
+                  isPast && !isSelected && "text-muted-foreground/40",
+                  isDisabled && "cursor-not-allowed opacity-60",
+                  !isSelected && !isAvailable && !isClosed && !isWeekend && !isPast && "text-muted-foreground"
                 )}
               >
                 {day}
@@ -100,10 +125,12 @@ const ReservationPage = () => {
             );
           })}
         </div>
-        <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground justify-center">
+        <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground justify-center flex-wrap">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full border border-success" /> 예약가능</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full border border-destructive" /> 마감</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent" /> 선택</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-destructive" /> 마감</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent ring-1 ring-primary" /> 선택</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-muted-foreground/30" /> 불가</span>
+        </div>
         </div>
       </div>
     </>
