@@ -390,7 +390,17 @@ const DefectReportPage = () => {
         {/* Submitted defects */}
         {submittedDefects.length > 0 && (
           <div className="bg-card rounded-xl border border-border p-4">
-            <h3 className="text-sm font-bold text-foreground mb-2">📝 접수 내역</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-bold text-foreground">📝 접수 내역</h3>
+              <button
+                onClick={handleListPdfDownload}
+                disabled={generatingPdf}
+                className="flex items-center gap-1 bg-primary text-primary-foreground text-sm px-3 py-1 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <Download className="w-3.5 h-3.5" />
+                {generatingPdf ? "PDF 생성 중..." : "PDF 다운"}
+              </button>
+            </div>
             <div className="space-y-2">
               {submittedDefects.map((d) => (
                 <button
