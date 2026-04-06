@@ -86,9 +86,9 @@ const HomePage = () => {
 
   const steps = [
     { label: "계약", status: "completed" as const },
-    { label: "납부", status: "completed" as const },
     { label: "사전점검", status: "completed" as const },
-    { label: "이사예약", status: "current" as const },
+    { label: "이사예약", status: "completed" as const },
+    { label: "잔금납부", status: "current" as const },
     { label: "입주", status: "pending" as const },
   ];
 
