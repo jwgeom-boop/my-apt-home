@@ -63,16 +63,43 @@ async function renderHtmlToPdf(html: string, fileName: string): Promise<void> {
   container.innerHTML = html;
   document.body.appendChild(container);
 
-  // Wait for fonts & images to load
+  // Wait for fonts to load
   await document.fonts.ready;
-  await new Promise((r) => setTimeout(r, 300));
+
+  // Wait for all images to load
+  const imgs = container.querySelectorAll("img");
+  await Promise.all(
+    Array.from(imgs).map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete) {
+            resolve();
+            return;
+          }
+          img.onload = () => resolve();
+          img.onerror = () => {
+            img.style.display = "none";
+            const fallback = document.createElement("div");
+            fallback.textContent = "사진 로딩 실패";
+            fallback.style.cssText =
+              "width:100px;height:100px;display:flex;align-items:center;justify-content:center;background:#f3f4f6;border-radius:6px;font-size:11px;color:#999;border:1px solid #ddd;";
+            img.parentElement?.insertBefore(fallback, img);
+            resolve();
+          };
+        })
+    )
+  );
+
+  await new Promise((r) => setTimeout(r, 200));
 
   try {
     const canvas = await html2canvas(container, {
       scale: 2,
       useCORS: true,
+      allowTaint: true,
       logging: false,
       backgroundColor: "#ffffff",
+      imageTimeout: 15000,
     });
 
     const imgData = canvas.toDataURL("image/png");
