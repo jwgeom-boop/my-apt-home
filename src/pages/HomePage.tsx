@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, QrCode, CreditCard, AlertTriangle, ChevronRight, ClipboardList, ListChecks, Loader2, X, WifiOff, Upload, Check } from "lucide-react";
+import { CheckCircle2, Circle, ChevronRight, Loader2, WifiOff, Upload, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
-
+import BannerSection from "@/components/home/BannerSection";
+import NoticeSection from "@/components/home/NoticeSection";
+import InspectionCard from "@/components/home/InspectionCard";
+import MovingReservationCard from "@/components/home/MovingReservationCard";
+import PaymentCard from "@/components/home/PaymentCard";
+import DefectCard from "@/components/home/DefectCard";
 
 interface DefectRow {
   receipt_no: string;
@@ -16,33 +21,39 @@ interface DefectRow {
   is_urgent: boolean;
 }
 
-const statusColorMap: Record<string, string> = {
-  "미배정": "text-muted-foreground",
-  "접수완료": "text-primary",
-  "배정완료": "text-primary",
-  "처리중": "text-warning",
-  "처리완료": "text-success",
-  "완료": "text-success",
-};
+// --- 단계 판별 ---
+const isContractDone = true;
+const isInspectionDone = false;
+const isMovingReserved = false;
+const isPaymentDone = false;
 
-const getChecklistItems = () => [
-  { id: 1, label: "잔금 납부", done: true, path: "/payment" },
-  { id: 2, label: "사전점검 예약", done: true, path: "/reservation" },
-  { id: 3, label: "QR 입장코드 발급", done: true, path: "/qr" },
-  { id: 4, label: "이사 예약", done: localStorage.getItem("moveInReserved") === "true", path: "/reservation" },
-  { id: 5, label: "동의서 서명", done: localStorage.getItem("consentSigned") === "true", path: "/consent" },
-];
+function getCurrentStage() {
+  if (isPaymentDone) return 5;
+  if (isMovingReserved) return 4;
+  if (isInspectionDone) return 3;
+  if (isContractDone) return 2;
+  return 1;
+}
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { drafts, syncAll, syncing } = useOfflineDrafts();
+  const stage = getCurrentStage();
+
+  const getChecklistItems = () => [
+    { id: 1, label: "잔금 납부", done: true, path: "/payment" },
+    { id: 2, label: "사전점검 예약", done: true, path: "/reservation" },
+    { id: 3, label: "QR 입장코드 발급", done: true, path: "/qr" },
+    { id: 4, label: "이사 예약", done: localStorage.getItem("moveInReserved") === "true", path: "/reservation" },
+    { id: 5, label: "동의서 서명", done: localStorage.getItem("consentSigned") === "true", path: "/consent" },
+  ];
+
   const checklistItems = getChecklistItems();
   const completedCount = checklistItems.filter((i) => i.done).length;
   const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
 
   const [defects, setDefects] = useState<DefectRow[]>([]);
   const [loadingDefects, setLoadingDefects] = useState(true);
-  const [showDefectList, setShowDefectList] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [showMoveInGuide, setShowMoveInGuide] = useState(false);
 
@@ -69,91 +80,25 @@ const HomePage = () => {
     load();
   }, []);
 
-  const statusCounts = {
-    접수완료: defects.filter((d) => ["미배정", "접수완료", "배정완료"].includes(d.status)).length,
-    처리중: defects.filter((d) => d.status === "처리중").length,
-    완료: defects.filter((d) => ["처리완료", "완료"].includes(d.status)).length,
-  };
-
   const targetDate = new Date("2026-04-26");
   const today = new Date();
   const diffDays = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   const dday = diffDays > 0 ? `D-${diffDays}` : diffDays === 0 ? "D-Day" : `D+${Math.abs(diffDays)}`;
 
   const readinessPercent = 45;
-  const circumference = 2 * Math.PI * 34; // ~213.6
-  const dashoffset = circumference * (1 - readinessPercent / 100);
 
-  const steps = [
-    { label: "계약", status: "completed" as const },
-    { label: "사전점검", status: "completed" as const },
-    { label: "이사예약", status: "completed" as const },
-    { label: "잔금납부", status: "current" as const },
-    { label: "입주", status: "pending" as const },
+  const stepsData: { label: string; status: "completed" | "current" | "pending" }[] = [
+    { label: "계약", status: stage > 1 ? "completed" : stage === 1 ? "current" : "pending" },
+    { label: "사전점검", status: stage > 2 ? "completed" : stage === 2 ? "current" : "pending" },
+    { label: "이사예약", status: stage > 3 ? "completed" : stage === 3 ? "current" : "pending" },
+    { label: "잔금납부", status: stage > 4 ? "completed" : stage === 4 ? "current" : "pending" },
+    { label: "입주", status: stage >= 5 ? "completed" : "pending" },
   ];
 
   return (
     <MobileLayout>
-      {/* 통합 배너 */}
-      <div className="bg-gradient-to-r from-[#0f1923] to-[#2e86c1] rounded-2xl p-4 mx-0 mt-1 mb-3 shadow-lg">
-        {/* 상단: 동호수 */}
-        <p className="text-xs text-white/70 mb-2">101동 1202호 · 입주 예정</p>
-
-        {/* 중간: D-Day + 준비율 */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-3xl font-black text-white">{dday}</p>
-            <p className="text-xs text-white/60 mt-0.5">2026년 4월 26일 입주</p>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 relative">
-              <svg width="64" height="64" viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="27" stroke="rgba(255,255,255,0.2)" strokeWidth="5" fill="none" />
-                <circle
-                  cx="32" cy="32" r="27"
-                  stroke="white" strokeWidth="5" fill="none"
-                  strokeDasharray={2 * Math.PI * 27}
-                  strokeDashoffset={2 * Math.PI * 27 * (1 - readinessPercent / 100)}
-                  strokeLinecap="round"
-                  transform="rotate(-90 32 32)"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-sm font-black text-white">{readinessPercent}%</span>
-                <span className="text-[8px] text-white/60">준비완료</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 하단: 5단계 진행 */}
-        <div className="flex items-center justify-between">
-          {steps.map((step, i) => (
-            <div key={step.label} className="flex items-center">
-              <div className="flex flex-col items-center">
-                {step.status === "completed" ? (
-                  <div className="w-4 h-4 rounded-full bg-white flex items-center justify-center">
-                    <Check className="w-2 h-2 text-[#0f1923]" />
-                  </div>
-                ) : step.status === "current" ? (
-                  <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
-                    <div className="w-1 h-1 bg-white rounded-full" />
-                  </div>
-                ) : (
-                  <div className="w-4 h-4 rounded-full bg-white/20" />
-                )}
-                <span className="text-[8px] text-white/50 mt-0.5 text-center">{step.label}</span>
-              </div>
-              {i < steps.length - 1 && (
-                <div className={cn(
-                  "w-5 h-px mx-0.5 mb-3",
-                  step.status === "completed" ? "bg-white/70" : "bg-white/20"
-                )} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* 배너 - 모든 단계 공통 */}
+      <BannerSection steps={stepsData} readinessPercent={readinessPercent} dday={dday} />
 
       {/* Offline drafts sync banner */}
       {drafts.length > 0 && (
@@ -176,130 +121,20 @@ const HomePage = () => {
         </div>
       )}
 
+      {/* 2단계: 사전점검 현황 */}
+      {stage === 2 && <InspectionCard />}
 
-      {/* 📢 공지사항 미리보기 */}
-      <div className="mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-base font-bold text-foreground">📢 공지사항</span>
-          <button onClick={() => navigate("/notice")} className="text-sm text-primary font-medium">
-            전체보기 →
-          </button>
-        </div>
-        <div className="bg-card rounded-xl overflow-hidden shadow-sm border border-border divide-y divide-border">
-          {[
-            { id: 1, badge: "공지", badgeClass: "bg-primary/15 text-primary", title: "입주 오리엔테이션 안내", date: "2026.03.28" },
-            { id: 2, badge: "안내문", badgeClass: "bg-success/15 text-success", title: "잔금 납부 및 등기 절차 안내", date: "2026.03.25" },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => navigate(`/notice/${item.id}`)}
-              className="w-full flex items-center justify-between py-3 px-4 text-left hover:bg-muted/30 transition-colors"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${item.badgeClass}`}>{item.badge}</span>
-                <span className="text-sm font-medium text-foreground truncate">{item.title}</span>
-              </div>
-              <span className="text-xs text-muted-foreground shrink-0 ml-2">{item.date}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* 3단계: 이사예약 현황 */}
+      {stage === 3 && <MovingReservationCard />}
 
-      {/* 사전점검 현황 카드 */}
-      {(() => {
-        const isReserved = localStorage.getItem("moveInReserved") === "true";
-        return (
-          <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">사전점검 현황</h3>
-              </div>
-              {isReserved ? (
-                <span className="text-xs font-bold bg-success/15 text-success px-2 py-0.5 rounded-full">
-                  ✅ 예약완료
-                </span>
-              ) : (
-                <span className="text-xs font-bold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
-                  미예약
-                </span>
-              )}
-            </div>
-            {isReserved ? (
-              <div className="flex items-end justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm text-foreground font-medium">2026.04.02 (목) 11:00</p>
-                  <p className="text-xs text-muted-foreground">대기번호 7번 · 현재 대기 3명</p>
-                </div>
-                <button
-                  onClick={() => navigate("/qr")}
-                  className="flex items-center gap-1 bg-primary/10 text-primary text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
-                >
-                  <QrCode className="w-3 h-3" />
-                  QR 보기
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between bg-muted/30 rounded-lg px-4 py-3">
-                <p className="text-sm text-muted-foreground">아직 예약하지 않으셨습니다</p>
-                <button
-                  onClick={() => navigate("/reservation")}
-                  className="bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
-                >
-                  예약하기
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })()}
+      {/* 4단계: 잔금납부 현황 */}
+      {stage === 4 && <PaymentCard />}
 
-      {/* 하자 현황 통합 카드 */}
-      <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-warning" />
-            <h3 className="text-sm font-semibold text-foreground">하자 현황</h3>
-          </div>
-          <button
-            onClick={() => navigate("/defect")}
-            className="flex items-center gap-1 bg-destructive/10 text-destructive text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
-          >
-            <ClipboardList className="w-3 h-3" />
-            접수하기
-          </button>
-        </div>
+      {/* 3~5단계: 하자 접수 카드 */}
+      {stage >= 3 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
 
-        {loadingDefects ? (
-          <div className="flex justify-center py-4">
-            <Loader2 className="w-5 h-5 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-primary/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-primary">{statusCounts.접수완료}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">접수완료</p>
-            </div>
-            <div className="bg-warning/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-warning">{statusCounts.처리중}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">처리중</p>
-            </div>
-            <div className="bg-success/10 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold text-success">{statusCounts.완료}</p>
-              <p className="text-[11px] text-muted-foreground mt-1">완료</p>
-            </div>
-          </div>
-        )}
-
-        <button
-          onClick={() => setShowDefectList(true)}
-          className="w-full flex items-center justify-center gap-1 mt-3 pt-3 border-t border-border text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ListChecks className="w-3.5 h-3.5" />
-          나의 접수 내역 보기
-          <ChevronRight className="w-3 h-3" />
-        </button>
-      </div>
+      {/* 공지사항 - 모든 단계 공통 */}
+      <NoticeSection />
 
       {/* Progress - 클릭하면 체크리스트 표시 */}
       <button
@@ -319,7 +154,6 @@ const HomePage = () => {
         </p>
       </button>
 
-
       {/* 입주 당일 가이드 */}
       <button
         onClick={() => setShowMoveInGuide(true)}
@@ -336,58 +170,6 @@ const HomePage = () => {
           <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
         </div>
       </button>
-      {/* 나의 접수 현황 슬라이드 패널 */}
-      {showDefectList && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setShowDefectList(false)} />
-          <div className="relative w-full max-w-[390px] bg-background rounded-t-2xl shadow-xl animate-slide-up max-h-[75vh] flex flex-col">
-            {/* 핸들바 */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            </div>
-            {/* 헤더 */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-              <h3 className="text-base font-bold text-foreground">나의 하자 접수 내역</h3>
-              <button onClick={() => setShowDefectList(false)}>
-                <X className="w-5 h-5 text-muted-foreground" />
-              </button>
-            </div>
-            {/* 내역 리스트 */}
-            <div className="flex-1 overflow-y-auto px-5 py-4">
-              {loadingDefects ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                </div>
-              ) : defects.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">접수된 하자가 없습니다</p>
-              ) : (
-                <div className="space-y-3">
-                  {defects.map((d) => (
-                    <div key={d.receipt_no} className="flex items-center justify-between bg-muted/30 rounded-xl px-4 py-3 border border-border">
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-foreground">{d.receipt_no}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{d.mid_category || ""} · {d.location}</p>
-                      </div>
-                      <span className={cn("text-sm font-bold shrink-0", statusColorMap[d.status] || "text-muted-foreground")}>
-                        {d.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* 하단 버튼 */}
-            <div className="px-5 py-4 border-t border-border">
-              <button
-                onClick={() => { setShowDefectList(false); navigate("/defect"); }}
-                className="w-full bg-primary text-primary-foreground rounded-xl py-3 text-sm font-bold active:scale-[0.98] transition-transform"
-              >
-                새 하자 접수하기
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 입주 체크리스트 슬라이드 패널 */}
       {showChecklist && (
