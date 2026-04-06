@@ -189,7 +189,6 @@ const HomePage = () => {
           {[
             { id: 1, badge: "공지", badgeClass: "bg-primary/15 text-primary", title: "입주 오리엔테이션 안내", date: "2026.03.28" },
             { id: 2, badge: "안내문", badgeClass: "bg-success/15 text-success", title: "잔금 납부 및 등기 절차 안내", date: "2026.03.25" },
-            { id: 3, badge: "동의서", badgeClass: "bg-warning/15 text-warning", title: "개인정보 수집·이용 동의서", date: "2026.03.20" },
           ].map((item) => (
             <button
               key={item.id}
