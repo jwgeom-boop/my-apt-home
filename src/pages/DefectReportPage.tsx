@@ -275,7 +275,6 @@ const DefectReportPage = () => {
     setShowPdfDialog(false);
     navigate("/");
   };
-  };
 
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
