@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight } from "lucide-react";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import InspectionChecklist from "@/components/defect/InspectionChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
-import { generateDefectPdf } from "@/utils/defectPdf";
+import { generateDefectPdf, generateDefectListPdf } from "@/utils/defectPdf";
 import {
   AlertDialog,
   AlertDialogContent,
