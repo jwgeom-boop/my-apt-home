@@ -1,10 +1,20 @@
 import { useRef, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { URGENT_KEYWORDS } from "@/data/defectCategories";
-import { AlertTriangle, Camera, MapPin, Search } from "lucide-react";
+import { AlertTriangle, Camera, MapPin, Search, X } from "lucide-react";
 import type { PhotoItem } from "./PhotoCapture";
 import PhotoMarkingCanvas from "./PhotoMarkingCanvas";
 import NormalConstructionFAQ from "./NormalConstructionFAQ";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface InspectionChecklistProps {
   guides: string[];
@@ -13,6 +23,7 @@ interface InspectionChecklistProps {
   locationLabel: string;
   guidePhotos: Record<string, PhotoItem[]>;
   onCaptureGuidePhoto: (guide: string, file: File, photoType: "far" | "close") => void;
+  onRemoveGuidePhoto?: (guide: string, photoId: string) => void;
 }
 
 const InspectionChecklist = ({
@@ -22,10 +33,33 @@ const InspectionChecklist = ({
   locationLabel,
   guidePhotos,
   onCaptureGuidePhoto,
+  onRemoveGuidePhoto,
 }: InspectionChecklistProps) => {
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [activeCapture, setActiveCapture] = useState<{ guide: string; type: "far" | "close" } | null>(null);
   const [markingImage, setMarkingImage] = useState<{ guide: string; photoId: string; dataUrl: string } | null>(null);
+  const [retakeTarget, setRetakeTarget] = useState<{ guide: string; photoId: string; type: "far" | "close" } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ guide: string; photoId: string } | null>(null);
+  const retakeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleRetakeFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && retakeTarget) {
+        // Remove old photo then add new one
+        onRemoveGuidePhoto?.(retakeTarget.guide, retakeTarget.photoId);
+        onCaptureGuidePhoto(retakeTarget.guide, file, retakeTarget.type);
+      }
+      e.target.value = "";
+      setRetakeTarget(null);
+    },
+    [retakeTarget, onRemoveGuidePhoto, onCaptureGuidePhoto]
+  );
+
+  const triggerRetake = (guide: string, photoId: string, type: "far" | "close") => {
+    setRetakeTarget({ guide, photoId, type });
+    setTimeout(() => retakeInputRef.current?.click(), 50);
+  };
 
   const handleFileChange = useCallback(
     (guide: string, photoType: "far" | "close") => (e: React.ChangeEvent<HTMLInputElement>) => {
