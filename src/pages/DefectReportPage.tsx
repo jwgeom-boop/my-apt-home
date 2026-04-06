@@ -298,6 +298,7 @@ const DefectReportPage = () => {
               locationLabel={locationLabel}
               guidePhotos={guidePhotos}
               onCaptureGuidePhoto={handleCaptureGuidePhoto}
+              onRemoveGuidePhoto={handleRemoveGuidePhoto}
             />
 
             {/* 안내 문구 - 심리적 문턱 낮추기 */}
