@@ -94,8 +94,9 @@ const HomePage = () => {
 
   return (
     <MobileLayout>
-      {/* D-Day Banner */}
+      {/* 통합 배너 */}
       <div className="bg-gradient-to-r from-[#0f1923] to-[#2e86c1] rounded-2xl p-5 mx-0 mt-1 mb-3 shadow-lg">
+        {/* 상단: D-Day + 준비율 */}
         <div className="flex items-center justify-between">
           <div>
             <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
@@ -125,51 +126,46 @@ const HomePage = () => {
             <span className="text-[10px] text-white/60 text-center mt-1">입주 준비율</span>
           </div>
         </div>
-      </div>
 
-      {/* 진행 단계 표시 */}
-      <div className="px-0 mt-0 mb-3">
-        <div className="flex items-start">
-          {steps.map((step, i) => (
-            <div key={step.label} className="flex items-start flex-1">
-              <div className="flex flex-col items-center">
-                {step.status === "completed" ? (
-                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="w-3 h-3 text-primary-foreground" />
-                  </div>
-                ) : step.status === "current" ? (
-                  <div className="w-6 h-6 rounded-full bg-white border-2 border-primary flex items-center justify-center">
-                    <div className="w-2 h-2 bg-primary rounded-full" />
-                  </div>
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-muted" />
+        {/* 중간: 5단계 진행 */}
+        <div className="mt-4 mb-4">
+          <div className="flex items-start">
+            {steps.map((step, i) => (
+              <div key={step.label} className="flex items-start flex-1">
+                <div className="flex flex-col items-center">
+                  {step.status === "completed" ? (
+                    <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
+                      <Check className="w-3 h-3 text-[#0f1923]" />
+                    </div>
+                  ) : step.status === "current" ? (
+                    <div className="w-6 h-6 rounded-full bg-transparent border-2 border-white flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full" />
+                    </div>
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-white/20" />
+                  )}
+                  <span className="text-[10px] text-white/70 mt-1 text-center w-10">{step.label}</span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={cn(
+                    "flex-1 h-0.5 self-center mb-4 mx-1",
+                    step.status === "completed" ? "bg-white/80" : "bg-white/20"
+                  )} />
                 )}
-                <span className="text-[10px] text-muted-foreground mt-1 text-center w-10">{step.label}</span>
               </div>
-              {i < steps.length - 1 && (
-                <div className={cn(
-                  "flex-1 h-0.5 self-center mb-4 mx-1",
-                  step.status === "completed" && steps[i + 1].status !== "pending" ? "bg-primary" :
-                  step.status === "completed" ? "bg-primary" : "bg-muted"
-                )} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Greeting */}
-      <div className="bg-accent text-accent-foreground rounded-xl p-4 mb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium opacity-80">101동 1202호</p>
-              <span className="text-[10px] bg-primary/20 text-primary-foreground px-2 py-0.5 rounded-full font-medium">
-                입주 예정
-              </span>
-            </div>
-            <h2 className="text-lg font-bold mt-1">홍길동님, 환영합니다!</h2>
+            ))}
           </div>
+        </div>
+
+        {/* 하단: 인사말 */}
+        <div className="pt-3 border-t border-white/15">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-white/80">101동 1202호</p>
+            <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-medium">
+              입주 예정
+            </span>
+          </div>
+          <h2 className="text-lg font-bold text-white mt-1">홍길동님, 환영합니다!</h2>
         </div>
       </div>
 
