@@ -10,6 +10,17 @@ import InspectionChecklist from "@/components/defect/InspectionChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
+import { generateDefectPdf } from "@/utils/defectPdf";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 interface SubmittedDefect {
   id: string;
@@ -36,6 +47,14 @@ const DefectReportPage = () => {
   const [submittedDefects, setSubmittedDefects] = useState<SubmittedDefect[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [residentId, setResidentId] = useState<string | null>(null);
+  const [showPdfDialog, setShowPdfDialog] = useState(false);
+  const [lastSubmitData, setLastSubmitData] = useState<{
+    receiptNo: string;
+    location: string;
+    midCategory: string;
+    guideItems: string[];
+    isUrgent: boolean;
+  } | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -217,16 +236,45 @@ const DefectReportPage = () => {
         status: "미배정",
       };
       setSubmittedDefects((prev) => [defect, ...prev]);
-      toast({
-        title: isUrgent ? "🚨 긴급 하자 접수 완료!" : "✅ 하자 접수 완료!",
-        description: `접수번호 ${receiptNo} | ${locationField} | DB에 저장되었습니다.`,
+      setLastSubmitData({
+        receiptNo,
+        location: locationField,
+        midCategory: selectedMid,
+        guideItems: guideItemsArr,
+        isUrgent,
       });
+      setShowPdfDialog(true);
     }
 
     setCurrentSubCategory(null);
     setSelectedSub("");
     setIssueGuides(new Set());
     setGuidePhotos({});
+  };
+
+  const handlePdfDownload = async () => {
+    if (!lastSubmitData) return;
+    const allPhotos = Object.values(guidePhotos).flat().map((p) => p.dataUrl);
+    await generateDefectPdf({
+      complexName: "OO아파트",
+      unitNumber: "101동 1202호",
+      residentName: "홍길동",
+      receiptNo: lastSubmitData.receiptNo,
+      items: [{
+        location: lastSubmitData.location,
+        midCategory: lastSubmitData.midCategory,
+        guideItems: lastSubmitData.guideItems,
+        isUrgent: lastSubmitData.isUrgent,
+        photoDataUrls: allPhotos,
+      }],
+    });
+    toast({
+      title: "✅ PDF 저장 완료",
+      description: "하자 접수 확인서가 다운로드되었습니다.",
+    });
+    setShowPdfDialog(false);
+    navigate("/");
+  };
   };
 
   return (
@@ -382,6 +430,32 @@ const DefectReportPage = () => {
           </Button>
         )}
       </div>
+
+      {/* PDF 다운로드 확인 다이얼로그 */}
+      <AlertDialog open={showPdfDialog} onOpenChange={setShowPdfDialog}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base">하자 접수가 완료되었습니다</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              접수 내역을 PDF로 저장하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel
+              onClick={() => {
+                setShowPdfDialog(false);
+                navigate("/");
+              }}
+              className="flex-1"
+            >
+              저장 안 함
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handlePdfDownload} className="flex-1">
+              PDF 저장
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
