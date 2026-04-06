@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
+import { useStage } from "@/hooks/useStage";
 import BannerSection from "@/components/home/BannerSection";
 import NoticeSection from "@/components/home/NoticeSection";
 import InspectionCard from "@/components/home/InspectionCard";
@@ -21,24 +22,10 @@ interface DefectRow {
   is_urgent: boolean;
 }
 
-// --- 단계 판별 ---
-const isContractDone = true;
-const isInspectionDone = false;
-const isMovingReserved = false;
-const isPaymentDone = false;
-
-function getCurrentStage() {
-  if (isPaymentDone) return 5;
-  if (isMovingReserved) return 4;
-  if (isInspectionDone) return 3;
-  if (isContractDone) return 2;
-  return 1;
-}
-
 const HomePage = () => {
   const navigate = useNavigate();
   const { drafts, syncAll, syncing } = useOfflineDrafts();
-  const stage = getCurrentStage();
+  const { stage } = useStage();
 
   const getChecklistItems = () => [
     { id: 1, label: "잔금 납부", done: true, path: "/payment" },
