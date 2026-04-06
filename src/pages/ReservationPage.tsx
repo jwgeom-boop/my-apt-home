@@ -131,7 +131,6 @@ const ReservationPage = () => {
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent ring-1 ring-primary" /> 선택</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-muted-foreground/30" /> 불가</span>
         </div>
-        </div>
       </div>
     </>
   );
