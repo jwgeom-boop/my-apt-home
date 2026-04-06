@@ -53,9 +53,9 @@ const ServicesPage = () => {
       { logo: "용달", name: "빠른용달 소형이사", desc: "원룸·소형 이사 당일 출발 가능", tags: ["소형이사", "당일배차"], buttonLabel: "견적 보기", action: () => navigate("/moving") },
     ],
     appliance: [
-      { logo: "삼성", name: "삼성전자 입주 패키지", desc: "냉장고·세탁기·에어컨 세트 할인", tags: ["가전세트", "배송설치"], buttonLabel: "상품 보기", action: () => toast.success("삼성전자 페이지로 이동합니다") },
-      { logo: "LG", name: "LG전자 신혼 패키지", desc: "오브제컬렉션 · 36개월 무이자", tags: ["무이자할부", "오브제"], buttonLabel: "상품 보기", action: () => toast.success("LG전자 페이지로 이동합니다") },
-      { logo: "이케아", name: "이케아 입주 특별전", desc: "거실·침실 풀패키지 구성 상담", tags: ["가구", "소품"], buttonLabel: "상품 보기", action: () => toast.success("이케아 페이지로 이동합니다") },
+      { logo: "삼성", name: "삼성전자 입주 패키지", desc: "냉장고·세탁기·에어컨 세트 할인", tags: ["가전세트", "배송설치"], buttonLabel: "상품 보기", action: () => toast.success("삼성전자 스토어로 연결됩니다") },
+      { logo: "LG", name: "LG전자 신혼 패키지", desc: "오브제컬렉션 · 36개월 무이자", tags: ["무이자할부", "오브제"], buttonLabel: "상품 보기", action: () => toast.success("LG전자 스토어로 연결됩니다") },
+      { logo: "이케아", name: "이케아 입주 특별전", desc: "거실·침실 풀패키지 구성 상담", tags: ["가구", "소품"], buttonLabel: "상품 보기", action: () => toast.success("이케아 스토어로 연결됩니다") },
     ],
   };
 
