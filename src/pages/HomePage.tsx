@@ -117,8 +117,8 @@ const HomePage = () => {
       {/* 4단계: 잔금납부 현황 */}
       {stage === 4 && <PaymentCard />}
 
-      {/* 3~5단계: 하자 접수 카드 */}
-      {stage >= 3 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
+      {/* 2~5단계: 하자 접수 카드 */}
+      {stage >= 2 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
 
       {/* 공지사항 - 모든 단계 공통 */}
       <NoticeSection />
