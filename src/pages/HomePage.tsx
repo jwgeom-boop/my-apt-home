@@ -205,13 +205,13 @@ const HomePage = () => {
         </div>
         <div className="bg-card rounded-xl overflow-hidden shadow-sm border border-border divide-y divide-border">
           {[
-            { badge: "공지", badgeClass: "bg-primary/15 text-primary", title: "입주 오리엔테이션 안내", date: "2026.03.28" },
-            { badge: "안내문", badgeClass: "bg-success/15 text-success", title: "잔금 납부 및 등기 절차 안내", date: "2026.03.25" },
-            { badge: "동의서", badgeClass: "bg-warning/15 text-warning", title: "개인정보 수집·이용 동의서", date: "2026.03.20" },
-          ].map((item, i) => (
+            { id: 1, badge: "공지", badgeClass: "bg-primary/15 text-primary", title: "입주 오리엔테이션 안내", date: "2026.03.28" },
+            { id: 2, badge: "안내문", badgeClass: "bg-success/15 text-success", title: "잔금 납부 및 등기 절차 안내", date: "2026.03.25" },
+            { id: 3, badge: "동의서", badgeClass: "bg-warning/15 text-warning", title: "개인정보 수집·이용 동의서", date: "2026.03.20" },
+          ].map((item) => (
             <button
-              key={i}
-              onClick={() => navigate("/notice")}
+              key={item.id}
+              onClick={() => navigate(`/notice/${item.id}`)}
               className="w-full flex items-center justify-between py-3 px-4 text-left hover:bg-muted/30 transition-colors"
             >
               <div className="flex items-center gap-2 min-w-0">
