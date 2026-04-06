@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight } from "lucide-react";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ import InspectionChecklist from "@/components/defect/InspectionChecklist";
 import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
-import { generateDefectPdf } from "@/utils/defectPdf";
+import { generateDefectPdf, generateDefectListPdf } from "@/utils/defectPdf";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -55,6 +55,7 @@ const DefectReportPage = () => {
     guideItems: string[];
     isUrgent: boolean;
   } | null>(null);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -276,6 +277,32 @@ const DefectReportPage = () => {
     navigate("/");
   };
 
+  const handleListPdfDownload = async () => {
+    setGeneratingPdf(true);
+    try {
+      await generateDefectListPdf({
+        complexName: "OO아파트",
+        unitNumber: "101동 1202호",
+        residentName: "홍길동",
+        items: submittedDefects.map((d) => ({
+          receiptNo: d.id,
+          location: d.location,
+          guide: d.guide,
+          isUrgent: d.isUrgent,
+          photoCount: d.photoCount,
+          status: d.status,
+        })),
+      });
+      toast({
+        title: "✅ PDF 다운로드 완료",
+        description: "하자 접수 전체 내역서가 저장되었습니다.",
+      });
+    } catch {
+      toast({ title: "❌ PDF 생성 실패", variant: "destructive" });
+    }
+    setGeneratingPdf(false);
+  };
+
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -363,7 +390,17 @@ const DefectReportPage = () => {
         {/* Submitted defects */}
         {submittedDefects.length > 0 && (
           <div className="bg-card rounded-xl border border-border p-4">
-            <h3 className="text-sm font-bold text-foreground mb-2">📝 접수 내역</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-bold text-foreground">📝 접수 내역</h3>
+              <button
+                onClick={handleListPdfDownload}
+                disabled={generatingPdf}
+                className="flex items-center gap-1 bg-primary text-primary-foreground text-sm px-3 py-1 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <Download className="w-3.5 h-3.5" />
+                {generatingPdf ? "PDF 생성 중..." : "PDF 다운"}
+              </button>
+            </div>
             <div className="space-y-2">
               {submittedDefects.map((d) => (
                 <button
