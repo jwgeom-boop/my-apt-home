@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import QRCode from "qrcode";
 import MobileLayout from "@/components/MobileLayout";
 import { ChevronLeft, ChevronRight, ClipboardList, Truck, Check, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useStage } from "@/hooks/useStage";
 
 const INSPECTION_AVAILABLE = [1, 2, 3, 4, 5];
 const INSPECTION_CLOSED = [6, 7, 12, 13, 14, 20, 21];
@@ -16,6 +18,8 @@ const TIME_SLOTS = [
 ];
 
 const ReservationPage = () => {
+  const navigate = useNavigate();
+  const { updateFlag } = useStage();
   const [activeTab, setActiveTab] = useState<"inspection" | "move">("inspection");
 
   // 사전점검
@@ -107,15 +111,19 @@ const ReservationPage = () => {
 
   const handleInspectionConfirm = () => {
     if (!inspectionDate || !inspectionTime) return;
-    toast.success(`사전점검 예약 완료: 4월 ${inspectionDate}일 ${inspectionTime}`);
+    toast.success("✅ 사전점검 예약이 완료되었습니다.");
     setInspectionConfirmed(true);
+    updateFlag("isInspectionDone", true);
+    setTimeout(() => navigate("/"), 2000);
   };
 
   const handleMoveConfirm = () => {
     if (!moveInDate || !moveInTime) return;
-    toast.success(`이사 예약 완료: 4월 ${moveInDate}일 ${moveInTime}`);
+    toast.success("✅ 이사 예약이 완료되었습니다.");
     setMoveInConfirmed(true);
     localStorage.setItem("moveInReserved", "true");
+    updateFlag("isMovingReserved", true);
+    setTimeout(() => navigate("/"), 2000);
   };
 
   return (
