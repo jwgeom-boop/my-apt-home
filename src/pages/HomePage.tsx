@@ -96,8 +96,17 @@ const HomePage = () => {
     <MobileLayout>
       {/* 통합 배너 */}
       <div className="bg-gradient-to-r from-[#0f1923] to-[#2e86c1] rounded-2xl p-5 mx-0 mt-1 mb-3 shadow-lg">
-        {/* 상단: D-Day + 준비율 */}
-        <div className="flex items-center justify-between">
+        {/* 상단: 인사말 */}
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-sm font-medium text-white/80">101동 1202호</p>
+          <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-medium">
+            입주 예정
+          </span>
+        </div>
+        <h2 className="text-lg font-bold text-white mb-4">홍길동님, 환영합니다!</h2>
+
+        {/* 중간: D-Day + 준비율 */}
+        <div className="flex items-center justify-between mb-4">
           <div>
             <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               입주 예정일
@@ -127,45 +136,32 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* 중간: 5단계 진행 */}
-        <div className="mt-4 mb-4">
-          <div className="flex items-start">
-            {steps.map((step, i) => (
-              <div key={step.label} className="flex items-start flex-1">
-                <div className="flex flex-col items-center">
-                  {step.status === "completed" ? (
-                    <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-                      <Check className="w-3 h-3 text-[#0f1923]" />
-                    </div>
-                  ) : step.status === "current" ? (
-                    <div className="w-6 h-6 rounded-full bg-transparent border-2 border-white flex items-center justify-center">
-                      <div className="w-2 h-2 bg-white rounded-full" />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-white/20" />
-                  )}
-                  <span className="text-[10px] text-white/70 mt-1 text-center w-10">{step.label}</span>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className={cn(
-                    "flex-1 h-0.5 self-center mb-4 mx-1",
-                    step.status === "completed" ? "bg-white/80" : "bg-white/20"
-                  )} />
+        {/* 하단: 5단계 진행 (작게) */}
+        <div className="flex items-center justify-between">
+          {steps.map((step, i) => (
+            <div key={step.label} className="flex items-center">
+              <div className="flex flex-col items-center">
+                {step.status === "completed" ? (
+                  <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                    <Check className="w-2.5 h-2.5 text-[#0f1923]" />
+                  </div>
+                ) : step.status === "current" ? (
+                  <div className="w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-white/20" />
                 )}
+                <span className="text-[9px] text-white/60 mt-1 text-center">{step.label}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 하단: 인사말 */}
-        <div className="pt-3 border-t border-white/15">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-white/80">101동 1202호</p>
-            <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full font-medium">
-              입주 예정
-            </span>
-          </div>
-          <h2 className="text-lg font-bold text-white mt-1">홍길동님, 환영합니다!</h2>
+              {i < steps.length - 1 && (
+                <div className={cn(
+                  "w-6 h-px mx-0.5 mb-4",
+                  step.status === "completed" ? "bg-white/70" : "bg-white/20"
+                )} />
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
