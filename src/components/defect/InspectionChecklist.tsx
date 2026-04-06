@@ -204,34 +204,51 @@ const InspectionChecklist = ({
                     </button>
                   </div>
 
-                  {/* Photo thumbnails with marking */}
+                  {/* Photo thumbnails with edit/delete */}
                   {photos.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto pt-1">
-                      {photos.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => setMarkingImage({ guide, photoId: p.id, dataUrl: p.dataUrl })}
-                          className="relative shrink-0 group"
-                          title="탭하여 마킹하기"
-                        >
-                          <img
-                            src={p.dataUrl}
-                            alt="defect"
-                            className="w-16 h-16 rounded-lg object-cover border border-border"
-                          />
-                          <span className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-active:opacity-100 transition-opacity">
-                            <span className="text-white text-[9px] font-bold">✏️ 마킹</span>
-                          </span>
-                          <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5 rounded-b-lg">
-                            {p.memo?.startsWith("[원거리]") ? "원거리" : "근거리"}
-                          </span>
-                        </button>
-                      ))}
+                      {photos.map((p) => {
+                        const photoType = p.memo?.startsWith("[원거리]") ? "far" as const : "close" as const;
+                        return (
+                          <div key={p.id} className="relative shrink-0">
+                            <button
+                              onClick={() => setMarkingImage({ guide, photoId: p.id, dataUrl: p.dataUrl })}
+                              className="group"
+                              title="탭하여 마킹하기"
+                            >
+                              <img
+                                src={p.dataUrl}
+                                alt="defect"
+                                className="w-16 h-16 rounded-lg object-cover border border-border"
+                              />
+                              <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5 rounded-b-lg">
+                                {photoType === "far" ? "원거리" : "근거리"}
+                              </span>
+                            </button>
+                            {/* Retake button */}
+                            <button
+                              onClick={() => triggerRetake(guide, p.id, photoType)}
+                              className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-white border border-border shadow flex items-center justify-center z-10"
+                              title="재촬영"
+                            >
+                              <Camera className="w-3 h-3 text-foreground" />
+                            </button>
+                            {/* Delete button */}
+                            <button
+                              onClick={() => setDeleteTarget({ guide, photoId: p.id })}
+                              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive shadow flex items-center justify-center z-10"
+                              title="삭제"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
                   <p className="text-[10px] text-muted-foreground text-center">
-                    📌 사진을 탭하면 하자 부위를 마킹할 수 있어요
+                    📌 사진을 탭하면 마킹, 📷 재촬영, 🗑️ 삭제 가능
                   </p>
                 </div>
               )}
