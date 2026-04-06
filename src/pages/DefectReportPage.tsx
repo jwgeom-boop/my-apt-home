@@ -55,6 +55,7 @@ const DefectReportPage = () => {
     guideItems: string[];
     isUrgent: boolean;
   } | null>(null);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
