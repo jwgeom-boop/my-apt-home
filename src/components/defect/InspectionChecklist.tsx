@@ -1,10 +1,20 @@
 import { useRef, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { URGENT_KEYWORDS } from "@/data/defectCategories";
-import { AlertTriangle, Camera, MapPin, Search } from "lucide-react";
+import { AlertTriangle, Camera, MapPin, Search, X } from "lucide-react";
 import type { PhotoItem } from "./PhotoCapture";
 import PhotoMarkingCanvas from "./PhotoMarkingCanvas";
 import NormalConstructionFAQ from "./NormalConstructionFAQ";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface InspectionChecklistProps {
   guides: string[];
@@ -13,6 +23,7 @@ interface InspectionChecklistProps {
   locationLabel: string;
   guidePhotos: Record<string, PhotoItem[]>;
   onCaptureGuidePhoto: (guide: string, file: File, photoType: "far" | "close") => void;
+  onRemoveGuidePhoto?: (guide: string, photoId: string) => void;
 }
 
 const InspectionChecklist = ({
@@ -22,10 +33,33 @@ const InspectionChecklist = ({
   locationLabel,
   guidePhotos,
   onCaptureGuidePhoto,
+  onRemoveGuidePhoto,
 }: InspectionChecklistProps) => {
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [activeCapture, setActiveCapture] = useState<{ guide: string; type: "far" | "close" } | null>(null);
   const [markingImage, setMarkingImage] = useState<{ guide: string; photoId: string; dataUrl: string } | null>(null);
+  const [retakeTarget, setRetakeTarget] = useState<{ guide: string; photoId: string; type: "far" | "close" } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ guide: string; photoId: string } | null>(null);
+  const retakeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleRetakeFile = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file && retakeTarget) {
+        // Remove old photo then add new one
+        onRemoveGuidePhoto?.(retakeTarget.guide, retakeTarget.photoId);
+        onCaptureGuidePhoto(retakeTarget.guide, file, retakeTarget.type);
+      }
+      e.target.value = "";
+      setRetakeTarget(null);
+    },
+    [retakeTarget, onRemoveGuidePhoto, onCaptureGuidePhoto]
+  );
+
+  const triggerRetake = (guide: string, photoId: string, type: "far" | "close") => {
+    setRetakeTarget({ guide, photoId, type });
+    setTimeout(() => retakeInputRef.current?.click(), 50);
+  };
 
   const handleFileChange = useCallback(
     (guide: string, photoType: "far" | "close") => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,34 +204,51 @@ const InspectionChecklist = ({
                     </button>
                   </div>
 
-                  {/* Photo thumbnails with marking */}
+                  {/* Photo thumbnails with edit/delete */}
                   {photos.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto pt-1">
-                      {photos.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => setMarkingImage({ guide, photoId: p.id, dataUrl: p.dataUrl })}
-                          className="relative shrink-0 group"
-                          title="탭하여 마킹하기"
-                        >
-                          <img
-                            src={p.dataUrl}
-                            alt="defect"
-                            className="w-16 h-16 rounded-lg object-cover border border-border"
-                          />
-                          <span className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center opacity-0 group-active:opacity-100 transition-opacity">
-                            <span className="text-white text-[9px] font-bold">✏️ 마킹</span>
-                          </span>
-                          <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5 rounded-b-lg">
-                            {p.memo?.startsWith("[원거리]") ? "원거리" : "근거리"}
-                          </span>
-                        </button>
-                      ))}
+                      {photos.map((p) => {
+                        const photoType = p.memo?.startsWith("[원거리]") ? "far" as const : "close" as const;
+                        return (
+                          <div key={p.id} className="relative shrink-0">
+                            <button
+                              onClick={() => setMarkingImage({ guide, photoId: p.id, dataUrl: p.dataUrl })}
+                              className="group"
+                              title="탭하여 마킹하기"
+                            >
+                              <img
+                                src={p.dataUrl}
+                                alt="defect"
+                                className="w-16 h-16 rounded-lg object-cover border border-border"
+                              />
+                              <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5 rounded-b-lg">
+                                {photoType === "far" ? "원거리" : "근거리"}
+                              </span>
+                            </button>
+                            {/* Retake button */}
+                            <button
+                              onClick={() => triggerRetake(guide, p.id, photoType)}
+                              className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-white border border-border shadow flex items-center justify-center z-10"
+                              title="재촬영"
+                            >
+                              <Camera className="w-3 h-3 text-foreground" />
+                            </button>
+                            {/* Delete button */}
+                            <button
+                              onClick={() => setDeleteTarget({ guide, photoId: p.id })}
+                              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive shadow flex items-center justify-center z-10"
+                              title="삭제"
+                            >
+                              <X className="w-3 h-3 text-white" />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
 
                   <p className="text-[10px] text-muted-foreground text-center">
-                    📌 사진을 탭하면 하자 부위를 마킹할 수 있어요
+                    📌 사진을 탭하면 마킹, 📷 재촬영, 🗑️ 삭제 가능
                   </p>
                 </div>
               )}
@@ -228,6 +279,42 @@ const InspectionChecklist = ({
           onCancel={() => setMarkingImage(null)}
         />
       )}
+
+      {/* Hidden retake file input */}
+      <input
+        ref={retakeInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleRetakeFile}
+      />
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="max-w-[320px] rounded-xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>사진을 삭제하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              삭제된 사진은 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deleteTarget) {
+                  onRemoveGuidePhoto?.(deleteTarget.guide, deleteTarget.photoId);
+                  setDeleteTarget(null);
+                }
+              }}
+            >
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
