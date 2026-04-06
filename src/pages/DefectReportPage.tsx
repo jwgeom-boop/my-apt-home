@@ -216,7 +216,6 @@ const DefectReportPage = () => {
     setSubmitting(false);
 
     if (error) {
-      // Offline fallback
       saveDraft(insertData);
       const defect: SubmittedDefect = {
         id: receiptNo,
@@ -237,44 +236,16 @@ const DefectReportPage = () => {
         status: "미배정",
       };
       setSubmittedDefects((prev) => [defect, ...prev]);
-      setLastSubmitData({
-        receiptNo,
-        location: locationField,
-        midCategory: selectedMid,
-        guideItems: guideItemsArr,
-        isUrgent,
+      toast({
+        title: "✅ 하자 접수가 완료되었습니다.",
       });
-      setShowPdfDialog(true);
+      setTimeout(() => navigate("/"), 1500);
     }
 
     setCurrentSubCategory(null);
     setSelectedSub("");
     setIssueGuides(new Set());
     setGuidePhotos({});
-  };
-
-  const handlePdfDownload = async () => {
-    if (!lastSubmitData) return;
-    const allPhotos = Object.values(guidePhotos).flat().map((p) => p.dataUrl);
-    await generateDefectPdf({
-      complexName: "OO아파트",
-      unitNumber: "101동 1202호",
-      residentName: "홍길동",
-      receiptNo: lastSubmitData.receiptNo,
-      items: [{
-        location: lastSubmitData.location,
-        midCategory: lastSubmitData.midCategory,
-        guideItems: lastSubmitData.guideItems,
-        isUrgent: lastSubmitData.isUrgent,
-        photoDataUrls: allPhotos,
-      }],
-    });
-    toast({
-      title: "✅ PDF 저장 완료",
-      description: "하자 접수 확인서가 다운로드되었습니다.",
-    });
-    setShowPdfDialog(false);
-    navigate("/");
   };
 
   const handleListPdfDownload = async () => {
