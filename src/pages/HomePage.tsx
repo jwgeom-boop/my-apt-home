@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
+import { useStage } from "@/hooks/useStage";
 import BannerSection from "@/components/home/BannerSection";
 import NoticeSection from "@/components/home/NoticeSection";
 import InspectionCard from "@/components/home/InspectionCard";
