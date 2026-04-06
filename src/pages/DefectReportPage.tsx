@@ -284,7 +284,14 @@ const DefectReportPage = () => {
         complexName: "OO아파트",
         unitNumber: "101동 1202호",
         residentName: "홍길동",
-        items: submittedDefects,
+        items: submittedDefects.map((d) => ({
+          receiptNo: d.id,
+          location: d.location,
+          guide: d.guide,
+          isUrgent: d.isUrgent,
+          photoCount: d.photoCount,
+          status: d.status,
+        })),
       });
       toast({
         title: "✅ PDF 다운로드 완료",
