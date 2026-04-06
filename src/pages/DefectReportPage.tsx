@@ -47,8 +47,14 @@ const DefectReportPage = () => {
   const [submittedDefects, setSubmittedDefects] = useState<SubmittedDefect[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [residentId, setResidentId] = useState<string | null>(null);
-
-  useEffect(() => {
+  const [showPdfDialog, setShowPdfDialog] = useState(false);
+  const [lastSubmitData, setLastSubmitData] = useState<{
+    receiptNo: string;
+    location: string;
+    midCategory: string;
+    guideItems: string[];
+    isUrgent: boolean;
+  } | null>(null);
     const loadData = async () => {
       const { data: resident } = await supabase
         .from("residents")
