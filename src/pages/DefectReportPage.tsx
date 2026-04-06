@@ -55,6 +55,8 @@ const DefectReportPage = () => {
     guideItems: string[];
     isUrgent: boolean;
   } | null>(null);
+
+  useEffect(() => {
     const loadData = async () => {
       const { data: resident } = await supabase
         .from("residents")
