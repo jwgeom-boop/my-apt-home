@@ -430,6 +430,32 @@ const DefectReportPage = () => {
           </Button>
         )}
       </div>
+
+      {/* PDF 다운로드 확인 다이얼로그 */}
+      <AlertDialog open={showPdfDialog} onOpenChange={setShowPdfDialog}>
+        <AlertDialogContent className="max-w-[340px] rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base">하자 접수가 완료되었습니다</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm">
+              접수 내역을 PDF로 저장하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex gap-2">
+            <AlertDialogCancel
+              onClick={() => {
+                setShowPdfDialog(false);
+                navigate("/");
+              }}
+              className="flex-1"
+            >
+              저장 안 함
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handlePdfDownload} className="flex-1">
+              PDF 저장
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
