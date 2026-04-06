@@ -62,23 +62,27 @@ const OnboardingPage = () => {
           ))}
         </div>
 
-        {isLast ? (
-          <button
-            onClick={finish}
-            className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-base"
-          >
-            시작하기
-          </button>
-        ) : (
-          <div className="flex items-center justify-between">
-            <button onClick={finish} className="text-sm text-muted-foreground">
-              건너뛰기
+        <div className="flex items-center justify-between">
+          {current > 0 ? (
+            <button onClick={prev} className="text-sm text-muted-foreground">
+              이전
             </button>
+          ) : (
+            <div />
+          )}
+          {isLast ? (
+            <button
+              onClick={finish}
+              className="text-base font-semibold text-primary"
+            >
+              시작하기
+            </button>
+          ) : (
             <button onClick={next} className="text-base font-semibold text-primary">
               다음
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
