@@ -135,9 +135,9 @@ function buildDefectPdfHtml(options: DefectPdfOptions): string {
     const photosHtml = item.photoDataUrls.length > 0
       ? `<div style="margin-top:8px;"><span style="font-size:12px;color:#555;">첨부 사진:</span>
          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
-           ${item.photoDataUrls.map(url => `<img src="${url}" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" />`).join("")}
+           ${item.photoDataUrls.map(url => `<img src="${url}" crossorigin="anonymous" style="width:100px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #ddd;" />`).join("")}
          </div></div>`
-      : "";
+      : '<div style="margin-top:8px;font-size:12px;color:#999;">첨부 사진 없음</div>';
 
     return `
       <div style="background:#F5F7FA;border-radius:6px;padding:10px 14px;margin-bottom:4px;">
