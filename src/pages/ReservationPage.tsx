@@ -7,10 +7,24 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useStage } from "@/hooks/useStage";
 
-const INSPECTION_AVAILABLE = [1, 2, 3, 4, 5];
-const INSPECTION_CLOSED = [6, 7, 12, 13, 14, 20, 21];
-const MOVE_AVAILABLE = [10, 11, 15, 16, 17, 22, 23, 24];
-const MOVE_CLOSED = [13, 14, 20, 21];
+const INSPECTION_AVAILABLE = [1, 2, 4, 5];
+const INSPECTION_CLOSED = [3, 7, 10];
+const MOVE_AVAILABLE = [11, 15, 16, 17, 22, 23, 24];
+const MOVE_CLOSED = [3, 7, 10];
+
+// 2026년 4월: firstDayOfWeek=2 (수요일 시작)
+// 주말 날짜 계산: 일=(5,12,19,26), 토=(4,11,18,25)
+const getWeekendDays = (): number[] => {
+  const weekends: number[] = [];
+  for (let day = 1; day <= 30; day++) {
+    const dow = (2 + day - 1) % 7; // 0=일, 6=토
+    if (dow === 0 || dow === 6) weekends.push(day);
+  }
+  return weekends;
+};
+const WEEKEND_DAYS = getWeekendDays();
+
+const TODAY_DAY = 6; // 4월 6일을 오늘로 설정
 
 const TIME_SLOTS = [
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
