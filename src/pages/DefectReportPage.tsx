@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,9 @@ interface SubmittedDefect {
   status: string;
 }
 
+const STATUS_FILTERS = ["전체", "미배정", "처리중", "처리완료"] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+
 const DefectReportPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -38,6 +41,7 @@ const DefectReportPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [residentId, setResidentId] = useState<string | null>(null);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("전체");
 
   useEffect(() => {
     const loadData = async () => {
@@ -71,6 +75,23 @@ const DefectReportPage = () => {
     };
     loadData();
   }, []);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { "전체": submittedDefects.length };
+    for (const d of submittedDefects) {
+      const mapped = d.status === "완료" ? "처리완료" : d.status;
+      counts[mapped] = (counts[mapped] || 0) + 1;
+    }
+    return counts;
+  }, [submittedDefects]);
+
+  const filteredDefects = useMemo(() => {
+    if (statusFilter === "전체") return submittedDefects;
+    return submittedDefects.filter((d) => {
+      if (statusFilter === "처리완료") return d.status === "처리완료" || d.status === "완료";
+      return d.status === statusFilter;
+    });
+  }, [submittedDefects, statusFilter]);
 
   const isUrgent = currentSubCategory
     ? checkUrgency(currentSubCategory, Array.from(issueGuides))
@@ -237,7 +258,7 @@ const DefectReportPage = () => {
         complexName: "OO아파트",
         unitNumber: "101동 1202호",
         residentName: "홍길동",
-        items: submittedDefects.map((d) => ({
+        items: filteredDefects.map((d) => ({
           receiptNo: d.id,
           location: d.location,
           guide: d.guide,
@@ -328,7 +349,7 @@ const DefectReportPage = () => {
               onRemoveGuidePhoto={handleRemoveGuidePhoto}
             />
 
-            {/* 안내 문구 - 심리적 문턱 낮추기 */}
+            {/* 안내 문구 */}
             {issueGuides.size > 0 && (
               <div className="mt-3 bg-muted/30 rounded-xl p-3 border border-border">
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -343,44 +364,67 @@ const DefectReportPage = () => {
         {/* Submitted defects */}
         {submittedDefects.length > 0 && (
           <div className="bg-card rounded-xl border border-border p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold text-foreground">📝 접수 내역</h3>
               <button
                 onClick={handleListPdfDownload}
-                disabled={generatingPdf}
+                disabled={generatingPdf || filteredDefects.length === 0}
                 className="flex items-center gap-1 bg-primary text-primary-foreground text-sm px-3 py-1 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
               >
                 <Download className="w-3.5 h-3.5" />
                 {generatingPdf ? "PDF 생성 중..." : "PDF 다운"}
               </button>
             </div>
-            <div className="space-y-2">
-              {submittedDefects.map((d) => (
+
+            {/* Status filter tabs */}
+            <div className="flex gap-1.5 mb-3 overflow-x-auto">
+              {STATUS_FILTERS.map((filter) => (
                 <button
-                  key={d.id}
-                  onClick={() => navigate(`/defect/${d.id}`)}
+                  key={filter}
+                  onClick={() => setStatusFilter(filter)}
                   className={cn(
-                    "flex items-center justify-between p-2.5 rounded-lg border text-xs w-full text-left",
-                    d.isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
+                    "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
+                    statusFilter === filter
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
                   )}
                 >
-                  <div>
-                    <span className="font-bold text-foreground">{d.location}</span>
-                    <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-muted-foreground">{d.status}</span>
-                    <span className={cn(
-                      "font-bold text-[10px] px-2 py-0.5 rounded-full",
-                      d.status === "임시저장" ? "bg-amber-100 text-amber-700" :
-                      d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
-                    )}>
-                      {d.status === "임시저장" ? "📱 임시저장" : d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
-                    </span>
-                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                  </div>
+                  {filter}({statusCounts[filter] || 0})
                 </button>
               ))}
+            </div>
+
+            <div className="space-y-2">
+              {filteredDefects.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">해당 접수 내역이 없습니다</p>
+              ) : (
+                filteredDefects.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => navigate(`/defect/${d.id}`)}
+                    className={cn(
+                      "flex items-center justify-between p-2.5 rounded-lg border text-xs w-full text-left",
+                      d.isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
+                    )}
+                  >
+                    <div>
+                      <span className="font-bold text-foreground">{d.location}</span>
+                      <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-muted-foreground">{d.status}</span>
+                      <span className={cn(
+                        "font-bold text-[10px] px-2 py-0.5 rounded-full",
+                        d.status === "임시저장" ? "bg-amber-100 text-amber-700" :
+                        d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+                      )}>
+                        {d.status === "임시저장" ? "📱 임시저장" : d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           </div>
         )}

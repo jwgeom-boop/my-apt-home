@@ -1,63 +1,30 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, Phone } from "lucide-react";
+import { ArrowLeft, Check, Phone, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import BottomTabBar from "@/components/BottomTabBar";
 
-interface MockDefect {
+interface DefectDetail {
   id: string;
+  receiptNo: string;
   location: string;
-  guide: string;
+  guideItems: string[];
   isUrgent: boolean;
   photoCount: number;
+  photoData: { guide: string; memo: string; timestamp: string; gps: string; dataUrl?: string }[];
   status: string;
-  receiptDate: string;
-  assignDate: string;
-  workDate: string;
-  completeDate: string;
-  workerName: string;
-  workerPhone: string;
-  note: string;
+  createdAt: string;
+  assignedCompany: string | null;
+  notes: string | null;
 }
 
-const mockDefects: MockDefect[] = [
-  {
-    id: "HD-001",
-    location: "침실1(안방) - 도배",
-    guide: "벽지 들뜸, 곰팡이 흔적",
-    isUrgent: false,
-    photoCount: 4,
-    status: "처리중",
-    receiptDate: "2026.04.02 11:23",
-    assignDate: "2026.04.03 09:00",
-    workDate: "2026.04.04 14:00",
-    completeDate: "",
-    workerName: "김기술",
-    workerPhone: "010-1234-5678",
-    note: "도배 재시공 예정",
-  },
-  {
-    id: "HD-002",
-    location: "욕실1 - 타일",
-    guide: "줄눈 균열",
-    isUrgent: true,
-    photoCount: 2,
-    status: "완료",
-    receiptDate: "2026.04.01 10:05",
-    assignDate: "2026.04.01 14:00",
-    workDate: "2026.04.02 10:00",
-    completeDate: "2026.04.02 12:30",
-    workerName: "이수리",
-    workerPhone: "010-9876-5432",
-    note: "줄눈 보수 완료",
-  },
-];
-
 const STEPS = [
-  { label: "접수완료", key: "receiptDate" },
-  { label: "담당자 배정", key: "assignDate" },
-  { label: "처리중", key: "workDate" },
-  { label: "처리완료", key: "completeDate" },
+  { label: "접수완료", key: "receipt" },
+  { label: "담당자 배정", key: "assign" },
+  { label: "처리중", key: "work" },
+  { label: "처리완료", key: "complete" },
 ] as const;
 
 function getCompletedSteps(status: string): number {
@@ -71,7 +38,50 @@ function getCompletedSteps(status: string): number {
 const DefectDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const defect = mockDefects.find((d) => d.id === id);
+  const [defect, setDefect] = useState<DefectDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
+
+  useEffect(() => {
+    const loadDefect = async () => {
+      if (!id) return;
+      const { data } = await supabase
+        .from("defects")
+        .select("*")
+        .eq("receipt_no", id)
+        .single();
+
+      if (data) {
+        const photoData = Array.isArray(data.photo_data)
+          ? (data.photo_data as { guide: string; memo: string; timestamp: string; gps: string; dataUrl?: string }[])
+          : [];
+        setDefect({
+          id: data.id,
+          receiptNo: data.receipt_no,
+          location: data.location,
+          guideItems: data.guide_items,
+          isUrgent: data.is_urgent,
+          photoCount: data.photo_count,
+          photoData,
+          status: data.status,
+          createdAt: new Date(data.created_at).toLocaleString("ko-KR"),
+          assignedCompany: data.assigned_company,
+          notes: data.notes,
+        });
+      }
+      setLoading(false);
+    };
+    loadDefect();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-[390px] min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">로딩 중...</p>
+      </div>
+    );
+  }
 
   if (!defect) {
     return (
@@ -85,12 +95,9 @@ const DefectDetailPage = () => {
   const isComplete = defect.status === "처리완료" || defect.status === "완료";
   const isAssigned = defect.status !== "미배정";
 
-  const stepDates: Record<string, string> = {
-    receiptDate: defect.receiptDate,
-    assignDate: defect.assignDate,
-    workDate: defect.workDate,
-    completeDate: defect.completeDate,
-  };
+  const photoUrls = defect.photoData
+    .filter((p) => p.dataUrl)
+    .map((p) => p.dataUrl!);
 
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background relative">
@@ -114,7 +121,7 @@ const DefectDetailPage = () => {
           <div className="space-y-2 text-xs">
             <div className="flex justify-between">
               <span className="text-muted-foreground">접수번호</span>
-              <span className="font-semibold text-foreground">{defect.id}</span>
+              <span className="font-semibold text-foreground">{defect.receiptNo}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">위치</span>
@@ -122,7 +129,7 @@ const DefectDetailPage = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">하자 내용</span>
-              <span className="font-semibold text-foreground">{defect.guide}</span>
+              <span className="font-semibold text-foreground">{defect.guideItems.join(", ")}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">사진</span>
@@ -130,7 +137,7 @@ const DefectDetailPage = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">접수일시</span>
-              <span className="font-semibold text-foreground">{defect.receiptDate}</span>
+              <span className="font-semibold text-foreground">{defect.createdAt}</span>
             </div>
           </div>
         </div>
@@ -145,16 +152,14 @@ const DefectDetailPage = () => {
               const isCurrent = stepNum === completedSteps && !isComplete;
               const isAllDone = isComplete && stepNum <= completedSteps;
               const done = isStepCompleted || isAllDone;
-              const dateStr = stepDates[step.key];
 
               return (
                 <div key={step.label}>
                   <div className="flex items-center gap-3">
-                    {/* Circle */}
                     <div
                       className={cn(
                         "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                        done && "bg-primary text-primary-foreground",
+                        done && "bg-green-500 text-white",
                         isCurrent && "bg-primary/20 border-2 border-primary",
                         !done && !isCurrent && "bg-muted text-muted-foreground"
                       )}
@@ -167,17 +172,15 @@ const DefectDetailPage = () => {
                         <span className="text-xs font-bold">{stepNum}</span>
                       )}
                     </div>
-                    {/* Label + date */}
                     <div>
                       <p className={cn("text-sm font-semibold", done || isCurrent ? "text-foreground" : "text-muted-foreground")}>
                         {step.label}
                       </p>
-                      {dateStr && (
-                        <p className="text-xs text-muted-foreground">{dateStr}</p>
+                      {done && (
+                        <p className="text-xs text-muted-foreground">{defect.createdAt}</p>
                       )}
                     </div>
                   </div>
-                  {/* Connecting line */}
                   {i < STEPS.length - 1 && (
                     <div className="ml-[15px] w-0.5 h-6 bg-border" />
                   )}
@@ -187,42 +190,93 @@ const DefectDetailPage = () => {
           </div>
         </div>
 
-        {/* Section 3 — 담당자 정보 */}
-        {isAssigned && (
+        {/* Section 3 — 사진 섹션 */}
+        {photoUrls.length > 0 && (
           <div className="bg-card rounded-xl p-4 border border-border mt-3 mx-4">
-            <h3 className="text-sm font-bold text-foreground mb-3">담당자 정보</h3>
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">담당 기사</span>
-                <span className="font-semibold text-foreground">{defect.workerName}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">연락처</span>
-                <a href={`tel:${defect.workerPhone}`} className="flex items-center gap-1 text-primary font-semibold">
-                  <Phone className="w-3.5 h-3.5" />
-                  {defect.workerPhone}
-                </a>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">처리 메모</span>
-                <span className="font-semibold text-foreground">{defect.note}</span>
-              </div>
+            <h3 className="text-sm font-bold text-foreground mb-3">접수 사진</h3>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {photoUrls.map((url, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => { setViewerIndex(idx); setViewerOpen(true); }}
+                  className="shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-border"
+                >
+                  <img src={url} alt={`사진 ${idx + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Section 4 — 완료 확인 버튼 */}
+        {/* Section 4 — 담당자 정보 */}
+        <div className="bg-card rounded-xl p-4 border border-border mt-3 mx-4">
+          <h3 className="text-sm font-bold text-foreground mb-3">담당자 정보</h3>
+          {!isAssigned ? (
+            <p className="text-xs text-muted-foreground">담당자 배정 대기중</p>
+          ) : (
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">담당 업체</span>
+                <span className="font-semibold text-foreground">{defect.assignedCompany || "-"}</span>
+              </div>
+              {defect.notes && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">처리 메모</span>
+                  <span className="font-semibold text-foreground">{defect.notes}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Section 5 — 완료 확인 버튼 */}
         {isComplete && (
           <div className="mx-4 mt-3">
             <button
               onClick={() => toast.success("확인 완료되었습니다")}
-              className="w-full h-12 rounded-xl bg-success text-white font-bold text-sm active:scale-[0.98] transition-transform"
+              className="w-full h-12 rounded-xl bg-green-500 text-white font-bold text-sm active:scale-[0.98] transition-transform"
             >
               처리 결과 확인 완료
             </button>
           </div>
         )}
       </main>
+
+      {/* Full-screen image viewer */}
+      {viewerOpen && photoUrls.length > 0 && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center">
+          <button
+            onClick={() => setViewerOpen(false)}
+            className="absolute top-4 right-4 text-white/80 hover:text-white z-10"
+          >
+            <X className="w-7 h-7" />
+          </button>
+          <div className="relative w-full h-full flex items-center justify-center px-12">
+            {viewerIndex > 0 && (
+              <button
+                onClick={() => setViewerIndex((i) => i - 1)}
+                className="absolute left-2 text-white/70 hover:text-white"
+              >
+                <ChevronLeft className="w-8 h-8" />
+              </button>
+            )}
+            <img
+              src={photoUrls[viewerIndex]}
+              alt={`사진 ${viewerIndex + 1}`}
+              className="max-w-full max-h-[80vh] object-contain rounded-lg"
+            />
+            {viewerIndex < photoUrls.length - 1 && (
+              <button
+                onClick={() => setViewerIndex((i) => i + 1)}
+                className="absolute right-2 text-white/70 hover:text-white"
+              >
+                <ChevronRight className="w-8 h-8" />
+              </button>
+            )}
+          </div>
+          <p className="text-white/60 text-sm mt-4">{viewerIndex + 1} / {photoUrls.length}</p>
+        </div>
+      )}
 
       <BottomTabBar />
     </div>
