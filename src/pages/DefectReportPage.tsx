@@ -43,7 +43,7 @@ const DefectReportPage = () => {
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("전체");
   const [listExpanded, setListExpanded] = useState(false);
-  const listSectionRef = React.useRef<HTMLDivElement>(null);
+  const listSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
