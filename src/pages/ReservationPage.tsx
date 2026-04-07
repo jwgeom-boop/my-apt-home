@@ -382,6 +382,28 @@ const ReservationPage = () => {
           )}
         </>
       )}
+
+      <AlertDialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
+        <AlertDialogContent className="rounded-xl max-w-[320px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>예약을 취소하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {cancelTarget === "inspection"
+                ? "취소 후 재예약이 어려울 수 있습니다."
+                : "취소 후 원하는 날짜 예약이 어려울 수 있습니다."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2">
+            <AlertDialogCancel className="flex-1 mt-0">돌아가기</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancel}
+              className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              예약 취소
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MobileLayout>
   );
 };
