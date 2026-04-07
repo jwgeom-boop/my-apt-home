@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, ChevronRight, Loader2, WifiOff, Upload, X } from "lucide-react";
+import { Loader2, WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { Progress } from "@/components/ui/progress";
