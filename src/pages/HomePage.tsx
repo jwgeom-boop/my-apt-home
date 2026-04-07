@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Circle, ChevronRight, Loader2, WifiOff, Upload, X } from "lucide-react";
+import { WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
@@ -28,21 +27,8 @@ const HomePage = () => {
   const { drafts, syncAll, syncing } = useOfflineDrafts();
   const { stage } = useStage();
 
-  const getChecklistItems = () => [
-    { id: 1, label: "잔금 납부", done: true, path: "/payment" },
-    { id: 2, label: "사전점검 예약", done: true, path: "/reservation" },
-    { id: 3, label: "QR 입장코드 발급", done: true, path: "/qr" },
-    { id: 4, label: "이사 예약", done: localStorage.getItem("moveInReserved") === "true", path: "/reservation" },
-    { id: 5, label: "동의서 서명", done: localStorage.getItem("consentSigned") === "true", path: "/consent" },
-  ];
-
-  const checklistItems = getChecklistItems();
-  const completedCount = checklistItems.filter((i) => i.done).length;
-  const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
-
   const [defects, setDefects] = useState<DefectRow[]>([]);
   const [loadingDefects, setLoadingDefects] = useState(true);
-  const [showChecklist, setShowChecklist] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -122,24 +108,6 @@ const HomePage = () => {
 
       {/* 공지사항 - 모든 단계 공통 */}
       <NoticeSection />
-
-      {/* Progress - 클릭하면 체크리스트 표시 */}
-      <button
-        onClick={() => setShowChecklist(true)}
-        className="w-full bg-card rounded-xl p-4 mb-3 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-foreground">입주 진행률</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-primary">{progressPercent}%</span>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </div>
-        </div>
-        <Progress value={progressPercent} className="h-3" />
-        <p className="text-xs text-muted-foreground mt-2">
-          {completedCount}/{checklistItems.length}개 항목 완료
-        </p>
-      </button>
 
       {/* 단계별 진행 가이드 */}
       <StageGuide stage={stage} />
