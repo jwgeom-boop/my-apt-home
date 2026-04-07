@@ -1,9 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, QrCode } from "lucide-react";
 
+interface InspectionReservation {
+  date: string;
+  time: string;
+  waitingNumber: number;
+  status: string;
+}
+
 const InspectionCard = () => {
   const navigate = useNavigate();
-  const isReserved = localStorage.getItem("moveInReserved") === "true";
+
+  let reservation: InspectionReservation | null = null;
+  try {
+    const raw = localStorage.getItem("inspectionReservation");
+    if (raw) reservation = JSON.parse(raw);
+  } catch {}
+
+  const isReserved = reservation?.status === "confirmed";
 
   return (
     <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
@@ -22,11 +36,11 @@ const InspectionCard = () => {
           </span>
         )}
       </div>
-      {isReserved ? (
+      {isReserved && reservation ? (
         <div className="flex items-end justify-between">
           <div className="space-y-1">
-            <p className="text-sm text-foreground font-medium">2026.04.02 (목) 11:00</p>
-            <p className="text-xs text-muted-foreground">대기번호 7번 · 현재 대기 3명</p>
+            <p className="text-sm text-foreground font-medium">{reservation.date} {reservation.time}</p>
+            <p className="text-xs text-muted-foreground">대기번호 {reservation.waitingNumber}번</p>
           </div>
           <button
             onClick={() => navigate("/qr")}

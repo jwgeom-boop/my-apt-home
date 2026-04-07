@@ -1,9 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import { Truck, QrCode } from "lucide-react";
 
+interface MovingReservation {
+  date: string;
+  time: string;
+  elevator: string;
+  parking: string;
+  status: string;
+}
+
 const MovingReservationCard = () => {
   const navigate = useNavigate();
-  const isReserved = localStorage.getItem("moveInReserved") === "true";
+
+  let reservation: MovingReservation | null = null;
+  try {
+    const raw = localStorage.getItem("movingReservation");
+    if (raw) reservation = JSON.parse(raw);
+  } catch {}
+
+  const isReserved = reservation?.status === "confirmed";
 
   return (
     <div className="bg-card rounded-xl p-4 mb-3 shadow-sm border border-border">
@@ -22,11 +37,11 @@ const MovingReservationCard = () => {
           </span>
         )}
       </div>
-      {isReserved ? (
+      {isReserved && reservation ? (
         <div className="flex items-end justify-between">
           <div className="space-y-1">
-            <p className="text-sm text-foreground font-medium">2026.04.20 (일) 09:00</p>
-            <p className="text-xs text-muted-foreground">엘리베이터 B동 2호기 배정</p>
+            <p className="text-sm text-foreground font-medium">{reservation.date} {reservation.time}</p>
+            <p className="text-xs text-muted-foreground">엘리베이터 {reservation.elevator} 배정 / 주차구역: {reservation.parking}</p>
           </div>
           <button
             onClick={() => navigate("/qr")}

@@ -193,6 +193,12 @@ const ReservationPage = () => {
     if (!inspectionDate || !inspectionTime) return;
     toast.success("✅ 사전점검 예약이 완료되었습니다.");
     setInspectionConfirmed(true);
+    localStorage.setItem("inspectionReservation", JSON.stringify({
+      date: formatDateStr(inspectionDate),
+      time: inspectionTime,
+      waitingNumber: 3,
+      status: "confirmed",
+    }));
     updateFlag("isInspectionDone", true);
     setTimeout(() => navigate("/"), 2000);
   };
@@ -201,6 +207,13 @@ const ReservationPage = () => {
     if (!moveInDate || !moveInTime) return;
     toast.success("✅ 이사 예약이 완료되었습니다.");
     setMoveInConfirmed(true);
+    localStorage.setItem("movingReservation", JSON.stringify({
+      date: formatDateStr(moveInDate),
+      time: moveInTime,
+      elevator: "1호기",
+      parking: "A-08",
+      status: "confirmed",
+    }));
     localStorage.setItem("moveInReserved", "true");
     updateFlag("isMovingReserved", true);
     setTimeout(() => navigate("/"), 2000);
@@ -211,11 +224,13 @@ const ReservationPage = () => {
       setInspectionConfirmed(false);
       setInspectionDate(null);
       setInspectionTime(null);
+      localStorage.removeItem("inspectionReservation");
       updateFlag("isInspectionDone", false);
     } else if (cancelTarget === "move") {
       setMoveInConfirmed(false);
       setMoveInDate(null);
       setMoveInTime(null);
+      localStorage.removeItem("movingReservation");
       localStorage.removeItem("moveInReserved");
       updateFlag("isMovingReserved", false);
     }
