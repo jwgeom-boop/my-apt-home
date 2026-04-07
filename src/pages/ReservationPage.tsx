@@ -6,6 +6,16 @@ import { ChevronLeft, ChevronRight, ClipboardList, Truck, Check, CheckCircle } f
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useStage } from "@/hooks/useStage";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const INSPECTION_AVAILABLE = [1, 2, 4, 5];
 const INSPECTION_CLOSED = [3, 7, 10];
@@ -45,6 +55,8 @@ const ReservationPage = () => {
   const [moveInDate, setMoveInDate] = useState<number | null>(null);
   const [moveInTime, setMoveInTime] = useState<string | null>(null);
   const [moveInConfirmed, setMoveInConfirmed] = useState(false);
+
+  const [cancelTarget, setCancelTarget] = useState<"inspection" | "move" | null>(null);
 
   const inspectionQrRef = useRef<HTMLCanvasElement>(null);
   const moveInQrRef = useRef<HTMLCanvasElement>(null);
@@ -152,6 +164,23 @@ const ReservationPage = () => {
     setTimeout(() => navigate("/"), 2000);
   };
 
+  const handleCancel = () => {
+    if (cancelTarget === "inspection") {
+      setInspectionConfirmed(false);
+      setInspectionDate(null);
+      setInspectionTime(null);
+      updateFlag("isInspectionDone", false);
+    } else if (cancelTarget === "move") {
+      setMoveInConfirmed(false);
+      setMoveInDate(null);
+      setMoveInTime(null);
+      localStorage.removeItem("moveInReserved");
+      updateFlag("isMovingReserved", false);
+    }
+    setCancelTarget(null);
+    toast.success("예약이 취소되었습니다.");
+  };
+
   return (
     <MobileLayout title="예약">
       {/* Tab Switcher */}
@@ -203,16 +232,24 @@ const ReservationPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">사전점검 입장 QR</p>
                 <canvas ref={inspectionQrRef} className="rounded-lg" />
               </div>
-              <button
-                onClick={() => {
-                  setInspectionConfirmed(false);
-                  setInspectionDate(null);
-                  setInspectionTime(null);
-                }}
-                className="mt-3 text-xs text-primary font-semibold underline"
-              >
-                변경
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setInspectionConfirmed(false);
+                    setInspectionDate(null);
+                    setInspectionTime(null);
+                  }}
+                  className="text-xs text-primary font-semibold underline"
+                >
+                  변경
+                </button>
+                <button
+                  onClick={() => setCancelTarget("inspection")}
+                  className="text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-1"
+                >
+                  취소
+                </button>
+              </div>
             </div>
           ) : (
             <>
@@ -278,16 +315,24 @@ const ReservationPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">이사 차량 출입 QR</p>
                 <canvas ref={moveInQrRef} className="rounded-lg" />
               </div>
-              <button
-                onClick={() => {
-                  setMoveInConfirmed(false);
-                  setMoveInDate(null);
-                  setMoveInTime(null);
-                }}
-                className="mt-3 text-xs text-primary font-semibold underline"
-              >
-                변경
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setMoveInConfirmed(false);
+                    setMoveInDate(null);
+                    setMoveInTime(null);
+                  }}
+                  className="text-xs text-primary font-semibold underline"
+                >
+                  변경
+                </button>
+                <button
+                  onClick={() => setCancelTarget("move")}
+                  className="text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-1"
+                >
+                  취소
+                </button>
+              </div>
             </div>
           ) : (
             <>
@@ -337,6 +382,28 @@ const ReservationPage = () => {
           )}
         </>
       )}
+
+      <AlertDialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
+        <AlertDialogContent className="rounded-xl max-w-[320px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle>예약을 취소하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {cancelTarget === "inspection"
+                ? "취소 후 재예약이 어려울 수 있습니다."
+                : "취소 후 원하는 날짜 예약이 어려울 수 있습니다."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2">
+            <AlertDialogCancel className="flex-1 mt-0">돌아가기</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancel}
+              className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              예약 취소
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MobileLayout>
   );
 };
