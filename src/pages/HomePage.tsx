@@ -123,24 +123,6 @@ const HomePage = () => {
       {/* 공지사항 - 모든 단계 공통 */}
       <NoticeSection />
 
-      {/* Progress - 클릭하면 체크리스트 표시 */}
-      <button
-        onClick={() => setShowChecklist(true)}
-        className="w-full bg-card rounded-xl p-4 mb-3 shadow-sm border border-border text-left active:scale-[0.99] transition-transform"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-foreground">입주 진행률</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-primary">{progressPercent}%</span>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </div>
-        </div>
-        <Progress value={progressPercent} className="h-3" />
-        <p className="text-xs text-muted-foreground mt-2">
-          {completedCount}/{checklistItems.length}개 항목 완료
-        </p>
-      </button>
-
       {/* 단계별 진행 가이드 */}
       <StageGuide stage={stage} />
     </MobileLayout>
