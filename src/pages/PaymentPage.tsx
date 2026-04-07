@@ -1,5 +1,5 @@
 import MobileLayout from "@/components/MobileLayout";
-import { Check, Copy, AlertCircle } from "lucide-react";
+import { Check, Copy, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,17 @@ interface PaymentItem {
   amount: number;
   paid: boolean;
   account?: string;
+  dueDate?: string;
 }
 
 const initialItems: PaymentItem[] = [
-  { label: "분양 잔금 (30%)", description: "분양가의 30%", amount: 150000000, paid: false, account: "신한 110-382-456789" },
-  { label: "중도금 1차 (30%)", description: "대출 상환 또는 잔금대출 전환", amount: 150000000, paid: false, account: "신한 110-382-456789" },
-  { label: "중도금 2차 (30%)", description: "대출 상환 또는 잔금대출 전환", amount: 150000000, paid: false, account: "신한 110-382-456789" },
-  { label: "중도금 후불 이자", description: "연 4.5% 기준 산정", amount: 18700000, paid: false, account: "신한 110-382-456789" },
-  { label: "발코니 확장비", amount: 15000000, paid: false, account: "신한 110-382-456789" },
+  { label: "분양 잔금 (30%)", description: "분양가의 30%", amount: 150000000, paid: false, account: "신한 110-382-456789", dueDate: "2026-04-30" },
+  { label: "중도금 1차 (30%)", description: "대출 상환 또는 잔금대출 전환", amount: 150000000, paid: false, account: "신한 110-382-456789", dueDate: "2026-05-15" },
+  { label: "중도금 2차 (30%)", description: "대출 상환 또는 잔금대출 전환", amount: 150000000, paid: false, account: "신한 110-382-456789", dueDate: "2026-06-15" },
+  { label: "중도금 후불 이자", description: "연 4.5% 기준 산정", amount: 18700000, paid: false, account: "신한 110-382-456789", dueDate: "2026-04-30" },
+  { label: "발코니 확장비", amount: 15000000, paid: false, account: "신한 110-382-456789", dueDate: "2026-04-30" },
   { label: "옵션비 (시스템에어컨)", amount: 4200000, paid: true },
-  { label: "관리비 예치금", amount: 450000, paid: false, account: "신한 110-382-456789" },
+  { label: "관리비 예치금", amount: 450000, paid: false, account: "신한 110-382-456789", dueDate: "2026-04-30" },
 ];
 
 const CONTRACT_DEPOSIT = 50000000;
@@ -30,6 +31,7 @@ const PaymentPage = () => {
   const [items] = useState<PaymentItem[]>(initialItems);
   const [loading, setLoading] = useState(true);
   const [requestedItems, setRequestedItems] = useState<Set<number>>(new Set());
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +52,11 @@ const PaymentPage = () => {
   const handleRequestConfirmation = (index: number) => {
     setRequestedItems(prev => new Set(prev).add(index));
     toast.success("납부 확인을 요청했습니다. 관리자 확인 후 처리됩니다.");
+  };
+
+  const toggleExpand = (index: number, paid: boolean) => {
+    if (paid) return;
+    setExpandedIndex(prev => prev === index ? null : index);
   };
 
   if (loading) {
@@ -85,62 +92,100 @@ const PaymentPage = () => {
         <p className="text-[11px] text-muted-foreground">기납부액 (계약금 10%): <span className="font-semibold text-foreground">{CONTRACT_DEPOSIT.toLocaleString()}원</span></p>
       </div>
 
-      {/* 납부 항목 - 컴팩트 리스트 */}
-      <div className="space-y-1.5 mb-4">
-        {items.map((item, i) => (
-          <div
-            key={i}
-            className={`bg-card rounded-lg px-3 py-2.5 border shadow-sm ${item.paid ? "border-border" : "border-destructive/30"}`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.paid ? "bg-success" : "bg-destructive"}`} />
-                <span className="text-xs font-semibold text-foreground truncate">{item.label}</span>
+      {/* 납부 항목 - 아코디언 리스트 */}
+      <div className="space-y-2 mb-4">
+        {items.map((item, i) => {
+          const isExpanded = expandedIndex === i;
+          return (
+            <div
+              key={i}
+              className={`bg-card rounded-lg border shadow-sm transition-all duration-200 ${
+                item.paid ? "border-muted opacity-60" : "border-destructive/30"
+              }`}
+            >
+              {/* 헤더 (항상 표시) */}
+              <div
+                className={`flex items-center justify-between px-3 py-2.5 ${!item.paid ? "cursor-pointer" : ""}`}
+                onClick={() => toggleExpand(i, item.paid)}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  {item.paid ? (
+                    <Check className="w-3.5 h-3.5 text-success shrink-0" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-destructive" />
+                  )}
+                  <span className={`text-xs font-semibold truncate ${item.paid ? "text-muted-foreground" : "text-foreground"}`}>
+                    {item.label}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-sm font-bold ${item.paid ? "text-muted-foreground" : "text-foreground"}`}>
+                    {item.amount.toLocaleString()}원
+                  </span>
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
+                    item.paid ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                  }`}>
+                    {item.paid ? "완료" : "미납"}
+                  </span>
+                  {!item.paid && (
+                    isExpanded
+                      ? <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                      : <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-sm font-bold text-foreground">{item.amount.toLocaleString()}원</span>
-                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${item.paid ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
-                  {item.paid ? "완료" : "미납"}
-                </span>
+
+              {/* 확장 영역 (미납 항목만) */}
+              <div
+                className={`overflow-hidden transition-all duration-200 ${
+                  isExpanded ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="px-3 pb-2.5 space-y-1.5">
+                  {item.account && (
+                    <div className="flex items-center justify-between bg-muted rounded px-2 py-1.5">
+                      <p className="text-[10px] text-muted-foreground">{item.account}</p>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); copyAccount(item.account!); }}
+                        className="text-primary hover:text-primary/80 transition-colors p-0.5"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  {item.dueDate && (
+                    <p className="text-[10px] text-muted-foreground px-1">
+                      납부 예정일: <span className="font-semibold text-foreground">{item.dueDate}</span>
+                    </p>
+                  )}
+                  {!requestedItems.has(i) ? (
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[11px] font-semibold text-primary border-primary hover:bg-primary/5"
+                        onClick={(e) => { e.stopPropagation(); handleRequestConfirmation(i); }}
+                      >
+                        납부확인 요청
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[11px] font-semibold text-muted-foreground border-muted"
+                        disabled
+                      >
+                        확인 요청됨 ✓
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            {!item.paid && item.account && (
-              <div className="flex items-center justify-between mt-1.5 bg-muted rounded px-2 py-1.5">
-                <p className="text-[10px] text-muted-foreground">{item.account}</p>
-                <button
-                  onClick={() => copyAccount(item.account!)}
-                  className="text-primary hover:text-primary/80 transition-colors p-0.5"
-                >
-                  <Copy className="w-3 h-3" />
-                </button>
-               </div>
-            )}
-            {!item.paid && !requestedItems.has(i) && (
-              <div className="flex justify-end mt-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-[11px] font-semibold text-primary border-primary hover:bg-primary/5"
-                  onClick={() => handleRequestConfirmation(i)}
-                >
-                  납부확인 요청
-                </Button>
-              </div>
-            )}
-            {!item.paid && requestedItems.has(i) && (
-              <div className="flex justify-end mt-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-[11px] font-semibold text-muted-foreground border-muted"
-                  disabled
-                >
-                  확인 요청됨 ✓
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* 하단 입주증 발급 버튼 */}
