@@ -146,7 +146,7 @@ const CalendarView = ({
 
 const ReservationPage = () => {
   const navigate = useNavigate();
-  const { updateFlag } = useStage();
+  
   const [activeTab, setActiveTab] = useState<"inspection" | "move">("inspection");
 
   // Restore from localStorage
