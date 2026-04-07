@@ -166,11 +166,8 @@ const MyPage = () => {
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
       {/* Profile Header */}
       <div className="bg-gradient-to-br from-navy via-navy/90 to-primary/80 text-white px-6 pt-14 pb-10 flex flex-col items-center">
-        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center mb-3">
-          <span className="text-xl font-bold tracking-tight">{unitShort}</span>
-        </div>
-        <p className="text-base font-bold">{complexName}</p>
-        <p className="text-sm text-white/70 mt-0.5">{unitNumber}</p>
+        <p className="text-lg font-bold">{complexName}</p>
+        <p className="text-sm text-white/70 mt-1">{unitNumber}</p>
       </div>
 
       {/* Accordion Info Card */}
