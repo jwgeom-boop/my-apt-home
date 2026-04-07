@@ -232,16 +232,24 @@ const ReservationPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">사전점검 입장 QR</p>
                 <canvas ref={inspectionQrRef} className="rounded-lg" />
               </div>
-              <button
-                onClick={() => {
-                  setInspectionConfirmed(false);
-                  setInspectionDate(null);
-                  setInspectionTime(null);
-                }}
-                className="mt-3 text-xs text-primary font-semibold underline"
-              >
-                변경
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setInspectionConfirmed(false);
+                    setInspectionDate(null);
+                    setInspectionTime(null);
+                  }}
+                  className="text-xs text-primary font-semibold underline"
+                >
+                  변경
+                </button>
+                <button
+                  onClick={() => setCancelTarget("inspection")}
+                  className="text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-1"
+                >
+                  취소
+                </button>
+              </div>
             </div>
           ) : (
             <>
