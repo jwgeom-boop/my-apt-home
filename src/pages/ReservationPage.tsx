@@ -17,29 +17,132 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 
-const INSPECTION_AVAILABLE = [1, 2, 4, 5];
-const INSPECTION_CLOSED = [3, 7, 10];
-const MOVE_AVAILABLE = [11, 15, 16, 17, 22, 23, 24];
-const MOVE_CLOSED = [3, 7, 10];
+// 오늘: 2026-04-07
+const TODAY = new Date(2026, 3, 7);
 
-// 2026년 4월: firstDayOfWeek=2 (수요일 시작)
-// 주말 날짜 계산: 일=(5,12,19,26), 토=(4,11,18,25)
-const getWeekendDays = (): number[] => {
-  const weekends: number[] = [];
-  for (let day = 1; day <= 30; day++) {
-    const dow = (2 + day - 1) % 7; // 0=일, 6=토
-    if (dow === 0 || dow === 6) weekends.push(day);
-  }
-  return weekends;
-};
-const WEEKEND_DAYS = getWeekendDays();
+// 사전점검: 2026-04-25 ~ 04-27
+const INSPECTION_AVAILABLE_DATES = [
+  new Date(2026, 3, 25),
+  new Date(2026, 3, 26),
+  new Date(2026, 3, 27),
+];
 
-const TODAY_DAY = 6; // 4월 6일을 오늘로 설정
+// 이사: 2026-05-15 ~ 2026-07-15 평일
+const MOVE_START = new Date(2026, 4, 15);
+const MOVE_END = new Date(2026, 6, 15);
+
+const isWeekday = (d: Date) => d.getDay() !== 0 && d.getDay() !== 6;
+const isSameDay = (a: Date, b: Date) =>
+  a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
 const TIME_SLOTS = [
   "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
   "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00",
 ];
+
+const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+
+const formatDateStr = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+
+interface CalendarProps {
+  year: number;
+  month: number; // 0-indexed
+  selectedDate: Date | null;
+  onSelect: (d: Date) => void;
+  isDateAvailable: (d: Date) => boolean;
+  onPrevMonth?: () => void;
+  onNextMonth?: () => void;
+  canGoPrev?: boolean;
+  canGoNext?: boolean;
+}
+
+const CalendarView = ({
+  year, month, selectedDate, onSelect,
+  isDateAvailable, onPrevMonth, onNextMonth,
+  canGoPrev = false, canGoNext = false,
+}: CalendarProps) => {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDow = new Date(year, month, 1).getDay(); // 0=Sun
+  const days = Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1));
+  const blanks = Array.from({ length: firstDow }, (_, i) => i);
+
+  const monthLabel = `${year}년 ${month + 1}월`;
+
+  return (
+    <>
+      <div className="bg-accent text-accent-foreground rounded-xl p-3 flex items-center justify-between mb-4">
+        <button onClick={onPrevMonth} disabled={!canGoPrev} className={cn("p-0.5", !canGoPrev && "opacity-30 cursor-not-allowed")}>
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <span className="text-sm font-semibold">{monthLabel}</span>
+        <button onClick={onNextMonth} disabled={!canGoNext} className={cn("p-0.5", !canGoNext && "opacity-30 cursor-not-allowed")}>
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+      <div className="bg-card rounded-xl p-4 border border-border shadow-sm mb-4">
+        <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
+          {DAY_LABELS.map((d) => (
+            <span key={d} className={d === "일" ? "text-destructive" : d === "토" ? "text-primary" : ""}>{d}</span>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1">
+          {blanks.map((b) => <div key={`b-${b}`} />)}
+          {days.map((day) => {
+            const dow = day.getDay();
+            const available = isDateAvailable(day);
+            const isSelected = selectedDate && isSameDay(day, selectedDate);
+            const isPast = day < TODAY && !isSameDay(day, TODAY);
+            const isToday = isSameDay(day, TODAY);
+            const isSun = dow === 0;
+            const isSat = dow === 6;
+            const isDisabled = !available || isPast;
+
+            let bgClass = "bg-background";
+            let textClass = "text-foreground";
+
+            if (isSelected) {
+              bgClass = "bg-navy";
+              textClass = "text-white";
+            } else if (!available) {
+              bgClass = "bg-muted";
+              textClass = "text-muted-foreground/40";
+            } else if (isSun) {
+              textClass = "text-destructive";
+            } else if (isSat) {
+              textClass = "text-primary";
+            }
+
+            return (
+              <button
+                key={day.getDate()}
+                disabled={isDisabled}
+                onClick={() => !isDisabled && onSelect(day)}
+                className={cn(
+                  "w-9 h-9 mx-auto rounded-full text-xs font-medium flex flex-col items-center justify-center transition-colors relative",
+                  bgClass, textClass,
+                  isDisabled && "cursor-not-allowed opacity-60",
+                  !isDisabled && !isSelected && "hover:bg-muted/60"
+                )}
+              >
+                {day.getDate()}
+                {isToday && !isSelected && (
+                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground justify-center flex-wrap">
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-background border border-border" /> 선택가능</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-navy" /> 선택됨</span>
+          <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-muted" /> 불가</span>
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> 오늘</span>
+        </div>
+      </div>
+    </>
+  );
+};
 
 const ReservationPage = () => {
   const navigate = useNavigate();
@@ -47,14 +150,15 @@ const ReservationPage = () => {
   const [activeTab, setActiveTab] = useState<"inspection" | "move">("inspection");
 
   // 사전점검
-  const [inspectionDate, setInspectionDate] = useState<number | null>(null);
+  const [inspectionDate, setInspectionDate] = useState<Date | null>(null);
   const [inspectionTime, setInspectionTime] = useState<string | null>(null);
   const [inspectionConfirmed, setInspectionConfirmed] = useState(false);
 
   // 이사
-  const [moveInDate, setMoveInDate] = useState<number | null>(null);
+  const [moveInDate, setMoveInDate] = useState<Date | null>(null);
   const [moveInTime, setMoveInTime] = useState<string | null>(null);
   const [moveInConfirmed, setMoveInConfirmed] = useState(false);
+  const [moveCalMonth, setMoveCalMonth] = useState<{ year: number; month: number }>({ year: 2026, month: 4 }); // May
 
   const [cancelTarget, setCancelTarget] = useState<"inspection" | "move" | null>(null);
 
@@ -62,119 +166,28 @@ const ReservationPage = () => {
   const moveInQrRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (inspectionConfirmed && inspectionQrRef.current) {
+    if (inspectionConfirmed && inspectionQrRef.current && inspectionDate) {
       QRCode.toCanvas(inspectionQrRef.current,
-        `INSPECTION-101-1202-${inspectionDate}-${inspectionTime}`,
+        `INSPECTION-101-1202-${formatDateStr(inspectionDate)}-${inspectionTime}`,
         { width: 120, margin: 1 }
       );
     }
   }, [inspectionConfirmed]);
 
   useEffect(() => {
-    if (moveInConfirmed && moveInQrRef.current) {
+    if (moveInConfirmed && moveInQrRef.current && moveInDate) {
       QRCode.toCanvas(moveInQrRef.current,
-        `MOVEIN-101-1202-${moveInDate}-${moveInTime}`,
+        `MOVEIN-101-1202-${formatDateStr(moveInDate)}-${moveInTime}`,
         { width: 120, margin: 1 }
       );
     }
   }, [moveInConfirmed]);
 
-  const daysInMonth = 30;
-  const firstDayOfWeek = 2;
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const blanks = Array.from({ length: firstDayOfWeek }, (_, i) => i);
+  const isInspectionDateAvailable = (d: Date) =>
+    INSPECTION_AVAILABLE_DATES.some((ad) => isSameDay(ad, d));
 
-  const availableDates = activeTab === "inspection" ? INSPECTION_AVAILABLE : MOVE_AVAILABLE;
-  const closedDates = activeTab === "inspection" ? INSPECTION_CLOSED : MOVE_CLOSED;
-
-  const renderCalendar = (
-    selectedDate: number | null,
-    onSelect: (d: number) => void
-  ) => {
-    const getSundayOrSaturday = (day: number) => {
-      const dow = (firstDayOfWeek + day - 1) % 7;
-      if (dow === 0) return "sunday";
-      if (dow === 6) return "saturday";
-      return null;
-    };
-
-    return (
-      <>
-        <div className="bg-accent text-accent-foreground rounded-xl p-3 flex items-center justify-between mb-4">
-          <ChevronLeft className="w-5 h-5" />
-          <span className="text-sm font-semibold">2026년 4월</span>
-          <ChevronRight className="w-5 h-5" />
-        </div>
-        <div className="bg-card rounded-xl p-4 border border-border shadow-sm mb-4">
-          <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
-            {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-              <span key={d} className={d === "일" ? "text-destructive" : d === "토" ? "text-primary" : ""}>{d}</span>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {blanks.map((b) => <div key={`b-${b}`} />)}
-            {days.map((day) => {
-              const weekendType = getSundayOrSaturday(day);
-              const isClosed = closedDates.includes(day);
-              const isAvailable = availableDates.includes(day);
-              const isSelected = day === selectedDate;
-              const isPast = day < TODAY_DAY;
-              const isToday = day === TODAY_DAY;
-              const isDisabled = isClosed || !!weekendType || isPast || !isAvailable;
-
-              // Determine styles
-              let bgClass = "bg-background"; // 선택 가능 (white)
-              let textClass = "text-foreground"; // black text
-
-              if (isSelected) {
-                bgClass = "bg-navy";
-                textClass = "text-white";
-              } else if (isClosed) {
-                bgClass = "bg-destructive/10";
-                textClass = "text-muted-foreground line-through";
-              } else if (isPast || (!isAvailable && !weekendType)) {
-                bgClass = "bg-muted";
-                textClass = "text-muted-foreground/40";
-              } else if (weekendType === "sunday") {
-                textClass = "text-destructive";
-              } else if (weekendType === "saturday") {
-                textClass = "text-primary";
-              }
-
-              return (
-                <button
-                  key={day}
-                  disabled={isDisabled}
-                  onClick={() => !isDisabled && onSelect(day)}
-                  className={cn(
-                    "w-9 h-9 mx-auto rounded-full text-xs font-medium flex flex-col items-center justify-center transition-colors relative",
-                    bgClass,
-                    textClass,
-                    isDisabled && !isClosed && "cursor-not-allowed opacity-60",
-                    isClosed && "cursor-not-allowed",
-                    !isDisabled && !isSelected && "hover:bg-muted/60"
-                  )}
-                >
-                  {day}
-                  {isToday && !isSelected && (
-                    <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {/* Legend */}
-          <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground justify-center flex-wrap">
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-background border border-border" /> 선택가능</span>
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-navy" /> 선택됨</span>
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-destructive/20" /> 마감</span>
-            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-muted" /> 불가</span>
-            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> 오늘</span>
-          </div>
-        </div>
-      </>
-    );
-  };
+  const isMoveDateAvailable = (d: Date) =>
+    d >= MOVE_START && d <= MOVE_END && isWeekday(d);
 
   const handleInspectionConfirm = () => {
     if (!inspectionDate || !inspectionTime) return;
@@ -209,6 +222,10 @@ const ReservationPage = () => {
     setCancelTarget(null);
     toast.success("예약이 취소되었습니다.");
   };
+
+  // Move calendar navigation (May 2026 ~ Jul 2026)
+  const moveCanGoPrev = moveCalMonth.year > 2026 || moveCalMonth.month > 4;
+  const moveCanGoNext = moveCalMonth.year < 2026 || moveCalMonth.month < 6;
 
   return (
     <MobileLayout title="예약">
@@ -247,7 +264,7 @@ const ReservationPage = () => {
         <>
           <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
             <p className="text-xs font-bold text-primary">사전점검 안내</p>
-            <p className="text-xs text-muted-foreground mt-0.5">운영 기간: 2026.04.01 ~ 04.05 (09:00 ~ 17:00)</p>
+            <p className="text-xs text-muted-foreground mt-0.5">운영 기간: 2026.04.25 ~ 04.27 (09:00 ~ 17:00)</p>
           </div>
 
           {inspectionConfirmed ? (
@@ -256,7 +273,7 @@ const ReservationPage = () => {
                 <CheckCircle className="w-5 h-5 text-success" />
                 <p className="text-sm font-bold text-success">사전점검 예약 완료</p>
               </div>
-              <p className="text-sm text-foreground">2026.04.{String(inspectionDate).padStart(2, "0")} {inspectionTime}</p>
+              <p className="text-sm text-foreground">{formatDateStr(inspectionDate!)} {inspectionTime}</p>
               <div className="flex flex-col items-center mt-3 pt-3 border-t border-border">
                 <p className="text-xs text-muted-foreground mb-2">사전점검 입장 QR</p>
                 <canvas ref={inspectionQrRef} className="rounded-lg" />
@@ -282,10 +299,13 @@ const ReservationPage = () => {
             </div>
           ) : (
             <>
-              {renderCalendar(inspectionDate, (d) => {
-                setInspectionDate(d);
-                setInspectionTime(null);
-              })}
+              <CalendarView
+                year={2026}
+                month={3}
+                selectedDate={inspectionDate}
+                onSelect={(d) => { setInspectionDate(d); setInspectionTime(null); }}
+                isDateAvailable={isInspectionDateAvailable}
+              />
 
               {inspectionDate && (
                 <div className="bg-card rounded-xl p-4 border border-border shadow-sm mb-4 animate-fade-in">
@@ -329,7 +349,7 @@ const ReservationPage = () => {
         <>
           <div className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4">
             <p className="text-xs font-bold text-primary">이사 예약 안내</p>
-            <p className="text-xs text-muted-foreground mt-0.5">주말·공휴일 제외 / 동당 1일 4세대 제한</p>
+            <p className="text-xs text-muted-foreground mt-0.5">운영 기간: 2026.05.15 ~ 07.15 / 주말·공휴일 제외 / 동당 1일 4세대 제한</p>
           </div>
 
           {moveInConfirmed ? (
@@ -338,7 +358,7 @@ const ReservationPage = () => {
                 <CheckCircle className="w-5 h-5 text-success" />
                 <p className="text-sm font-bold text-success">이사 예약 완료</p>
               </div>
-              <p className="text-sm text-foreground">2026.04.{String(moveInDate).padStart(2, "0")} {moveInTime}</p>
+              <p className="text-sm text-foreground">{formatDateStr(moveInDate!)} {moveInTime}</p>
               <p className="text-xs text-muted-foreground mt-1">엘리베이터: 1호기 배정 / 주차구역: A-08</p>
               <div className="flex flex-col items-center mt-3 pt-3 border-t border-border">
                 <p className="text-xs text-muted-foreground mb-2">이사 차량 출입 QR</p>
@@ -365,10 +385,27 @@ const ReservationPage = () => {
             </div>
           ) : (
             <>
-              {renderCalendar(moveInDate, (d) => {
-                setMoveInDate(d);
-                setMoveInTime(null);
-              })}
+              <CalendarView
+                year={moveCalMonth.year}
+                month={moveCalMonth.month}
+                selectedDate={moveInDate}
+                onSelect={(d) => { setMoveInDate(d); setMoveInTime(null); }}
+                isDateAvailable={isMoveDateAvailable}
+                canGoPrev={moveCanGoPrev}
+                canGoNext={moveCanGoNext}
+                onPrevMonth={() => {
+                  setMoveCalMonth((prev) => {
+                    const m = prev.month - 1;
+                    return m < 0 ? { year: prev.year - 1, month: 11 } : { year: prev.year, month: m };
+                  });
+                }}
+                onNextMonth={() => {
+                  setMoveCalMonth((prev) => {
+                    const m = prev.month + 1;
+                    return m > 11 ? { year: prev.year + 1, month: 0 } : { year: prev.year, month: m };
+                  });
+                }}
+              />
 
               {moveInDate && (
                 <div className="bg-card rounded-xl p-4 border border-border shadow-sm mb-4 animate-fade-in">
