@@ -56,6 +56,8 @@ const ReservationPage = () => {
   const [moveInTime, setMoveInTime] = useState<string | null>(null);
   const [moveInConfirmed, setMoveInConfirmed] = useState(false);
 
+  const [cancelTarget, setCancelTarget] = useState<"inspection" | "move" | null>(null);
+
   const inspectionQrRef = useRef<HTMLCanvasElement>(null);
   const moveInQrRef = useRef<HTMLCanvasElement>(null);
 
