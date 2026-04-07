@@ -1,0 +1,1 @@
+UPDATE public.residents SET area = '84㎡', complex_name = '스마트 아파트' WHERE id = '540830ea-7412-4046-bffc-532ea6c48dea';
