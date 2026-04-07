@@ -47,6 +47,11 @@ const PaymentPage = () => {
     toast.success("계좌번호가 복사되었습니다");
   };
 
+  const handleRequestConfirmation = (index: number) => {
+    setRequestedItems(prev => new Set(prev).add(index));
+    toast.success("납부 확인을 요청했습니다. 관리자 확인 후 처리됩니다.");
+  };
+
   if (loading) {
     return (
       <MobileLayout title="납부내역">
