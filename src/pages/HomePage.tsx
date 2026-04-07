@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Loader2, WifiOff, Upload } from "lucide-react";
+import { WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
