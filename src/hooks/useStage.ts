@@ -1,55 +1,55 @@
 import { useState, useEffect, useCallback } from "react";
 
-const STAGE_KEY = "movein_stage_flags";
+function calcStage(): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-interface StageFlags {
-  isContractDone: boolean;
-  isInspectionDone: boolean;
-  isMovingReserved: boolean;
-  isPaymentDone: boolean;
-}
-
-const defaultFlags: StageFlags = {
-  isContractDone: true,
-  isInspectionDone: false,
-  isMovingReserved: false,
-  isPaymentDone: false,
-};
-
-function loadFlags(): StageFlags {
+  // Check moving completion
   try {
-    const stored = localStorage.getItem(STAGE_KEY);
-    if (stored) return { ...defaultFlags, ...JSON.parse(stored) };
-  } catch { /* ignore */ }
-  return defaultFlags;
-}
+    const movingRes = localStorage.getItem("movingReservation");
+    if (movingRes) {
+      const moving = JSON.parse(movingRes);
+      if (moving.status === "confirmed") {
+        const movingDate = new Date(moving.date);
+        movingDate.setHours(0, 0, 0, 0);
+        const dayAfterMoving = new Date(movingDate);
+        dayAfterMoving.setDate(movingDate.getDate() + 1);
+        if (today >= dayAfterMoving) return 5;
+        return 4;
+      }
+    }
+  } catch {}
 
-function calcStage(flags: StageFlags): number {
-  if (flags.isPaymentDone) return 5;
-  if (flags.isMovingReserved) return 4;
-  if (flags.isInspectionDone) return 3;
-  if (flags.isContractDone) return 2;
-  return 1;
+  // Check inspection reservation
+  try {
+    const inspRes = localStorage.getItem("inspectionReservation");
+    if (inspRes) {
+      const inspection = JSON.parse(inspRes);
+      if (inspection.status === "confirmed") {
+        const inspDate = new Date(inspection.date);
+        inspDate.setHours(0, 0, 0, 0);
+        const dayAfterInspection = new Date(inspDate);
+        dayAfterInspection.setDate(inspDate.getDate() + 1);
+        if (today >= dayAfterInspection) return 3;
+        return 2;
+      }
+    }
+  } catch {}
+
+  // Contract is done by default
+  return 2;
 }
 
 export const useStage = () => {
-  const [flags, setFlags] = useState<StageFlags>(loadFlags);
-  const stage = calcStage(flags);
+  const [stage, setStage] = useState(calcStage);
 
-  // Listen for changes from other tabs/components
   useEffect(() => {
-    const handler = () => setFlags(loadFlags());
+    const handler = () => setStage(calcStage());
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
   }, []);
 
-  const updateFlag = useCallback((key: keyof StageFlags, value: boolean) => {
-    setFlags((prev) => {
-      const next = { ...prev, [key]: value };
-      localStorage.setItem(STAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }, []);
+  const refresh = useCallback(() => setStage(calcStage()), []);
 
-  return { stage, flags, updateFlag };
+  return { stage, refresh };
 };
