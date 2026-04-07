@@ -33,6 +33,20 @@ const QRPage = () => {
     toast.success("방문 차량 출입 QR이 발급되었습니다");
   };
 
+  // Wake Lock to keep screen on
+  useEffect(() => {
+    let wakeLock: WakeLockSentinel | null = null;
+    const requestWakeLock = async () => {
+      try {
+        if ("wakeLock" in navigator) {
+          wakeLock = await navigator.wakeLock.request("screen");
+        }
+      } catch {}
+    };
+    requestWakeLock();
+    return () => { wakeLock?.release(); };
+  }, []);
+
   return (
     <MobileLayout title="QR 입장코드">
       {/* 상태 배너 */}
@@ -50,6 +64,7 @@ const QRPage = () => {
           <Clock className="w-3.5 h-3.5 text-muted-foreground" />
           <p className="text-xs text-muted-foreground">유효기간: 2026.04.01 ~ 04.05</p>
         </div>
+        <p className="text-[12px] text-muted-foreground mt-2">화면이 자동으로 켜진 상태를 유지합니다</p>
       </div>
 
       {/* 예약 정보 */}

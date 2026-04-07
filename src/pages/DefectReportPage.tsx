@@ -308,11 +308,86 @@ const DefectReportPage = () => {
     setGeneratingPdf(false);
   };
 
+  const saveDraftToStorage = () => {
+    const draft = { selectedMain, selectedMid, selectedSub, notes: "" };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    toast({ title: "임시저장되었습니다." });
+  };
+
+  const restoreDraft = () => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved);
+        if (draft.selectedMain) setSelectedMain(draft.selectedMain);
+        if (draft.selectedMid) setSelectedMid(draft.selectedMid);
+      } catch {}
+    }
+    setDraftBanner(false);
+  };
+
+  const deleteDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    setDraftBanner(false);
+  };
+
+  const handleBackClick = () => {
+    if (hasUnsavedWork) {
+      setPendingNavigation(() => () => navigate(-1));
+      setShowLeaveDialog(true);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleLeaveWithSave = () => {
+    saveDraftToStorage();
+    setShowLeaveDialog(false);
+    pendingNavigation?.();
+    setPendingNavigation(null);
+  };
+
+  const handleLeaveWithoutSave = () => {
+    setShowLeaveDialog(false);
+    pendingNavigation?.();
+    setPendingNavigation(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
+        <header className="sticky top-0 z-40 bg-accent text-accent-foreground flex items-center h-12 px-4">
+          <button onClick={() => navigate(-1)} className="mr-2">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <h1 className="flex-1 text-center text-base font-semibold pr-8">하자 접수</h1>
+        </header>
+        <div className="flex-1 px-4 pt-4 pb-24">
+          <DefectPageSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
+      {/* Leave confirmation dialog */}
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>작성 중인 내용이 있습니다</AlertDialogTitle>
+            <AlertDialogDescription>임시저장 후 나가시겠습니까?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleLeaveWithoutSave}>그냥 나가기</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLeaveWithSave}>임시저장</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Header */}
       <header className="sticky top-0 z-40 bg-accent text-accent-foreground flex items-center h-12 px-4">
-        <button onClick={() => navigate(-1)} className="mr-2">
+        <button onClick={handleBackClick} className="mr-2">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="flex-1 text-center text-base font-semibold pr-8">하자 접수</h1>
@@ -323,7 +398,19 @@ const DefectReportPage = () => {
         )}
       </header>
 
-      <div className="flex-1 px-4 pt-4 pb-24 flex flex-col gap-4 overflow-y-auto">
+      <div className="flex-1 px-4 pt-4 pb-24 flex flex-col gap-4 overflow-y-auto animate-fade-in-content">
+        {/* Draft restore banner */}
+        {draftBanner && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
+            <p className="text-xs font-semibold text-foreground">📝 임시저장된 내용이 있습니다.</p>
+            <div className="flex items-center gap-2">
+              <button onClick={restoreDraft} className="text-xs font-bold text-primary">이어서 작성하기</button>
+              <button onClick={deleteDraft} className="text-xs text-muted-foreground">삭제</button>
+            </div>
+          </div>
+        )}
+
+        {/* Offline drafts banner */}
         {/* Offline drafts banner */}
         {drafts.length > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
