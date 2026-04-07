@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import HomePageSkeleton from "@/components/skeletons/HomePageSkeleton";
 import { WifiOff, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
@@ -68,49 +69,59 @@ const HomePage = () => {
     { label: "입주", status: stage >= 5 ? "completed" : "pending" },
   ];
 
+  if (loadingDefects) {
+    return (
+      <MobileLayout>
+        <HomePageSkeleton />
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout>
-      {/* 배너 - 모든 단계 공통 */}
-      <BannerSection steps={stepsData} readinessPercent={readinessPercent} dday={dday} />
+      <div className="animate-fade-in-content">
+        {/* 배너 - 모든 단계 공통 */}
+        <BannerSection steps={stepsData} readinessPercent={readinessPercent} dday={dday} />
 
-      {/* Offline drafts sync banner */}
-      {drafts.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <WifiOff className="w-4 h-4 text-amber-600" />
-            <div>
-              <p className="text-xs font-bold text-amber-800">📱 임시 저장: {drafts.length}건</p>
-              <p className="text-[10px] text-amber-600">전송 대기 중인 하자 접수가 있습니다</p>
+        {/* Offline drafts sync banner */}
+        {drafts.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <WifiOff className="w-4 h-4 text-amber-600" />
+              <div>
+                <p className="text-xs font-bold text-amber-800">📱 임시 저장: {drafts.length}건</p>
+                <p className="text-[10px] text-amber-600">전송 대기 중인 하자 접수가 있습니다</p>
+              </div>
             </div>
+            <button
+              onClick={syncAll}
+              disabled={syncing}
+              className="flex items-center gap-1 bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-50"
+            >
+              <Upload className="w-3 h-3" />
+              {syncing ? "전송 중..." : "일괄 전송"}
+            </button>
           </div>
-          <button
-            onClick={syncAll}
-            disabled={syncing}
-            className="flex items-center gap-1 bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-50"
-          >
-            <Upload className="w-3 h-3" />
-            {syncing ? "전송 중..." : "일괄 전송"}
-          </button>
-        </div>
-      )}
+        )}
 
-      {/* 2단계: 사전점검 현황 */}
-      {stage === 2 && <InspectionCard />}
+        {/* 2단계: 사전점검 현황 */}
+        {stage === 2 && <InspectionCard />}
 
-      {/* 3단계: 이사예약 현황 */}
-      {stage === 3 && <MovingReservationCard />}
+        {/* 3단계: 이사예약 현황 */}
+        {stage === 3 && <MovingReservationCard />}
 
-      {/* 4단계: 잔금납부 현황 */}
-      {stage === 4 && <PaymentCard />}
+        {/* 4단계: 잔금납부 현황 */}
+        {stage === 4 && <PaymentCard />}
 
-      {/* 2~5단계: 하자 접수 카드 */}
-      {stage >= 2 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
+        {/* 2~5단계: 하자 접수 카드 */}
+        {stage >= 2 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
 
-      {/* 공지사항 - 모든 단계 공통 */}
-      <NoticeSection />
+        {/* 공지사항 - 모든 단계 공통 */}
+        <NoticeSection />
 
-      {/* 단계별 진행 가이드 */}
-      <StageGuide stage={stage} />
+        {/* 단계별 진행 가이드 */}
+        <StageGuide stage={stage} />
+      </div>
     </MobileLayout>
   );
 };
