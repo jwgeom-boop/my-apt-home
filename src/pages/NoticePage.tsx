@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileLayout from "@/components/MobileLayout";
 import { cn } from "@/lib/utils";
 import { notices } from "@/data/notices";
+import NoticePageSkeleton from "@/components/skeletons/NoticePageSkeleton";
 
 type NoticeType = "전체" | "안내문" | "공지" | "동의서";
 
@@ -22,8 +23,14 @@ const cardBorder: Record<string, string> = {
 
 const NoticePage = () => {
   const [active, setActive] = useState<NoticeType>("전체");
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const filtered = active === "전체" ? notices : notices.filter((n) => n.type === active);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleCardClick = (notice: typeof notices[0]) => {
     if (notice.type === "동의서") {
@@ -33,8 +40,17 @@ const NoticePage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <MobileLayout title="공지·안내문">
+        <NoticePageSkeleton />
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout title="공지·안내문">
+      <div className="animate-fade-in-content">
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-4">
         {filters.map((f) => (
@@ -87,6 +103,7 @@ const NoticePage = () => {
             </button>
           ))
         )}
+      </div>
       </div>
     </MobileLayout>
   );

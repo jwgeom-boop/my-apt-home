@@ -1,9 +1,10 @@
 import MobileLayout from "@/components/MobileLayout";
 import { Check, Copy, AlertCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import PaymentPageSkeleton from "@/components/skeletons/PaymentPageSkeleton";
 
 interface PaymentItem {
   label: string;
@@ -27,7 +28,13 @@ const CONTRACT_DEPOSIT = 50000000;
 
 const PaymentPage = () => {
   const [items] = useState<PaymentItem[]>(initialItems);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const total = items.reduce((s, i) => s + i.amount, 0);
   const paidTotal = items.filter(i => i.paid).reduce((s, i) => s + i.amount, 0);
@@ -39,8 +46,17 @@ const PaymentPage = () => {
     toast.success("계좌번호가 복사되었습니다");
   };
 
+  if (loading) {
+    return (
+      <MobileLayout title="납부내역">
+        <PaymentPageSkeleton />
+      </MobileLayout>
+    );
+  }
+
   return (
     <MobileLayout title="납부내역">
+      <div className="animate-fade-in-content">
       {/* 상단 총액 */}
       <div className="bg-accent text-accent-foreground rounded-xl p-4 mb-2 text-center">
         <p className="text-[11px] opacity-80">총 납부 예정액</p>
@@ -106,6 +122,7 @@ const PaymentPage = () => {
         >
           {allPaid ? "입주증 발급" : "전체 납부 완료 시 입주증 발급 가능"}
         </Button>
+      </div>
       </div>
     </MobileLayout>
   );
