@@ -1,8 +1,10 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
 const PaymentPageSkeleton = () => (
   <div className="space-y-2">
-    <div className="skeleton-shimmer w-full h-[90px]" />
+    <Skeleton className="w-full h-[90px] rounded-2xl" />
     {[1, 2, 3, 4].map((i) => (
-      <div key={i} className="skeleton-shimmer w-full h-[70px]" />
+      <Skeleton key={i} className="w-full h-[70px] rounded-xl" />
     ))}
   </div>
 );
