@@ -315,16 +315,24 @@ const ReservationPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">이사 차량 출입 QR</p>
                 <canvas ref={moveInQrRef} className="rounded-lg" />
               </div>
-              <button
-                onClick={() => {
-                  setMoveInConfirmed(false);
-                  setMoveInDate(null);
-                  setMoveInTime(null);
-                }}
-                className="mt-3 text-xs text-primary font-semibold underline"
-              >
-                변경
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setMoveInConfirmed(false);
+                    setMoveInDate(null);
+                    setMoveInTime(null);
+                  }}
+                  className="text-xs text-primary font-semibold underline"
+                >
+                  변경
+                </button>
+                <button
+                  onClick={() => setCancelTarget("move")}
+                  className="text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-1"
+                >
+                  취소
+                </button>
+              </div>
             </div>
           ) : (
             <>
