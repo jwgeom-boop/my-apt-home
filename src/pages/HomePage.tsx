@@ -27,21 +27,8 @@ const HomePage = () => {
   const { drafts, syncAll, syncing } = useOfflineDrafts();
   const { stage } = useStage();
 
-  const getChecklistItems = () => [
-    { id: 1, label: "잔금 납부", done: true, path: "/payment" },
-    { id: 2, label: "사전점검 예약", done: true, path: "/reservation" },
-    { id: 3, label: "QR 입장코드 발급", done: true, path: "/qr" },
-    { id: 4, label: "이사 예약", done: localStorage.getItem("moveInReserved") === "true", path: "/reservation" },
-    { id: 5, label: "동의서 서명", done: localStorage.getItem("consentSigned") === "true", path: "/consent" },
-  ];
-
-  const checklistItems = getChecklistItems();
-  const completedCount = checklistItems.filter((i) => i.done).length;
-  const progressPercent = Math.round((completedCount / checklistItems.length) * 100);
-
   const [defects, setDefects] = useState<DefectRow[]>([]);
   const [loadingDefects, setLoadingDefects] = useState(true);
-  const [showChecklist, setShowChecklist] = useState(false);
 
   useEffect(() => {
     const load = async () => {
