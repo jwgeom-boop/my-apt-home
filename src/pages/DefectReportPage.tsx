@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, Download } from "lucide-react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
