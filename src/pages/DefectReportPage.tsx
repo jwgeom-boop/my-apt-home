@@ -42,6 +42,8 @@ const DefectReportPage = () => {
   const [residentId, setResidentId] = useState<string | null>(null);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("전체");
+  const [listExpanded, setListExpanded] = useState(false);
+  const listSectionRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
