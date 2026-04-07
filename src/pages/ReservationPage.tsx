@@ -6,6 +6,16 @@ import { ChevronLeft, ChevronRight, ClipboardList, Truck, Check, CheckCircle } f
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useStage } from "@/hooks/useStage";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const INSPECTION_AVAILABLE = [1, 2, 4, 5];
 const INSPECTION_CLOSED = [3, 7, 10];
