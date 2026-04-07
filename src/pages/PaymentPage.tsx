@@ -29,6 +29,7 @@ const CONTRACT_DEPOSIT = 50000000;
 const PaymentPage = () => {
   const [items] = useState<PaymentItem[]>(initialItems);
   const [loading, setLoading] = useState(true);
+  const [requestedItems, setRequestedItems] = useState<Set<number>>(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
