@@ -113,6 +113,30 @@ const PaymentPage = () => {
                 >
                   <Copy className="w-3 h-3" />
                 </button>
+               </div>
+            )}
+            {!item.paid && !requestedItems.has(i) && (
+              <div className="flex justify-end mt-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px] font-semibold text-primary border-primary hover:bg-primary/5"
+                  onClick={() => handleRequestConfirmation(i)}
+                >
+                  납부확인 요청
+                </Button>
+              </div>
+            )}
+            {!item.paid && requestedItems.has(i) && (
+              <div className="flex justify-end mt-1.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-[11px] font-semibold text-muted-foreground border-muted"
+                  disabled
+                >
+                  확인 요청됨 ✓
+                </Button>
               </div>
             )}
           </div>
