@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import BottomTabBar from "@/components/BottomTabBar";
+import OfflineScreen from "@/components/OfflineScreen";
+import NetworkStatusBanner from "@/components/NetworkStatusBanner";
 
 interface DefectDetail {
   id: string;
@@ -85,8 +87,15 @@ const DefectDetailPage = () => {
 
   if (!defect) {
     return (
-      <div className="mx-auto max-w-[390px] min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">해당 하자 정보를 찾을 수 없습니다.</p>
+      <div className="mx-auto max-w-[390px] min-h-screen bg-background">
+        <NetworkStatusBanner />
+        {!navigator.onLine ? (
+          <OfflineScreen />
+        ) : (
+          <div className="flex items-center justify-center min-h-screen">
+            <p className="text-muted-foreground text-sm">해당 하자 정보를 찾을 수 없습니다.</p>
+          </div>
+        )}
       </div>
     );
   }
