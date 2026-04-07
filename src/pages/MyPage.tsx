@@ -164,14 +164,13 @@ const MyPage = () => {
 
   return (
     <div className="mx-auto max-w-[390px] min-h-screen bg-background flex flex-col">
-      {/* Profile Header */}
-      <div className="bg-gradient-to-br from-navy via-navy/90 to-primary/80 text-white px-6 pt-14 pb-10 flex flex-col items-center">
-        <p className="text-lg font-bold">{complexName}</p>
-        <p className="text-sm text-white/70 mt-1">{unitNumber}</p>
+      {/* App Bar */}
+      <div className="sticky top-0 z-10 bg-background border-b border-border px-4 py-3">
+        <h1 className="text-base font-bold text-foreground text-center">마이페이지</h1>
       </div>
 
-      {/* Accordion Info Card */}
-      <div className="px-4 -mt-5">
+      {/* Info Card */}
+      <div className="px-4 mt-4">
         <Accordion type="single" collapsible>
           <AccordionItem value="info" className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
             <AccordionTrigger className="px-4 py-3 text-sm font-bold text-foreground hover:no-underline">
