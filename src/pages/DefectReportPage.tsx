@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, Download } from "lucide-react";
+import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,8 @@ const DefectReportPage = () => {
   const [residentId, setResidentId] = useState<string | null>(null);
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("전체");
+  const [listExpanded, setListExpanded] = useState(false);
+  const listSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -381,7 +383,7 @@ const DefectReportPage = () => {
               {STATUS_FILTERS.map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setStatusFilter(filter)}
+                  onClick={() => { setStatusFilter(filter); setListExpanded(false); }}
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
                     statusFilter === filter
@@ -394,36 +396,57 @@ const DefectReportPage = () => {
               ))}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2" ref={listSectionRef}>
               {filteredDefects.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">해당 접수 내역이 없습니다</p>
               ) : (
-                filteredDefects.map((d) => (
-                  <button
-                    key={d.id}
-                    onClick={() => navigate(`/defect/${d.id}`)}
-                    className={cn(
-                      "flex items-center justify-between p-2.5 rounded-lg border text-xs w-full text-left",
-                      d.isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
-                    )}
-                  >
-                    <div>
-                      <span className="font-bold text-foreground">{d.location}</span>
-                      <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-muted-foreground">{d.status}</span>
-                      <span className={cn(
-                        "font-bold text-[10px] px-2 py-0.5 rounded-full",
-                        d.status === "임시저장" ? "bg-amber-100 text-amber-700" :
-                        d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
-                      )}>
-                        {d.status === "임시저장" ? "📱 임시저장" : d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
-                      </span>
-                      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-                    </div>
-                  </button>
-                ))
+                <>
+                  {(listExpanded ? filteredDefects : filteredDefects.slice(0, 3)).map((d) => (
+                    <button
+                      key={d.id}
+                      onClick={() => navigate(`/defect/${d.id}`)}
+                      className={cn(
+                        "flex items-center justify-between p-2.5 rounded-lg border text-xs w-full text-left",
+                        d.isUrgent ? "bg-destructive/5 border-destructive/20" : "bg-primary/5 border-primary/20"
+                      )}
+                    >
+                      <div>
+                        <span className="font-bold text-foreground">{d.location}</span>
+                        <span className="text-muted-foreground ml-2">📷 {d.photoCount}장</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-muted-foreground">{d.status}</span>
+                        <span className={cn(
+                          "font-bold text-[10px] px-2 py-0.5 rounded-full",
+                          d.status === "임시저장" ? "bg-amber-100 text-amber-700" :
+                          d.isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
+                        )}>
+                          {d.status === "임시저장" ? "📱 임시저장" : d.isUrgent ? "🚨 긴급" : "접수됨 ✓"}
+                        </span>
+                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                      </div>
+                    </button>
+                  ))}
+                  {filteredDefects.length > 3 && (
+                    <button
+                      onClick={() => {
+                        if (listExpanded) {
+                          setListExpanded(false);
+                          listSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        } else {
+                          setListExpanded(true);
+                        }
+                      }}
+                      className="w-full flex items-center justify-center gap-1 py-2.5 mt-1 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+                    >
+                      {listExpanded ? (
+                        <>접기 <ChevronUp className="w-4 h-4" /></>
+                      ) : (
+                        <>펼쳐보기 (총 {filteredDefects.length}개) <ChevronDown className="w-4 h-4" /></>
+                      )}
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
