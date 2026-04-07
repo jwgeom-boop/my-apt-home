@@ -261,22 +261,22 @@ const ReservationPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">사전점검 입장 QR</p>
                 <canvas ref={inspectionQrRef} className="rounded-lg" />
               </div>
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => {
                     setInspectionConfirmed(false);
                     setInspectionDate(null);
                     setInspectionTime(null);
                   }}
-                  className="text-xs text-primary font-semibold underline"
+                  className="flex-1 text-xs font-semibold border border-border text-foreground rounded-lg px-3 py-2"
                 >
-                  변경
+                  예약 변경
                 </button>
                 <button
                   onClick={() => setCancelTarget("inspection")}
-                  className="text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-1"
+                  className="flex-1 text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-2"
                 >
-                  취소
+                  예약 취소
                 </button>
               </div>
             </div>
@@ -344,22 +344,22 @@ const ReservationPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">이사 차량 출입 QR</p>
                 <canvas ref={moveInQrRef} className="rounded-lg" />
               </div>
-              <div className="mt-3 flex items-center gap-3">
+              <div className="mt-3 flex items-center gap-2">
                 <button
                   onClick={() => {
                     setMoveInConfirmed(false);
                     setMoveInDate(null);
                     setMoveInTime(null);
                   }}
-                  className="text-xs text-primary font-semibold underline"
+                  className="flex-1 text-xs font-semibold border border-border text-foreground rounded-lg px-3 py-2"
                 >
-                  변경
+                  예약 변경
                 </button>
                 <button
                   onClick={() => setCancelTarget("move")}
-                  className="text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-1"
+                  className="flex-1 text-xs font-semibold border border-destructive text-destructive rounded-lg px-3 py-2"
                 >
-                  취소
+                  예약 취소
                 </button>
               </div>
             </div>
@@ -415,11 +415,15 @@ const ReservationPage = () => {
       <AlertDialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
         <AlertDialogContent className="rounded-xl max-w-[320px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>예약을 취소하시겠습니까?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle>
               {cancelTarget === "inspection"
-                ? "취소 후 재예약이 어려울 수 있습니다."
-                : "취소 후 원하는 날짜 예약이 어려울 수 있습니다."}
+                ? "사전점검 예약을 취소하시겠습니까?"
+                : "이사 예약을 취소하시겠습니까?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-line">
+              {cancelTarget === "inspection"
+                ? "취소 후 재예약이 가능합니다.\n단, 마감된 날짜는 선택할 수 없습니다."
+                : "취소 후 재예약이 가능합니다.\n동당 예약 인원이 제한되어 있어\n원하는 날짜를 선택하지 못할 수 있습니다."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row gap-2">
