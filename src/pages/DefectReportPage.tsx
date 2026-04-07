@@ -102,6 +102,7 @@ const DefectReportPage = () => {
           );
         }
       }
+      setLoading(false);
     };
     loadData();
   }, []);
