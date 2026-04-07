@@ -213,7 +213,7 @@ const ReservationPage = () => {
       waitingNumber: 3,
       status: "confirmed",
     }));
-    updateFlag("isInspectionDone", true);
+    
     setTimeout(() => navigate("/"), 2000);
   };
 
@@ -229,7 +229,7 @@ const ReservationPage = () => {
       status: "confirmed",
     }));
     localStorage.setItem("moveInReserved", "true");
-    updateFlag("isMovingReserved", true);
+    
     setTimeout(() => navigate("/"), 2000);
   };
 
@@ -239,14 +239,14 @@ const ReservationPage = () => {
       setInspectionDate(null);
       setInspectionTime(null);
       localStorage.removeItem("inspectionReservation");
-      updateFlag("isInspectionDone", false);
+      
     } else if (cancelTarget === "move") {
       setMoveInConfirmed(false);
       setMoveInDate(null);
       setMoveInTime(null);
       localStorage.removeItem("movingReservation");
       localStorage.removeItem("moveInReserved");
-      updateFlag("isMovingReserved", false);
+      
     }
     setCancelTarget(null);
     toast.success("예약이 취소되었습니다.");
