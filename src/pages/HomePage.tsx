@@ -13,6 +13,7 @@ import InspectionCard from "@/components/home/InspectionCard";
 import MovingReservationCard from "@/components/home/MovingReservationCard";
 import PaymentCard from "@/components/home/PaymentCard";
 import DefectCard from "@/components/home/DefectCard";
+import StageGuide from "@/components/home/StageGuide";
 
 interface DefectRow {
   receipt_no: string;
