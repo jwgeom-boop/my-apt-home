@@ -116,50 +116,54 @@ const StageGuide = ({ stage }: StageGuideProps) => {
         </div>
       </button>
 
-      <Accordion type="multiple" className="px-4 pb-2">
-        {guideData.items.map((item, idx) => {
-          const key = `${stage}-${idx}`;
-          const isChecked = !!checked[key];
+      <div className={`grid transition-all duration-300 ease-in-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="overflow-hidden">
+          <Accordion type="multiple" className="px-4 pb-2">
+            {guideData.items.map((item, idx) => {
+              const key = `${stage}-${idx}`;
+              const isChecked = !!checked[key];
 
-          return (
-            <AccordionItem key={key} value={key} className="border-b border-border last:border-b-0">
-              <AccordionTrigger className="py-3 hover:no-underline">
-                <div className="flex items-center gap-3 text-left">
-                  <Checkbox
-                    checked={isChecked}
-                    onCheckedChange={() => toggleCheck(key)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="shrink-0 rounded-full h-5 w-5"
-                  />
-                  <span className="text-base shrink-0">{item.icon}</span>
-                  <span className={`text-sm font-medium ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>
-                    {String(idx + 1).padStart(2, "0")}. {item.title}
-                  </span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="pl-14 space-y-2">
-                  <p className="text-xs text-muted-foreground whitespace-pre-line">{item.desc}</p>
-                  {item.link && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-sm text-primary border-primary rounded-lg h-8 px-3"
-                      onClick={() => navigate(item.link!.path)}
-                    >
-                      {item.link.label}
-                    </Button>
-                  )}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          );
-        })}
-      </Accordion>
+              return (
+                <AccordionItem key={key} value={key} className="border-b border-border last:border-b-0">
+                  <AccordionTrigger className="py-3 hover:no-underline">
+                    <div className="flex items-center gap-3 text-left">
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => toggleCheck(key)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="shrink-0 rounded-full h-5 w-5"
+                      />
+                      <span className="text-base shrink-0">{item.icon}</span>
+                      <span className={`text-sm font-medium ${isChecked ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                        {String(idx + 1).padStart(2, "0")}. {item.title}
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="pl-14 space-y-2">
+                      <p className="text-xs text-muted-foreground whitespace-pre-line">{item.desc}</p>
+                      {item.link && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-sm text-primary border-primary rounded-lg h-8 px-3"
+                          onClick={() => navigate(item.link!.path)}
+                        >
+                          {item.link.label}
+                        </Button>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
 
-      <div className="px-4 pb-4">
-        <div className="bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
-          <p className="text-xs text-muted-foreground">💡 문의: 입주지원센터 1588-0000 (평일 09~18시)</p>
+          <div className="px-4 pb-4">
+            <div className="bg-primary/5 border border-primary/10 rounded-lg px-3 py-2">
+              <p className="text-xs text-muted-foreground">💡 문의: 입주지원센터 1588-0000 (평일 09~18시)</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
