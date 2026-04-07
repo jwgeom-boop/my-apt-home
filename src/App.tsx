@@ -24,6 +24,7 @@ import InteriorPage from "./pages/InteriorPage";
 import MovingPage from "./pages/MovingPage";
 import FaqPage from "./pages/FaqPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -53,7 +54,7 @@ const App = () => (
           <Route path="/moving" element={<ProtectedRoute><MovingPage /></ProtectedRoute>} />
           <Route path="/faq" element={<ProtectedRoute><FaqPage /></ProtectedRoute>} />
           <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
-          <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
