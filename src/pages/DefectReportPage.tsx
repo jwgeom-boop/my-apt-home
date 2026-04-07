@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, ChevronDown, ChevronUp, Download } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Home, AlertTriangle, WifiOff, Upload, ChevronRight, ChevronDown, ChevronUp, Download, X } from "lucide-react";
+import { useNavigate, useBlocker } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,17 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 import { generateDefectListPdf } from "@/utils/defectPdf";
+import DefectPageSkeleton from "@/components/skeletons/DefectPageSkeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SubmittedDefect {
   id: string;
@@ -44,6 +55,23 @@ const DefectReportPage = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("전체");
   const [listExpanded, setListExpanded] = useState(false);
   const listSectionRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
+  const [draftBanner, setDraftBanner] = useState(false);
+
+  const DRAFT_KEY = "defect_draft";
+
+  // Check if user has unsaved work
+  const hasUnsavedWork = selectedMain !== "" || issueGuides.size > 0;
+
+  // Load saved draft on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(DRAFT_KEY);
+    if (saved) {
+      setDraftBanner(true);
+    }
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
