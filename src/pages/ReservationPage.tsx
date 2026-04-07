@@ -90,62 +90,91 @@ const ReservationPage = () => {
   const renderCalendar = (
     selectedDate: number | null,
     onSelect: (d: number) => void
-  ) => (
-    <>
-      <div className="bg-accent text-accent-foreground rounded-xl p-3 flex items-center justify-between mb-4">
-        <ChevronLeft className="w-5 h-5" />
-        <span className="text-sm font-semibold">2026년 4월</span>
-        <ChevronRight className="w-5 h-5" />
-      </div>
-      <div className="bg-card rounded-xl p-4 border border-border shadow-sm mb-4">
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
-          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <span key={d} className={d === "일" ? "text-destructive" : d === "토" ? "text-primary" : ""}>{d}</span>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 gap-1">
-          {blanks.map((b) => <div key={`b-${b}`} />)}
-          {days.map((day) => {
-            const dow = (firstDayOfWeek + day - 1) % 7;
-            const isWeekend = WEEKEND_DAYS.includes(day);
-            const isClosed = closedDates.includes(day);
-            const isAvailable = availableDates.includes(day);
-            const isSelected = day === selectedDate;
-            const isPast = day < TODAY_DAY;
-            const isToday = day === TODAY_DAY;
-            const isDisabled = isClosed || isWeekend || isPast || !isAvailable;
+  ) => {
+    const getSundayOrSaturday = (day: number) => {
+      const dow = (firstDayOfWeek + day - 1) % 7;
+      if (dow === 0) return "sunday";
+      if (dow === 6) return "saturday";
+      return null;
+    };
 
-            return (
-              <button
-                key={day}
-                disabled={isDisabled}
-                onClick={() => !isDisabled && onSelect(day)}
-                className={cn(
-                  "w-9 h-9 mx-auto rounded-full text-xs font-medium flex items-center justify-center transition-colors relative",
-                  isSelected && "bg-accent text-accent-foreground ring-2 ring-primary",
-                  isToday && !isSelected && "ring-2 ring-primary",
-                  !isSelected && isAvailable && !isDisabled && "border border-success text-success",
-                  isClosed && !isSelected && "text-destructive line-through",
-                  isWeekend && !isClosed && !isSelected && "text-destructive/50",
-                  isPast && !isSelected && "text-muted-foreground/40",
-                  isDisabled && "cursor-not-allowed opacity-60",
-                  !isSelected && !isAvailable && !isClosed && !isWeekend && !isPast && "text-muted-foreground"
-                )}
-              >
-                {day}
-              </button>
-            );
-          })}
+    return (
+      <>
+        <div className="bg-accent text-accent-foreground rounded-xl p-3 flex items-center justify-between mb-4">
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-semibold">2026년 4월</span>
+          <ChevronRight className="w-5 h-5" />
         </div>
-        <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground justify-center flex-wrap">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full border border-success" /> 예약가능</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-destructive" /> 마감</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent ring-1 ring-primary" /> 선택</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-muted-foreground/30" /> 불가</span>
+        <div className="bg-card rounded-xl p-4 border border-border shadow-sm mb-4">
+          <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground mb-2">
+            {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
+              <span key={d} className={d === "일" ? "text-destructive" : d === "토" ? "text-primary" : ""}>{d}</span>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {blanks.map((b) => <div key={`b-${b}`} />)}
+            {days.map((day) => {
+              const weekendType = getSundayOrSaturday(day);
+              const isClosed = closedDates.includes(day);
+              const isAvailable = availableDates.includes(day);
+              const isSelected = day === selectedDate;
+              const isPast = day < TODAY_DAY;
+              const isToday = day === TODAY_DAY;
+              const isDisabled = isClosed || !!weekendType || isPast || !isAvailable;
+
+              // Determine styles
+              let bgClass = "bg-background"; // 선택 가능 (white)
+              let textClass = "text-foreground"; // black text
+
+              if (isSelected) {
+                bgClass = "bg-navy";
+                textClass = "text-white";
+              } else if (isClosed) {
+                bgClass = "bg-destructive/10";
+                textClass = "text-muted-foreground line-through";
+              } else if (isPast || (!isAvailable && !weekendType)) {
+                bgClass = "bg-muted";
+                textClass = "text-muted-foreground/40";
+              } else if (weekendType === "sunday") {
+                textClass = "text-destructive";
+              } else if (weekendType === "saturday") {
+                textClass = "text-primary";
+              }
+
+              return (
+                <button
+                  key={day}
+                  disabled={isDisabled}
+                  onClick={() => !isDisabled && onSelect(day)}
+                  className={cn(
+                    "w-9 h-9 mx-auto rounded-full text-xs font-medium flex flex-col items-center justify-center transition-colors relative",
+                    bgClass,
+                    textClass,
+                    isDisabled && !isClosed && "cursor-not-allowed opacity-60",
+                    isClosed && "cursor-not-allowed",
+                    !isDisabled && !isSelected && "hover:bg-muted/60"
+                  )}
+                >
+                  {day}
+                  {isToday && !isSelected && (
+                    <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-primary" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {/* Legend */}
+          <div className="flex items-center gap-3 mt-3 text-[10px] text-muted-foreground justify-center flex-wrap">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-background border border-border" /> 선택가능</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-navy" /> 선택됨</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-destructive/20" /> 마감</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-muted" /> 불가</span>
+            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> 오늘</span>
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  };
 
   const handleInspectionConfirm = () => {
     if (!inspectionDate || !inspectionTime) return;
