@@ -86,7 +86,8 @@ const NoticePage = () => {
               onClick={() => handleCardClick(n)}
               className={cn(
                 "w-full text-left bg-card rounded-xl p-4 border shadow-sm relative",
-                cardBorder[n.type]
+                cardBorder[n.type],
+                !n.unread && "opacity-60"
               )}
             >
               <div className="flex items-center justify-between mb-2">
@@ -98,7 +99,7 @@ const NoticePage = () => {
                   {n.unread && <span className="w-2.5 h-2.5 rounded-full bg-destructive" />}
                 </div>
               </div>
-              <h4 className="text-sm font-semibold text-foreground">{n.title}</h4>
+              <h4 className={cn("text-sm font-semibold", n.unread ? "text-foreground" : "text-muted-foreground")}>{n.title}</h4>
               <p className="text-xs text-muted-foreground mt-1">{n.desc}</p>
             </button>
           ))
