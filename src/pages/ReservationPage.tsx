@@ -149,15 +149,29 @@ const ReservationPage = () => {
   const { updateFlag } = useStage();
   const [activeTab, setActiveTab] = useState<"inspection" | "move">("inspection");
 
+  // Restore from localStorage
+  const savedInspection = (() => {
+    try { const r = localStorage.getItem("inspectionReservation"); return r ? JSON.parse(r) : null; } catch { return null; }
+  })();
+  const savedMoving = (() => {
+    try { const r = localStorage.getItem("movingReservation"); return r ? JSON.parse(r) : null; } catch { return null; }
+  })();
+
   // 사전점검
-  const [inspectionDate, setInspectionDate] = useState<Date | null>(null);
-  const [inspectionTime, setInspectionTime] = useState<string | null>(null);
-  const [inspectionConfirmed, setInspectionConfirmed] = useState(false);
+  const [inspectionDate, setInspectionDate] = useState<Date | null>(() => {
+    if (savedInspection?.date) { const [y, m, d] = savedInspection.date.split(".").map(Number); return new Date(y, m - 1, d); }
+    return null;
+  });
+  const [inspectionTime, setInspectionTime] = useState<string | null>(savedInspection?.time ?? null);
+  const [inspectionConfirmed, setInspectionConfirmed] = useState(savedInspection?.status === "confirmed");
 
   // 이사
-  const [moveInDate, setMoveInDate] = useState<Date | null>(null);
-  const [moveInTime, setMoveInTime] = useState<string | null>(null);
-  const [moveInConfirmed, setMoveInConfirmed] = useState(false);
+  const [moveInDate, setMoveInDate] = useState<Date | null>(() => {
+    if (savedMoving?.date) { const [y, m, d] = savedMoving.date.split(".").map(Number); return new Date(y, m - 1, d); }
+    return null;
+  });
+  const [moveInTime, setMoveInTime] = useState<string | null>(savedMoving?.time ?? null);
+  const [moveInConfirmed, setMoveInConfirmed] = useState(savedMoving?.status === "confirmed");
   const [moveCalMonth, setMoveCalMonth] = useState<{ year: number; month: number }>({ year: 2026, month: 4 }); // May
 
   const [cancelTarget, setCancelTarget] = useState<"inspection" | "move" | null>(null);
