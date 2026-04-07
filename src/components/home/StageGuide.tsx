@@ -99,17 +99,22 @@ const StageGuide = ({ stage }: StageGuideProps) => {
   };
 
   const checkedCount = guideData.items.filter((_, i) => checked[`${stage}-${i}`]).length;
+  const [open, setOpen] = useState(false);
 
   return (
     <div className="bg-card rounded-xl shadow-sm border border-border mt-4">
-      <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-foreground">{guideData.sectionTitle}</h3>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full px-4 pt-4 pb-3 flex items-center justify-between"
+      >
+        <h3 className="text-sm font-bold text-foreground">{guideData.sectionTitle}</h3>
+        <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             {checkedCount}/{guideData.items.length} 완료
           </span>
+          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
         </div>
-      </div>
+      </button>
 
       <Accordion type="multiple" className="px-4 pb-2">
         {guideData.items.map((item, idx) => {
