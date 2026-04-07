@@ -383,7 +383,7 @@ const DefectReportPage = () => {
               {STATUS_FILTERS.map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setStatusFilter(filter)}
+                  onClick={() => { setStatusFilter(filter); setListExpanded(false); }}
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors",
                     statusFilter === filter
