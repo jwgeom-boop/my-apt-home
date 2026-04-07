@@ -164,6 +164,23 @@ const ReservationPage = () => {
     setTimeout(() => navigate("/"), 2000);
   };
 
+  const handleCancel = () => {
+    if (cancelTarget === "inspection") {
+      setInspectionConfirmed(false);
+      setInspectionDate(null);
+      setInspectionTime(null);
+      updateFlag("isInspectionDone", false);
+    } else if (cancelTarget === "move") {
+      setMoveInConfirmed(false);
+      setMoveInDate(null);
+      setMoveInTime(null);
+      localStorage.removeItem("moveInReserved");
+      updateFlag("isMovingReserved", false);
+    }
+    setCancelTarget(null);
+    toast.success("예약이 취소되었습니다.");
+  };
+
   return (
     <MobileLayout title="예약">
       {/* Tab Switcher */}
