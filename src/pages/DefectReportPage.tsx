@@ -292,7 +292,6 @@ const DefectReportPage = () => {
         setTimeout(() => navigate("/"), 1500);
       }
     }
-    }
 
     setCurrentSubCategory(null);
     setSelectedSub("");
