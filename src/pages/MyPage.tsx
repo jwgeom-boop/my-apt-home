@@ -91,9 +91,12 @@ const MyPage = () => {
     };
 
     if (residentId) {
+      const dbField = dbFieldMap[key];
+      const updateObj: Record<string, boolean> = {};
+      updateObj[dbField] = newValue;
       const { error } = await supabase
         .from("notification_settings")
-        .update({ [dbFieldMap[key]]: newValue })
+        .update(updateObj as any)
         .eq("resident_id", residentId);
 
       if (error) {
