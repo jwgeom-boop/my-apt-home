@@ -137,6 +137,7 @@ const MyPage = () => {
       items: [
         { icon: FileText, label: "공지·안내문", desc: "공지·안내문·동의서 모아보기", action: () => navigate("/notice") },
         { icon: Award, label: "입주증", desc: "디지털 입주증 확인 및 저장", action: () => navigate("/certificate") },
+        { icon: MessageCircle, label: "커뮤니티 게시판", desc: "입주민 소통 공간", action: () => navigate("/community") },
         { icon: HelpCircle, label: "자주 묻는 질문", desc: "잔금·등기·하자 등 FAQ", action: () => navigate("/faq") },
       ],
     },
