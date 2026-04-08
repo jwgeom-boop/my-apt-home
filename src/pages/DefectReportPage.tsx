@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PhotoItem } from "@/components/defect/PhotoCapture";
 import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 import { generateDefectListPdf } from "@/utils/defectPdf";
+import OfflineDraftVault from "@/components/defect/OfflineDraftVault";
+import NetworkStatusBanner from "@/components/NetworkStatusBanner";
 import DefectPageSkeleton from "@/components/skeletons/DefectPageSkeleton";
 import {
   AlertDialog,
@@ -38,7 +40,7 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 const DefectReportPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { drafts, saveDraft, syncAll, syncing } = useOfflineDrafts();
+  const { drafts, saveDraft, removeDraft, syncAll, syncing } = useOfflineDrafts();
 
   const [selectedMain, setSelectedMain] = useState("");
   const [selectedMid, setSelectedMid] = useState("");
@@ -398,7 +400,17 @@ const DefectReportPage = () => {
         )}
       </header>
 
+      <NetworkStatusBanner />
+
       <div className="flex-1 px-4 pt-4 pb-24 flex flex-col gap-4 overflow-y-auto animate-fade-in-content">
+        {/* Offline vault banner */}
+        <OfflineDraftVault
+          drafts={drafts}
+          syncing={syncing}
+          onSyncAll={syncAll}
+          onRemoveDraft={removeDraft}
+        />
+
         {/* Draft restore banner */}
         {draftBanner && (
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
@@ -410,27 +422,6 @@ const DefectReportPage = () => {
           </div>
         )}
 
-        {/* Offline drafts banner */}
-        {/* Offline drafts banner */}
-        {drafts.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <WifiOff className="w-4 h-4 text-amber-600" />
-              <div>
-                <p className="text-xs font-bold text-amber-800">📱 임시 저장: {drafts.length}건</p>
-                <p className="text-[10px] text-amber-600">네트워크 연결 시 전송해주세요</p>
-              </div>
-            </div>
-            <button
-              onClick={syncAll}
-              disabled={syncing}
-              className="flex items-center gap-1 bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-50"
-            >
-              <Upload className="w-3 h-3" />
-              {syncing ? "전송 중..." : "일괄 전송"}
-            </button>
-          </div>
-        )}
 
         {/* Session count */}
         {submittedDefects.length > 0 && (
