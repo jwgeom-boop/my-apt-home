@@ -25,6 +25,7 @@ import MovingPage from "./pages/MovingPage";
 import FaqPage from "./pages/FaqPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import CommunityPage from "./pages/CommunityPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/faq" element={<ProtectedRoute><FaqPage /></ProtectedRoute>} />
           <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+          <Route path="/community" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

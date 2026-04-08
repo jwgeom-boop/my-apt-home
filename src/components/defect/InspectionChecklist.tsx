@@ -5,6 +5,7 @@ import { AlertTriangle, Camera, MapPin, Search, X } from "lucide-react";
 import type { PhotoItem } from "./PhotoCapture";
 import PhotoMarkingCanvas from "./PhotoMarkingCanvas";
 import NormalConstructionFAQ from "./NormalConstructionFAQ";
+import VoiceMemoButton from "./VoiceMemoButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +42,7 @@ const InspectionChecklist = ({
   const [retakeTarget, setRetakeTarget] = useState<{ guide: string; photoId: string; type: "far" | "close" } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ guide: string; photoId: string } | null>(null);
   const retakeInputRef = useRef<HTMLInputElement | null>(null);
+  const [voiceMemos, setVoiceMemos] = useState<Record<string, string>>({});
 
   const handleRetakeFile = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,6 +248,25 @@ const InspectionChecklist = ({
                       })}
                     </div>
                   )}
+
+                  {/* Voice memo */}
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="text"
+                      value={voiceMemos[guide] || ""}
+                      onChange={(e) => setVoiceMemos((prev) => ({ ...prev, [guide]: e.target.value }))}
+                      placeholder="메모 입력 (음성 가능)"
+                      className="flex-1 text-xs px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground"
+                    />
+                    <VoiceMemoButton
+                      onTranscript={(text) =>
+                        setVoiceMemos((prev) => ({
+                          ...prev,
+                          [guide]: (prev[guide] || "") + (prev[guide] ? " " : "") + text,
+                        }))
+                      }
+                    />
+                  </div>
 
                   <p className="text-[10px] text-muted-foreground text-center">
                     📌 사진을 탭하면 마킹, 📷 재촬영, 🗑️ 삭제 가능

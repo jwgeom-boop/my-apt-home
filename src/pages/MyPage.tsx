@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ChevronRight, Phone, MessageSquare, Loader2, Bell, BellRing, FileText, Award, HelpCircle, Settings, UserCog, LogOut } from "lucide-react";
+import { User, ChevronRight, Phone, MessageSquare, MessageCircle, Loader2, Bell, BellRing, FileText, Award, HelpCircle, Settings, UserCog, LogOut } from "lucide-react";
 import BottomTabBar from "@/components/BottomTabBar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -91,9 +91,12 @@ const MyPage = () => {
     };
 
     if (residentId) {
+      const dbField = dbFieldMap[key];
+      const updateObj: Record<string, boolean> = {};
+      updateObj[dbField] = newValue;
       const { error } = await supabase
         .from("notification_settings")
-        .update({ [dbFieldMap[key]]: newValue })
+        .update(updateObj as any)
         .eq("resident_id", residentId);
 
       if (error) {
@@ -134,6 +137,7 @@ const MyPage = () => {
       items: [
         { icon: FileText, label: "공지·안내문", desc: "공지·안내문·동의서 모아보기", action: () => navigate("/notice") },
         { icon: Award, label: "입주증", desc: "디지털 입주증 확인 및 저장", action: () => navigate("/certificate") },
+        { icon: MessageCircle, label: "커뮤니티 게시판", desc: "입주민 소통 공간", action: () => navigate("/community") },
         { icon: HelpCircle, label: "자주 묻는 질문", desc: "잔금·등기·하자 등 FAQ", action: () => navigate("/faq") },
       ],
     },
