@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ChevronRight, Phone, MessageSquare, Loader2, Bell, BellRing, FileText, Award, HelpCircle, Settings, UserCog, LogOut } from "lucide-react";
+import { User, ChevronRight, Phone, MessageSquare, MessageCircle, Loader2, Bell, BellRing, FileText, Award, HelpCircle, Settings, UserCog, LogOut } from "lucide-react";
 import BottomTabBar from "@/components/BottomTabBar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
