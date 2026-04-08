@@ -248,10 +248,8 @@ const DefectReportPage = () => {
     setSubmitting(true);
     const { receiptNo, totalPhotos, guideItemsArr, insertData } = buildInsertData();
 
-    const { error } = await supabase.from("defects").insert(insertData);
-    setSubmitting(false);
-
-    if (error) {
+    // Offline: save to vault instead of server
+    if (!navigator.onLine) {
       saveDraft(insertData);
       const defect: SubmittedDefect = {
         id: receiptNo,
@@ -262,20 +260,38 @@ const DefectReportPage = () => {
         status: "임시저장",
       };
       setSubmittedDefects((prev) => [defect, ...prev]);
-    } else {
-      const defect: SubmittedDefect = {
-        id: receiptNo,
-        location: locationField,
-        guide: guideItemsArr.join(", "),
-        isUrgent,
-        photoCount: totalPhotos,
-        status: "미배정",
-      };
-      setSubmittedDefects((prev) => [defect, ...prev]);
-      toast({
-        title: "✅ 하자 접수가 완료되었습니다.",
-      });
+      setSubmitting(false);
+      toast({ title: "📦 보관함에 저장되었습니다.", description: "온라인 연결 후 전송해주세요." });
       setTimeout(() => navigate("/"), 1500);
+    } else {
+      const { error } = await supabase.from("defects").insert(insertData);
+      setSubmitting(false);
+
+      if (error) {
+        saveDraft(insertData);
+        const defect: SubmittedDefect = {
+          id: receiptNo,
+          location: locationField,
+          guide: guideItemsArr.join(", "),
+          isUrgent,
+          photoCount: totalPhotos,
+          status: "임시저장",
+        };
+        setSubmittedDefects((prev) => [defect, ...prev]);
+      } else {
+        const defect: SubmittedDefect = {
+          id: receiptNo,
+          location: locationField,
+          guide: guideItemsArr.join(", "),
+          isUrgent,
+          photoCount: totalPhotos,
+          status: "미배정",
+        };
+        setSubmittedDefects((prev) => [defect, ...prev]);
+        toast({ title: "✅ 하자 접수가 완료되었습니다." });
+        setTimeout(() => navigate("/"), 1500);
+      }
+    }
     }
 
     setCurrentSubCategory(null);

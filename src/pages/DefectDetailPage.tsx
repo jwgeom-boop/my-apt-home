@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomTabBar from "@/components/BottomTabBar";
 import OfflineScreen from "@/components/OfflineScreen";
 import NetworkStatusBanner from "@/components/NetworkStatusBanner";
+import SatisfactionRating from "@/components/defect/SatisfactionRating";
 
 interface DefectDetail {
   id: string;
