@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import BottomTabBar from "@/components/BottomTabBar";
 import OfflineScreen from "@/components/OfflineScreen";
 import NetworkStatusBanner from "@/components/NetworkStatusBanner";
+import SatisfactionRating from "@/components/defect/SatisfactionRating";
 
 interface DefectDetail {
   id: string;
@@ -238,7 +239,12 @@ const DefectDetailPage = () => {
           )}
         </div>
 
-        {/* Section 5 — 완료 확인 버튼 */}
+        {/* Section 5 — 만족도 평가 (처리 완료 시) */}
+        {isComplete && (
+          <SatisfactionRating defectId={defect.receiptNo} />
+        )}
+
+        {/* Section 6 — 완료 확인 버튼 */}
         {isComplete && (
           <div className="mx-4 mt-3">
             <button
