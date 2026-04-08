@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, MessageCircle, Plus, Send, ChevronLeft, Image, X } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Plus, Send, ChevronLeft, Image, X, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import BottomTabBar from "@/components/BottomTabBar";
 import { dummyPosts, type CommunityPost, type CommunityComment } from "@/data/communityData";
 
@@ -24,6 +34,8 @@ const CommunityPage = () => {
   const [posts, setPosts] = useState<CommunityPost[]>(dummyPosts);
   const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
   const [showWrite, setShowWrite] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [fullscreenPhoto, setFullscreenPhoto] = useState<string | null>(null);
 
   // Write form
   const [writeTitle, setWriteTitle] = useState("");
@@ -50,11 +62,20 @@ const CommunityPage = () => {
     }
   };
 
+  const handleDeletePost = () => {
+    if (!selectedPost) return;
+    setPosts((prev) => prev.filter((p) => p.id !== selectedPost.id));
+    setSelectedPost(null);
+    setShowDeleteConfirm(false);
+    toast.success("게시글이 삭제되었습니다.");
+  };
+
   const handleAddComment = () => {
     if (!commentText.trim() || !selectedPost) return;
+    const post = posts.find((p) => p.id === selectedPost.id);
     const newComment: CommunityComment = {
       id: `c-${Date.now()}`,
-      author: activeTab === "anonymous" ? "익명" : "나",
+      author: post?.board === "anonymous" ? "익명" : "나",
       content: commentText.trim(),
       createdAt: new Date().toISOString().slice(0, 10),
     };
@@ -85,6 +106,7 @@ const CommunityPage = () => {
       comments: [],
       photos: writePhotos,
       likedByMe: false,
+      isMine: true,
     };
     setPosts((prev) => [newPost, ...prev]);
     setShowWrite(false);
@@ -115,6 +137,21 @@ const CommunityPage = () => {
     input.click();
   };
 
+  // Fullscreen photo viewer
+  if (fullscreenPhoto) {
+    return (
+      <div
+        className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center"
+        onClick={() => setFullscreenPhoto(null)}
+      >
+        <button className="absolute top-4 right-4 text-white/80 hover:text-white">
+          <X className="w-7 h-7" />
+        </button>
+        <img src={fullscreenPhoto} alt="" className="max-w-full max-h-[85vh] object-contain rounded-lg" />
+      </div>
+    );
+  }
+
   // Detail view
   if (selectedPost) {
     const post = posts.find((p) => p.id === selectedPost.id) || selectedPost;
@@ -124,11 +161,25 @@ const CommunityPage = () => {
           <button onClick={() => setSelectedPost(null)} className="mr-3">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-base font-semibold flex-1">게시글</h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 text-xs text-accent-foreground/70">
+              <span className="font-medium">{post.author}</span>
+              <span>·</span>
+              <span>{post.createdAt}</span>
+            </div>
+          </div>
+          {post.isMine && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-destructive p-1"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </header>
 
         <div className="flex-1 px-4 pt-4 pb-24 overflow-y-auto">
-          <h2 className="text-base font-bold text-foreground mb-1">{post.title}</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">{post.title}</h2>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
             <span>{post.author}</span>
             <span>·</span>
@@ -140,9 +191,15 @@ const CommunityPage = () => {
           </p>
 
           {post.photos.length > 0 && (
-            <div className="flex gap-2 mb-4 overflow-x-auto">
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
               {post.photos.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-24 h-24 rounded-lg object-cover border border-border" />
+                <button
+                  key={i}
+                  onClick={() => setFullscreenPhoto(url)}
+                  className="shrink-0"
+                >
+                  <img src={url} alt="" className="w-24 h-24 rounded-lg object-cover border border-border" />
+                </button>
               ))}
             </div>
           )}
@@ -157,11 +214,11 @@ const CommunityPage = () => {
             )}
           >
             <Heart className={cn("w-3.5 h-3.5", post.likedByMe && "fill-current")} />
-            좋아요 {post.likes}
+            {post.likedByMe ? "❤️" : "🤍"} {post.likes}
           </button>
 
           <div className="border-t border-border pt-4">
-            <p className="text-xs font-bold text-foreground mb-3">댓글 {post.comments.length}</p>
+            <p className="text-xs font-bold text-foreground mb-3">💬 댓글 {post.comments.length}</p>
             <div className="space-y-3 mb-4">
               {post.comments.map((c) => (
                 <div key={c.id} className="bg-muted/30 rounded-lg p-3">
@@ -193,6 +250,25 @@ const CommunityPage = () => {
             <Send className="w-4 h-4" />
           </Button>
         </div>
+
+        {/* Delete confirmation */}
+        <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <AlertDialogContent className="max-w-[320px] rounded-xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>게시글을 삭제하시겠습니까?</AlertDialogTitle>
+              <AlertDialogDescription>삭제된 글은 복구할 수 없습니다.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>취소</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeletePost}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                삭제
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
@@ -237,20 +313,29 @@ const CommunityPage = () => {
             <button
               key={post.id}
               onClick={() => setSelectedPost(post)}
-              className="w-full text-left bg-card border border-border rounded-xl p-3.5 hover:bg-muted/30 transition-colors"
+              className="w-full text-left bg-card border border-border rounded-xl p-3.5 hover:bg-muted/30 transition-colors flex gap-3"
             >
-              <p className="text-sm font-semibold text-foreground line-clamp-2 mb-1">{post.title}</p>
-              <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{post.content}</p>
-              <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                <span>{post.author}</span>
-                <span>{post.createdAt}</span>
-                <span className="flex items-center gap-0.5">
-                  <Heart className="w-3 h-3" /> {post.likes}
-                </span>
-                <span className="flex items-center gap-0.5">
-                  <MessageCircle className="w-3 h-3" /> {post.comments.length}
-                </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground line-clamp-2 mb-1">{post.title}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{post.content}</p>
+                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                  <span>{post.author}</span>
+                  <span>{post.createdAt}</span>
+                  <span className="flex items-center gap-0.5">
+                    🤍 {post.likes}
+                  </span>
+                  <span className="flex items-center gap-0.5">
+                    💬 {post.comments.length}
+                  </span>
+                </div>
               </div>
+              {post.photos.length > 0 && (
+                <img
+                  src={post.photos[0]}
+                  alt=""
+                  className="w-14 h-14 rounded-lg object-cover border border-border shrink-0"
+                />
+              )}
             </button>
           ))
         )}
@@ -261,18 +346,20 @@ const CommunityPage = () => {
         onClick={() => setShowWrite(true)}
         className="fixed bottom-20 right-[calc(50%-195px+16px)] w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center active:scale-95 transition-transform z-40"
       >
-        <Plus className="w-6 h-6" />
+        <span className="text-lg">✏️</span>
       </button>
 
       {/* Write dialog */}
       <Dialog open={showWrite} onOpenChange={setShowWrite}>
-        <DialogContent className="max-w-[360px] rounded-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[360px] rounded-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-base">
               {activeTab === "free" ? "자유게시판" : "익명게시판"} 글쓰기
             </DialogTitle>
             <DialogDescription className="text-xs">
-              {activeTab === "anonymous" && "작성자명은 '익명'으로 표시됩니다."}
+              {activeTab === "anonymous"
+                ? "작성자명은 '익명'으로 표시됩니다."
+                : "게시글을 작성해주세요."}
             </DialogDescription>
           </DialogHeader>
 
@@ -287,14 +374,14 @@ const CommunityPage = () => {
               value={writeContent}
               onChange={(e) => setWriteContent(e.target.value)}
               placeholder="내용을 입력하세요"
-              className="text-sm min-h-[120px] resize-none"
+              className="text-sm min-h-[200px] resize-none"
             />
 
             {/* Photo attach */}
             <div className="flex items-center gap-2">
               <button
                 onClick={handlePhotoAdd}
-                className="flex items-center gap-1.5 text-xs text-primary font-semibold px-3 py-1.5 rounded-lg border border-primary/20 hover:bg-primary/5"
+                className="flex items-center gap-1.5 text-xs text-primary font-semibold px-3 py-1.5 rounded-lg border border-primary/20 hover:bg-primary/5 transition-colors"
               >
                 <Image className="w-3.5 h-3.5" />
                 사진 첨부 ({writePhotos.length}/3)
@@ -307,7 +394,7 @@ const CommunityPage = () => {
                     <img src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-border" />
                     <button
                       onClick={() => setWritePhotos((prev) => prev.filter((_, idx) => idx !== i))}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-white flex items-center justify-center"
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -316,7 +403,11 @@ const CommunityPage = () => {
               </div>
             )}
 
-            <Button onClick={handlePublish} className="w-full h-11 rounded-xl font-bold">
+            <Button
+              onClick={handlePublish}
+              disabled={!writeTitle.trim() || !writeContent.trim()}
+              className="w-full h-11 rounded-xl font-bold"
+            >
               등록
             </Button>
           </div>
