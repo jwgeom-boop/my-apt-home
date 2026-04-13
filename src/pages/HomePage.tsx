@@ -59,7 +59,7 @@ const HomePage = () => {
   const diffDays = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   const dday = diffDays > 0 ? `D-${diffDays}` : diffDays === 0 ? "D-Day" : `D+${Math.abs(diffDays)}`;
 
-  const readinessPercent = 45;
+  const readinessPercent = stage * 20;
 
   const stepsData: { label: string; status: "completed" | "current" | "pending" }[] = [
     { label: "계약", status: stage > 1 ? "completed" : stage === 1 ? "current" : "pending" },
