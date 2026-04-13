@@ -31,6 +31,7 @@ const ServicesPage = () => {
     { emoji: "🚚", label: "이사", desc: "비용 비교 및 신청", key: "moving" },
     { emoji: "📺", label: "인터넷/TV", desc: "통신사 비교 및 신청", key: "internet" },
     { emoji: "🧹", label: "청소", desc: "입주청소 전문업체 연결", key: "cleaning" },
+    { emoji: "🛋️", label: "가구", desc: "브랜드 가구 할인 구매", key: "furniture" },
     { emoji: "🖥️", label: "가전", desc: "제품 정보 및 설치", key: "appliance" },
   ];
 
@@ -60,6 +61,11 @@ const ServicesPage = () => {
       { logo: "LG", name: "LG전자 신혼 패키지", desc: "오브제컬렉션 · 36개월 무이자", tags: ["무이자할부", "오브제"], buttonLabel: "상품 보기", action: () => toast.success("LG전자 스토어로 연결됩니다") },
       { logo: "이케아", name: "이케아 입주 특별전", desc: "거실·침실 풀패키지 구성 상담", tags: ["가구", "소품"], buttonLabel: "상품 보기", action: () => toast.success("이케아 스토어로 연결됩니다") },
     ],
+    furniture: [
+      { logo: "한샘", name: "한샘", desc: "입주 패키지 최대 30% 할인", tags: ["가구", "패키지"], buttonLabel: "상담하기", action: () => toast.success("한샘 상담 신청되었습니다") },
+      { logo: "현대", name: "현대리바트", desc: "맞춤 가구 제작 전문", tags: ["맞춤", "가구"], buttonLabel: "상담하기", action: () => toast.success("현대리바트 상담 신청되었습니다") },
+      { logo: "에넥스", name: "에넥스", desc: "주방·붙박이장 전문", tags: ["주방", "붙박이"], buttonLabel: "상담하기", action: () => toast.success("에넥스 상담 신청되었습니다") },
+    ],
     cleaning: [
       { logo: "클린", name: "입주청소 전문", desc: "새집 입주청소 전문업체", tags: ["입주청소", "전문"], buttonLabel: "신청하기", action: () => toast.success("청소 업체 상담 신청되었습니다") },
       { logo: "홈케어", name: "홈케어서비스", desc: "정기청소 + 입주청소 패키지", tags: ["패키지", "정기"], buttonLabel: "신청하기", action: () => toast.success("홈케어 상담 신청되었습니다") },
@@ -78,6 +84,7 @@ const ServicesPage = () => {
     moving: "이사",
     internet: "인터넷/TV",
     cleaning: "청소",
+    furniture: "가구",
     appliance: "가전",
   };
 
