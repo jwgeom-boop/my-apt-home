@@ -11,7 +11,7 @@ import BannerSection from "@/components/home/BannerSection";
 import NoticeSection from "@/components/home/NoticeSection";
 import InspectionCard from "@/components/home/InspectionCard";
 import MovingReservationCard from "@/components/home/MovingReservationCard";
-import PaymentCard from "@/components/home/PaymentCard";
+
 import DefectCard from "@/components/home/DefectCard";
 import StageGuide from "@/components/home/StageGuide";
 
@@ -110,8 +110,23 @@ const HomePage = () => {
         {/* 3단계: 이사예약 현황 */}
         {stage === 3 && <MovingReservationCard />}
 
-        {/* 4단계: 잔금납부 현황 */}
-        {stage === 4 && <PaymentCard />}
+        {/* 4단계: 잔금납부 확인 신청 */}
+        {stage === 4 && (
+          <div className="bg-[#F0F6FF] rounded-xl p-4 mb-4 border border-blue-100">
+            <p className="text-sm font-semibold text-foreground mb-1">
+              📋 잔금납부 확인 신청
+            </p>
+            <p className="text-xs text-muted-foreground mb-2">
+              납부 영수증을 업로드하고 납부완료를 신청해 주세요
+            </p>
+            <button
+              onClick={() => navigate("/payment")}
+              className="text-xs text-blue-700 underline"
+            >
+              납부 확인 신청하러 가기 →
+            </button>
+          </div>
+        )}
 
         {/* 2~5단계: 하자 접수 카드 */}
         {stage >= 2 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
