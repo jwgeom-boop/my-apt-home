@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const ConsentPage = () => {
   const navigate = useNavigate();
@@ -130,6 +131,7 @@ const ConsentPage = () => {
           동의 및 서명 완료
         </Button>
       </div>
+      <BottomTabBar />
     </div>
   );
 };

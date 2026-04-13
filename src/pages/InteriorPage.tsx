@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const partners = [
   {
@@ -94,6 +95,7 @@ const InteriorPage = () => {
           * 시공 일정은 입주 지정 기간 내 협의하여 진행됩니다.
         </p>
       </div>
+      <BottomTabBar />
     </div>
   );
 };

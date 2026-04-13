@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { ArrowLeft, Download, Camera, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import BottomTabBar from "@/components/BottomTabBar";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -127,6 +128,7 @@ const CertificatePage = () => {
           </Button>
         </div>
       </div>
+      <BottomTabBar />
     </div>
   );
 };

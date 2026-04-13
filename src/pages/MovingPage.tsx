@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const partners = [
   {
@@ -92,6 +93,7 @@ const MovingPage = () => {
           * 이사 날짜 예약은 상단 예약 메뉴에서 진행해주세요.
         </p>
       </div>
+      <BottomTabBar />
     </div>
   );
 };
