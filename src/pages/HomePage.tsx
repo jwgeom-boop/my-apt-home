@@ -105,7 +105,7 @@ const HomePage = () => {
         )}
 
         {/* 2단계 이상: 사전점검 현황 */}
-        {stage >= 2 && <InspectionCard />}
+        {stage === 2 && <InspectionCard />}
 
         {/* 3단계: 이사예약 현황 */}
         {stage === 3 && <MovingReservationCard />}
