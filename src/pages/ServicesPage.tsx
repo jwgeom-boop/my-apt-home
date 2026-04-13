@@ -69,68 +69,67 @@ const ServicesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-accent text-accent-foreground h-12 flex items-center px-4 gap-3">
-        {selectedCategory ? (
-          <>
-            <button onClick={() => setSelectedCategory(null)} className="active:scale-90 transition-transform">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <span className="text-sm font-bold">{categoryLabels[selectedCategory]}</span>
-          </>
-        ) : (
-          <span className="text-sm font-bold">입주 준비 서비스</span>
-        )}
-      </div>
+    <MobileLayout>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <div className="sticky top-0 z-40 bg-accent text-accent-foreground h-12 flex items-center px-4 gap-3">
+          {selectedCategory ? (
+            <>
+              <button onClick={() => setSelectedCategory(null)} className="active:scale-90 transition-transform">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm font-bold">{categoryLabels[selectedCategory]}</span>
+            </>
+          ) : (
+            <span className="text-sm font-bold">입주 준비 서비스</span>
+          )}
+        </div>
 
-      <div className="px-4 pt-4 pb-24">
-        {!selectedCategory ? (
-          <>
-            <p className="text-xs text-muted-foreground mb-4">필요한 서비스를 선택하세요</p>
-            <div className="grid grid-cols-2 gap-3">
-              {categories.map((cat) => (
-                <button
-                  key={cat.key}
-                  onClick={() => setSelectedCategory(cat.key)}
-                  className="bg-card rounded-2xl shadow-sm border border-border p-5 flex flex-col items-center text-center active:scale-[0.97] transition-transform"
-                >
-                  <span className="text-4xl mb-2">{cat.emoji}</span>
-                  <span className="text-sm font-bold text-foreground">{cat.label}</span>
-                  <span className="text-xs text-muted-foreground mt-1">{cat.desc}</span>
-                </button>
+        <div className="px-4 pt-4 pb-24">
+          {!selectedCategory ? (
+            <>
+              <p className="text-xs text-muted-foreground mb-4">필요한 서비스를 선택하세요</p>
+              <div className="grid grid-cols-2 gap-3">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setSelectedCategory(cat.key)}
+                    className="bg-card rounded-2xl shadow-sm border border-border p-5 flex flex-col items-center text-center active:scale-[0.97] transition-transform"
+                  >
+                    <span className="text-4xl mb-2">{cat.emoji}</span>
+                    <span className="text-sm font-bold text-foreground">{cat.label}</span>
+                    <span className="text-xs text-muted-foreground mt-1">{cat.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="space-y-3 mt-2">
+              {partnersMap[selectedCategory]?.map((p, i) => (
+                <div key={i} className="bg-card rounded-xl shadow-sm border border-border p-4 flex gap-3 relative">
+                  <span className="absolute top-3 right-3 text-[10px] font-bold bg-destructive/10 text-destructive rounded px-1">AD</span>
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-muted-foreground">{p.logo}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{p.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{p.desc}</p>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {p.tags.map((t) => (
+                        <span key={t} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{t}</span>
+                      ))}
+                    </div>
+                    <button onClick={p.action} className="text-xs text-primary font-semibold mt-2 underline">
+                      {p.buttonLabel}
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
-          </>
-        ) : (
-          <div className="space-y-3 mt-2">
-            {partnersMap[selectedCategory]?.map((p, i) => (
-              <div key={i} className="bg-card rounded-xl shadow-sm border border-border p-4 flex gap-3 relative">
-                {/* AD badge */}
-                <span className="absolute top-3 right-3 text-[10px] font-bold bg-destructive/10 text-destructive rounded px-1">AD</span>
-                {/* Logo */}
-                <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-muted-foreground">{p.logo}</span>
-                </div>
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{p.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{p.desc}</p>
-                  <div className="flex flex-wrap gap-1 mt-1.5">
-                    {p.tags.map((t) => (
-                      <span key={t} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">{t}</span>
-                    ))}
-                  </div>
-                  <button onClick={p.action} className="text-xs text-primary font-semibold mt-2 underline">
-                    {p.buttonLabel}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </MobileLayout>
   );
 };
 
