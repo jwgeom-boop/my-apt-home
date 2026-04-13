@@ -25,11 +25,13 @@ const ServicesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const categories: CategoryItem[] = [
-    { emoji: "🏦", label: "잔금대출", desc: "협약 은행 금리 비교", key: "loan" },
-    { emoji: "⚖️", label: "법무·등기", desc: "소유권이전 대행", key: "registry" },
-    { emoji: "🛋️", label: "인테리어", desc: "입주 시공·청소", key: "interior" },
-    { emoji: "🚚", label: "이사업체", desc: "포장이사 견적 비교", key: "moving" },
-    { emoji: "🏠", label: "가전·가구", desc: "입주 패키지 할인", key: "appliance" },
+    { emoji: "🏦", label: "대출", desc: "금리 비교 및 빠른 신청", key: "loan" },
+    { emoji: "📋", label: "부동산등기", desc: "등기부등본 조회 및 신청", key: "registry" },
+    { emoji: "🏠", label: "인테리어", desc: "시공사 추천 및 상담", key: "interior" },
+    { emoji: "🚚", label: "이사", desc: "비용 비교 및 신청", key: "moving" },
+    { emoji: "📺", label: "인터넷/TV", desc: "통신사 비교 및 신청", key: "internet" },
+    { emoji: "🧹", label: "청소", desc: "입주청소 전문업체 연결", key: "cleaning" },
+    { emoji: "🖥️", label: "가전", desc: "제품 정보 및 설치", key: "appliance" },
   ];
 
   const partnersMap: Record<string, Partner[]> = {
@@ -58,14 +60,25 @@ const ServicesPage = () => {
       { logo: "LG", name: "LG전자 신혼 패키지", desc: "오브제컬렉션 · 36개월 무이자", tags: ["무이자할부", "오브제"], buttonLabel: "상품 보기", action: () => toast.success("LG전자 스토어로 연결됩니다") },
       { logo: "이케아", name: "이케아 입주 특별전", desc: "거실·침실 풀패키지 구성 상담", tags: ["가구", "소품"], buttonLabel: "상품 보기", action: () => toast.success("이케아 스토어로 연결됩니다") },
     ],
+    cleaning: [
+      { logo: "클린", name: "입주청소 전문", desc: "새집 입주청소 전문업체", tags: ["입주청소", "전문"], buttonLabel: "신청하기", action: () => toast.success("청소 업체 상담 신청되었습니다") },
+      { logo: "홈케어", name: "홈케어서비스", desc: "정기청소 + 입주청소 패키지", tags: ["패키지", "정기"], buttonLabel: "신청하기", action: () => toast.success("홈케어 상담 신청되었습니다") },
+    ],
+    internet: [
+      { logo: "KT", name: "KT 인터넷", desc: "기가인터넷 + IPTV 결합 할인", tags: ["인터넷", "TV", "결합"], buttonLabel: "신청하기", action: () => toast.success("KT 상담 신청되었습니다") },
+      { logo: "SKT", name: "SK브로드밴드", desc: "인터넷 + B tv 패키지", tags: ["인터넷", "IPTV"], buttonLabel: "신청하기", action: () => toast.success("SKB 상담 신청되었습니다") },
+      { logo: "LG", name: "LG유플러스", desc: "U+ 인터넷 + TV 결합상품", tags: ["인터넷", "TV"], buttonLabel: "신청하기", action: () => toast.success("LGU+ 상담 신청되었습니다") },
+    ],
   };
 
   const categoryLabels: Record<string, string> = {
-    loan: "잔금대출",
-    registry: "법무·등기",
+    loan: "대출",
+    registry: "부동산등기",
     interior: "인테리어",
-    moving: "이사업체",
-    appliance: "가전·가구",
+    moving: "이사",
+    internet: "인터넷/TV",
+    cleaning: "청소",
+    appliance: "가전",
   };
 
   return (
