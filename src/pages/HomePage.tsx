@@ -173,7 +173,7 @@ const HomePage = () => {
       {showGuide && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowGuide(false)} />
-          <div className="relative bg-card rounded-t-2xl max-h-[85vh] flex flex-col animate-slide-up">
+          <div className="relative bg-card rounded-t-2xl max-h-[calc(100vh-80px)] flex flex-col animate-slide-up mb-[68px]">
             {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3">
               <h2 className="text-base font-bold text-foreground">🚀 입주 준비 가이드</h2>
