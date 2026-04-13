@@ -1,18 +1,10 @@
 import { useState, useEffect } from "react";
-import HomePageSkeleton from "@/components/skeletons/HomePageSkeleton";
-import { WifiOff, Upload, ChevronRight, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { X, ChevronRight } from "lucide-react";
 import MobileLayout from "@/components/MobileLayout";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
-import { useStage } from "@/hooks/useStage";
-import BannerSection from "@/components/home/BannerSection";
-import NoticeSection from "@/components/home/NoticeSection";
-import InspectionCard from "@/components/home/InspectionCard";
-import MovingReservationCard from "@/components/home/MovingReservationCard";
-import DefectCard from "@/components/home/DefectCard";
-import StageGuide from "@/components/home/StageGuide";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const GUIDE_TABS = ["잔금·등기", "입주당일", "행정처리", "공과금"];
 
@@ -45,136 +37,92 @@ const GUIDE_DATA: Record<string, { icon: string; title: string; desc: string }[]
   ],
 };
 
-interface DefectRow {
-  receipt_no: string;
-  location: string;
-  mid_category: string | null;
-  status: string;
-  is_urgent: boolean;
-}
-
 const HomePage = () => {
   const navigate = useNavigate();
-  const { drafts, syncAll, syncing } = useOfflineDrafts();
-  const { stage } = useStage();
-
-  const [defects, setDefects] = useState<DefectRow[]>([]);
-  const [loadingDefects, setLoadingDefects] = useState(true);
+  const [unitInfo, setUnitInfo] = useState<{ unit: string; moveInDate: string } | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showGuide, setShowGuide] = useState(false);
   const [activeGuideTab, setActiveGuideTab] = useState("잔금·등기");
 
   useEffect(() => {
     const load = async () => {
-      const { data: resident } = await supabase
-        .from("residents")
-        .select("id")
-        .limit(1)
-        .single();
+      try {
+        const { data: resident } = await supabase
+          .from("residents")
+          .select("unit_number, complex_name")
+          .limit(1)
+          .single();
 
-      if (resident) {
-        const { data } = await supabase
-          .from("defects")
-          .select("receipt_no, location, mid_category, status, is_urgent")
-          .eq("resident_id", resident.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
-
-        if (data) setDefects(data);
+        if (resident) {
+          setUnitInfo({
+            unit: resident.unit_number || "---동 ---호",
+            moveInDate: "2026.05.15 입주예정",
+          });
+        } else {
+          setUnitInfo({ unit: "---동 ---호", moveInDate: "입주일 미정" });
+        }
+      } catch {
+        setUnitInfo({ unit: "---동 ---호", moveInDate: "입주일 미정" });
       }
-      setLoadingDefects(false);
+      setLoading(false);
     };
     load();
   }, []);
 
-  const targetDate = new Date("2026-04-26");
-  const today = new Date();
-  const diffDays = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  const dday = diffDays > 0 ? `D-${diffDays}` : diffDays === 0 ? "D-Day" : `D+${Math.abs(diffDays)}`;
-
-  const readinessPercent = stage * 20;
-
-  const stepsData: { label: string; status: "completed" | "current" | "pending" }[] = [
-    { label: "계약", status: stage > 1 ? "completed" : stage === 1 ? "current" : "pending" },
-    { label: "사전점검", status: stage > 2 ? "completed" : stage === 2 ? "current" : "pending" },
-    { label: "이사예약", status: stage > 3 ? "completed" : stage === 3 ? "current" : "pending" },
-    { label: "잔금납부", status: stage > 4 ? "completed" : stage === 4 ? "current" : "pending" },
-    { label: "입주", status: stage >= 5 ? "completed" : "pending" },
+  const cards = [
+    { emoji: "📢", title: "공지사항", sub: "", action: () => navigate("/notice") },
+    { emoji: "🔍", title: "사전점검", sub: "예약 및 현황 확인", action: () => navigate("/reservation") },
+    { emoji: "🏪", title: "제휴업체", sub: "인테리어·이사·대출", action: () => navigate("/services") },
+    {
+      emoji: "🏠", title: "입주", sub: "입주 준비 가이드",
+      action: () => { setActiveGuideTab("잔금·등기"); setShowGuide(true); },
+    },
   ];
 
-  if (loadingDefects) {
-    return (
-      <MobileLayout>
-        <HomePageSkeleton />
-      </MobileLayout>
-    );
-  }
-
   return (
-    <MobileLayout>
-      <div className="animate-fade-in-content">
-        <BannerSection steps={stepsData} readinessPercent={readinessPercent} dday={dday} />
-
-        {drafts.length > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <WifiOff className="w-4 h-4 text-amber-600" />
-              <div>
-                <p className="text-xs font-bold text-amber-800">📱 임시 저장: {drafts.length}건</p>
-                <p className="text-[10px] text-amber-600">전송 대기 중인 하자 접수가 있습니다</p>
-              </div>
-            </div>
-            <button
-              onClick={syncAll}
-              disabled={syncing}
-              className="flex items-center gap-1 bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 disabled:opacity-50"
-            >
-              <Upload className="w-3 h-3" />
-              {syncing ? "전송 중..." : "일괄 전송"}
-            </button>
-          </div>
+    <div className="mx-auto max-w-[390px] min-h-screen bg-background relative flex flex-col">
+      {/* Header */}
+      <div className="h-20 px-5 flex items-center justify-between shrink-0" style={{ backgroundColor: "#1E3A5F" }}>
+        {loading ? (
+          <>
+            <Skeleton className="w-28 h-6 bg-white/20" />
+            <Skeleton className="w-32 h-4 bg-white/20" />
+          </>
+        ) : (
+          <>
+            <span className="text-white font-bold text-lg">{unitInfo?.unit}</span>
+            <span className="text-white/80 text-xs">{unitInfo?.moveInDate}</span>
+          </>
         )}
-
-        {stage === 2 && <InspectionCard />}
-        {stage === 3 && <MovingReservationCard />}
-
-        {stage === 4 && (
-          <div className="bg-[#F0F6FF] rounded-xl p-4 mb-4 border border-blue-100">
-            <p className="text-sm font-semibold text-foreground mb-1">📋 잔금납부 확인 신청</p>
-            <p className="text-xs text-muted-foreground mb-2">납부 영수증을 업로드하고 납부완료를 신청해 주세요</p>
-            <button onClick={() => navigate("/payment")} className="text-xs text-blue-700 underline">
-              납부 확인 신청하러 가기 →
-            </button>
-          </div>
-        )}
-
-        {stage >= 2 && <DefectCard defects={defects} loadingDefects={loadingDefects} />}
-
-        <NoticeSection />
-
-        <StageGuide stage={stage} />
-
-        {/* 입주 준비 가이드 버튼 */}
-        <button
-          onClick={() => { setActiveGuideTab("잔금·등기"); setShowGuide(true); }}
-          className="w-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl p-4 text-left mt-3"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-lg">🚀</span>
-            <div>
-              <p className="text-sm font-bold">입주 준비 가이드</p>
-              <p className="text-xs text-muted-foreground">잔금·등기·행정처리·공과금 안내</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
-          </div>
-        </button>
       </div>
 
-      {/* Bottom Sheet Overlay */}
+      {/* 2x2 Grid — fills remaining space above bottom nav */}
+      <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-3 p-3 pb-[calc(68px+12px)]">
+        {cards.map((card) => (
+          <button
+            key={card.title}
+            onClick={card.action}
+            className="bg-card rounded-2xl shadow-md border border-border flex flex-col items-center justify-center gap-2 transition-transform active:scale-[0.97]"
+          >
+            <span className="text-5xl">{card.emoji}</span>
+            <span className="font-bold text-lg text-foreground">{card.title}</span>
+            {card.sub && (
+              <span className="text-xs text-muted-foreground">{card.sub}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Bottom Tab Bar — reuse the shared one */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-40">
+        <BottomTabBarInline />
+      </div>
+
+      {/* Guide Bottom Sheet */}
       {showGuide && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/40" onClick={() => setShowGuide(false)} />
           <div className="relative bg-card rounded-t-2xl max-h-[calc(100vh-80px)] flex flex-col animate-slide-up mb-[68px]">
-            {/* Header */}
             <div className="flex items-center justify-between px-5 pt-5 pb-3">
               <h2 className="text-base font-bold text-foreground">🚀 입주 준비 가이드</h2>
               <button onClick={() => setShowGuide(false)} className="p-1 rounded-full hover:bg-muted">
@@ -182,7 +130,6 @@ const HomePage = () => {
               </button>
             </div>
 
-            {/* Tabs */}
             <div className="flex gap-2 px-5 pb-4 overflow-x-auto">
               {GUIDE_TABS.map((tab) => (
                 <button
@@ -190,9 +137,7 @@ const HomePage = () => {
                   onClick={() => setActiveGuideTab(tab)}
                   className={cn(
                     "shrink-0 text-xs font-bold px-3 py-1.5 rounded-full transition-colors",
-                    activeGuideTab === tab
-                      ? "bg-primary text-white"
-                      : "bg-muted text-muted-foreground"
+                    activeGuideTab === tab ? "bg-primary text-white" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {tab}
@@ -200,7 +145,6 @@ const HomePage = () => {
               ))}
             </div>
 
-            {/* Content */}
             <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-3">
               {GUIDE_DATA[activeGuideTab].map((item, i) => (
                 <div key={i} className="flex items-start gap-3 bg-muted/30 rounded-xl px-4 py-3 border border-border">
@@ -220,8 +164,12 @@ const HomePage = () => {
           </div>
         </div>
       )}
-    </MobileLayout>
+    </div>
   );
 };
+
+/* Inline bottom tab bar to avoid MobileLayout wrapper (we need custom layout) */
+import BottomTabBar from "@/components/BottomTabBar";
+const BottomTabBarInline = BottomTabBar;
 
 export default HomePage;
