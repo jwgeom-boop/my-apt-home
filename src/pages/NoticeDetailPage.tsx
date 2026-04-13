@@ -28,6 +28,7 @@ const NoticeDetailPage = () => {
         <div className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground text-sm">공지를 찾을 수 없습니다.</p>
         </div>
+        <BottomTabBar />
       </div>
     );
   }
