@@ -383,6 +383,7 @@ const DefectReportPage = () => {
         <div className="flex-1 px-4 pt-4 pb-24">
           <DefectPageSkeleton />
         </div>
+        <BottomTabBar />
       </div>
     );
   }
