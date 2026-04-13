@@ -24,7 +24,7 @@ const BottomTabBar = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[#1E3A5F] shadow-[0_-4px_12px_rgba(0,0,0,0.15)]">
       <div className="mx-auto max-w-[390px] flex items-center justify-around h-[68px] pb-safe">
         {tabs.map((tab) => {
           const isActive = location.pathname === tab.path;
@@ -36,12 +36,12 @@ const BottomTabBar = () => {
               onClick={() => navigate(tab.path)}
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 w-14 h-full transition-colors",
-                isActive ? "text-primary" : "text-gray-400"
+                isActive ? "text-white" : "text-white/40"
               )}
             >
               <div className={cn(
                 "relative flex items-center justify-center transition-all",
-                isActive && "bg-primary/10 rounded-xl px-3 py-1"
+                isActive && "bg-white/20 rounded-xl px-3 py-1"
               )}>
                 <Icon className={cn(
                   isActive ? "w-6 h-6 stroke-[2.5]" : "w-5 h-5"
@@ -56,7 +56,7 @@ const BottomTabBar = () => {
                 )}
               </div>
               <span className={cn(
-                isActive ? "text-primary font-bold text-[11px]" : "text-gray-400 font-medium text-[10px]"
+                isActive ? "text-white font-bold text-[11px]" : "text-white/40 font-medium text-[10px]"
               )}>
                 {tab.label}
               </span>
