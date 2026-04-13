@@ -13,6 +13,7 @@ import { useOfflineDrafts } from "@/hooks/useOfflineDrafts";
 import { generateDefectListPdf } from "@/utils/defectPdf";
 import OfflineDraftVault from "@/components/defect/OfflineDraftVault";
 import NetworkStatusBanner from "@/components/NetworkStatusBanner";
+import BottomTabBar from "@/components/BottomTabBar";
 import DefectPageSkeleton from "@/components/skeletons/DefectPageSkeleton";
 import {
   AlertDialog,
@@ -609,6 +610,7 @@ const DefectReportPage = () => {
         )}
       </div>
 
+      <BottomTabBar />
     </div>
   );
 };

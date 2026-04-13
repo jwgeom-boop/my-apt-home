@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { notices } from "@/data/notices";
 import { cn } from "@/lib/utils";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const badgeColors: Record<string, string> = {
   안내문: "bg-destructive/15 text-destructive border-destructive/30",

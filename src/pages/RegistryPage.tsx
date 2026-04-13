@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Phone } from "lucide-react";
 import { toast } from "sonner";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const steps = [
   { num: 1, title: "서류 접수", desc: "신분증, 계약서 사본 제출 (앱 또는 방문)" },
@@ -121,6 +122,7 @@ const RegistryPage = () => {
           온라인 신청
         </button>
       </div>
+      <BottomTabBar />
     </div>
   );
 };

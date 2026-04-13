@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const banks = [
   {
@@ -126,6 +127,7 @@ const LoanPage = () => {
           </div>
         ))}
       </div>
+      <BottomTabBar />
     </div>
   );
 };
