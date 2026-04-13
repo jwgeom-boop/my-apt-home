@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import MobileLayout from "@/components/MobileLayout";
 import { toast } from "sonner";
 
 interface Partner {
