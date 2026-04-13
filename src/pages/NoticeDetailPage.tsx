@@ -73,6 +73,7 @@ const NoticeDetailPage = () => {
           </button>
         )}
       </div>
+      <BottomTabBar />
     </div>
   );
 };
