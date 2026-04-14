@@ -162,17 +162,19 @@ const HomePage = () => {
         )}
       </div>
 
-      {/* 2x2 Grid */}
+      {/* Top spacer — background visible */}
+      <div style={{ position: "relative", zIndex: 10, height: 40 }} />
+
+      {/* 2x2 Grid — fixed height cards */}
       <div
         style={{
           position: "relative",
           zIndex: 10,
-          flex: 1,
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "1fr 1fr",
-          gap: "12px",
-          padding: "12px 12px 80px 12px",
+          gridTemplateRows: "200px 200px",
+          gap: 12,
+          padding: "0 16px",
         }}
       >
         {CARDS.map((card) => (
@@ -187,24 +189,23 @@ const HomePage = () => {
               }
             }}
             style={{
-              background: "rgba(255,255,255,0.65)",
+              background: "rgba(255,255,255,0.70)",
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
-              borderRadius: "20px",
-              border: "1px solid rgba(255,255,255,0.5)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+              borderRadius: 20,
+              border: "1px solid rgba(255,255,255,0.6)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
               display: "flex",
               flexDirection: "column" as const,
               alignItems: "center",
               justifyContent: "center",
-              gap: "12px",
-              padding: "20px 12px",
+              gap: 12,
               cursor: "pointer",
               transition: "transform 0.15s",
             }}
             className="active:scale-[0.97]"
           >
-            <div className={cn("rounded-2xl w-16 h-16 flex items-center justify-center text-4xl", card.iconBg)}>
+            <div style={{ width: 64, height: 64, borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }} className={card.iconBg}>
               {card.emoji}
             </div>
             <div className="text-center">
@@ -214,6 +215,9 @@ const HomePage = () => {
           </button>
         ))}
       </div>
+
+      {/* Bottom spacer — background visible */}
+      <div style={{ position: "relative", zIndex: 10, flex: 1, minHeight: 80 }} />
 
       {/* Bottom Tab Bar */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-40">
