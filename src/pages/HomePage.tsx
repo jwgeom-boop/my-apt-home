@@ -68,7 +68,7 @@ const CARDS = [
   {
     emoji: "🤝",
     title: "제휴업체",
-    sub: "인테리어/이사/가전/금융 안내",
+    sub: "인테리어·이사·가전·금융",
     iconBg: "bg-[#4CAF82]",
     path: "/services",
   },
@@ -122,7 +122,7 @@ const HomePage = () => {
           backgroundPosition: "center",
         }}
       />
-      <div className="absolute inset-0 z-0 bg-black/30" />
+      <div className="absolute inset-0 z-0 bg-black/20" />
 
       {/* Header bar */}
       <div className="relative z-10 flex items-center justify-between px-4 h-11 bg-black/60 backdrop-blur-sm">
@@ -154,14 +154,14 @@ const HomePage = () => {
                 setShowGuide(true);
               }
             }}
-            className="bg-white/[0.88] backdrop-blur-md rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 p-4 active:scale-[0.97] transition-transform cursor-pointer"
+            className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 p-4 active:scale-[0.97] transition-transform cursor-pointer"
           >
-            <div className={cn("rounded-2xl w-14 h-14 flex items-center justify-center text-3xl", card.iconBg)}>
+            <div className={cn("rounded-2xl w-16 h-16 flex items-center justify-center text-4xl", card.iconBg)}>
               {card.emoji}
             </div>
             <div className="text-center">
-              <p className="text-gray-900 font-bold text-base">{card.title}</p>
-              <p className="text-gray-500 text-xs mt-0.5">{card.sub}</p>
+              <p className="text-gray-900 text-[17px] font-extrabold">{card.title}</p>
+              <p className="text-gray-500 text-[10px] mt-0.5 whitespace-nowrap">{card.sub}</p>
             </div>
           </button>
         ))}
