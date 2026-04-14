@@ -133,67 +133,72 @@ export default function HomePage() {
       {/* 상단 배경 노출 영역 */}
       <div style={{ position: "relative", zIndex: 10, height: 40 }} />
 
-      {/* 카드 그리드 */}
+      {/* 카드 그리드 — 지그재그 배치 */}
       <div
         style={{
           position: "relative",
           zIndex: 10,
+          flexShrink: 0,
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "200px 200px",
           gap: 12,
-          padding: "0 16px",
+          padding: "0 14px",
         }}
       >
-        {CARDS.map((card) => (
-          <button
-            key={card.key}
-            onClick={() => {
-              if (card.key === "movein") {
-                setActiveTab("잔금·등기");
-                setShowGuide(true);
-              } else {
-                navigate(card.path);
-              }
-            }}
-            style={{
-              background: "rgba(255,255,255,0.72)",
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              borderRadius: 20,
-              border: "1px solid rgba(255,255,255,0.55)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.13)",
-              display: "flex",
-              flexDirection: "column" as const,
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 10,
-              cursor: "pointer",
-              transition: "transform 0.15s",
-            }}
-            onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
-            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          >
-            <div
+        {CARDS.map((card, i) => {
+          const marginTops = [0, 40, -20, 20];
+          return (
+            <button
+              key={card.key}
+              onClick={() => {
+                if (card.key === "movein") {
+                  setActiveTab("잔금·등기");
+                  setShowGuide(true);
+                } else {
+                  navigate(card.path);
+                }
+              }}
               style={{
-                width: 64,
-                height: 64,
-                borderRadius: 18,
-                background: card.iconBg,
+                height: 180,
+                marginTop: marginTops[i],
+                background: "rgba(255,255,255,0.72)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                borderRadius: 20,
+                border: "1px solid rgba(255,255,255,0.55)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.13)",
                 display: "flex",
+                flexDirection: "column" as const,
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 32,
+                gap: 10,
+                cursor: "pointer",
+                transition: "transform 0.15s",
               }}
+              onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+              onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
             >
-              {card.emoji}
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <p style={{ color: "#111", fontSize: 17, fontWeight: 800 }}>{card.title}</p>
-              <p style={{ color: "#888", fontSize: 11, marginTop: 2, whiteSpace: "nowrap" }}>{card.sub}</p>
-            </div>
-          </button>
-        ))}
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: card.iconBg,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 32,
+                }}
+              >
+                {card.emoji}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <p style={{ color: "#111", fontSize: 17, fontWeight: 800 }}>{card.title}</p>
+                <p style={{ color: "#888", fontSize: 11, marginTop: 2, whiteSpace: "nowrap" }}>{card.sub}</p>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
       {/* 하단 배경 노출 영역 */}
