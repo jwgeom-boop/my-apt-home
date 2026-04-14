@@ -115,17 +115,38 @@ const HomePage = () => {
     <div className="mx-auto max-w-[390px] min-h-screen relative flex flex-col">
       {/* Background */}
       <div
-        className="absolute inset-0 z-0"
         style={{
+          position: "absolute",
+          inset: 0,
           backgroundImage: "url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80')",
           backgroundSize: "cover",
           backgroundPosition: "center",
+          zIndex: 0,
         }}
       />
-      <div className="absolute inset-0 z-0 bg-black/20" />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(0,0,0,0.25)",
+          zIndex: 1,
+        }}
+      />
 
       {/* Header bar */}
-      <div className="relative z-10 flex items-center justify-between px-4 h-11 bg-black/60 backdrop-blur-sm">
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "10px 16px",
+          background: "rgba(0,0,0,0.55)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+        }}
+      >
         {loading ? (
           <>
             <Skeleton className="w-24 h-5 bg-white/20 rounded" />
@@ -142,7 +163,18 @@ const HomePage = () => {
       </div>
 
       {/* 2x2 Grid */}
-      <div className="relative z-10 flex-1 grid grid-cols-2 gap-3 p-3 pb-[calc(68px+12px)]">
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          flex: 1,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gridTemplateRows: "1fr 1fr",
+          gap: "12px",
+          padding: "12px 12px 80px 12px",
+        }}
+      >
         {CARDS.map((card) => (
           <button
             key={card.title}
@@ -154,7 +186,23 @@ const HomePage = () => {
                 setShowGuide(true);
               }
             }}
-            className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg flex flex-col items-center justify-center gap-4 p-4 active:scale-[0.97] transition-transform cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.65)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+              borderRadius: "20px",
+              border: "1px solid rgba(255,255,255,0.5)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+              display: "flex",
+              flexDirection: "column" as const,
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "12px",
+              padding: "20px 12px",
+              cursor: "pointer",
+              transition: "transform 0.15s",
+            }}
+            className="active:scale-[0.97]"
           >
             <div className={cn("rounded-2xl w-16 h-16 flex items-center justify-center text-4xl", card.iconBg)}>
               {card.emoji}
