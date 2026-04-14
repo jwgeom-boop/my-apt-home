@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X, ChevronRight } from "lucide-react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +50,37 @@ function getDday() {
   return `D+${Math.abs(diff)}`;
 }
 
+const CARDS = [
+  {
+    emoji: "📢",
+    title: "공지사항",
+    sub: "최신 소식 확인",
+    iconBg: "bg-[#FF6B7A]",
+    path: "/notice",
+  },
+  {
+    emoji: "🔍",
+    title: "사전점검",
+    sub: "예약 및 현황 확인",
+    iconBg: "bg-[#4A90D9]",
+    path: "/reservation",
+  },
+  {
+    emoji: "🤝",
+    title: "제휴업체",
+    sub: "인테리어/이사/가전/금융 안내",
+    iconBg: "bg-[#4CAF82]",
+    path: "/services",
+  },
+  {
+    emoji: "🏠",
+    title: "입주",
+    sub: "입주 가이드 및 정보",
+    iconBg: "bg-[#F5A623]",
+    path: null,
+  },
+];
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [unitInfo, setUnitInfo] = useState<{ unit: string; moveInDate: string } | null>(null);
@@ -65,12 +96,8 @@ const HomePage = () => {
           .select("unit_number, complex_name")
           .limit(1)
           .single();
-
         if (resident) {
-          setUnitInfo({
-            unit: resident.unit_number || "---동 ---호",
-            moveInDate: "2026.05.15",
-          });
+          setUnitInfo({ unit: resident.unit_number || "---동 ---호", moveInDate: "2026.05.15" });
         } else {
           setUnitInfo({ unit: "---동 ---호", moveInDate: "입주일 미정" });
         }
@@ -84,86 +111,60 @@ const HomePage = () => {
 
   const dday = getDday();
 
-  const cards = [
-    {
-      emoji: "📢", title: "공지사항", sub: "최신 공지 확인",
-      iconBg: "bg-[#FFE8EC]", badge: "NEW 2",
-      action: () => navigate("/notice"),
-    },
-    {
-      emoji: "🔍", title: "사전점검", sub: "정밀 하자 및 예약 관리",
-      iconBg: "bg-[#E8F4FF]",
-      action: () => navigate("/reservation"),
-    },
-    {
-      emoji: "🤝", title: "제휴업체", sub: "인테리어/이사/가전/금융 안내",
-      iconBg: "bg-[#E8FFF0]",
-      action: () => navigate("/services"),
-    },
-    {
-      emoji: "🏠", title: "입주", sub: "입주 준비 가이드 및 정보",
-      iconBg: "bg-[#FFF3E8]",
-      action: () => { setActiveGuideTab("잔금·등기"); setShowGuide(true); },
-    },
-  ];
-
   return (
-    <div className="mx-auto max-w-[390px] min-h-screen relative flex flex-col bg-gradient-to-b from-[#0a1428] to-[#1a3a5c]">
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/40 to-black/70 pointer-events-none" />
+    <div className="mx-auto max-w-[390px] min-h-screen relative flex flex-col">
+      {/* Background */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+      <div className="absolute inset-0 z-0 bg-black/30" />
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col flex-1">
-        {/* Header */}
-        <div className="px-5 pt-3 pb-4">
-          {loading ? (
-            <>
-              <Skeleton className="w-32 h-7 bg-white/20 rounded" />
-              <Skeleton className="w-44 h-4 bg-white/20 rounded mt-2" />
-            </>
-          ) : (
-            <>
-              <h1 className="text-white text-xl font-extrabold tracking-tight">
-                {unitInfo?.unit}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-white/70 text-xs">
-                  {unitInfo?.moveInDate} 입주예정
-                </span>
-                <span className="bg-white/20 text-[#5BC8FF] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#5BC8FF]/40">
-                  {dday}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
+      {/* Header bar */}
+      <div className="relative z-10 flex items-center justify-between px-4 h-11 bg-black/60 backdrop-blur-sm">
+        {loading ? (
+          <>
+            <Skeleton className="w-24 h-5 bg-white/20 rounded" />
+            <Skeleton className="w-36 h-4 bg-white/20 rounded" />
+          </>
+        ) : (
+          <>
+            <span className="text-white font-bold text-sm">{unitInfo?.unit}</span>
+            <span className="text-white/80 text-xs">
+              {unitInfo?.moveInDate} 입주예정 ({dday})
+            </span>
+          </>
+        )}
+      </div>
 
-        {/* 2x2 Grid */}
-        <div className="flex-1 grid grid-cols-2 gap-3 px-4 pb-[calc(68px+16px)]">
-          {cards.map((card) => (
-            <button
-              key={card.title}
-              onClick={card.action}
-              className="bg-white/90 backdrop-blur-md rounded-[22px] shadow-xl border border-white/60 flex flex-col justify-end p-4 relative overflow-hidden active:scale-[0.97] transition-transform cursor-pointer text-left"
-            >
-              {/* Badge */}
-              {card.badge && (
-                <span className="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                  {card.badge}
-                </span>
-              )}
-
-              {/* Icon */}
-              <div className={cn("absolute top-3 right-3 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl", card.iconBg)}>
-                {card.emoji}
-              </div>
-
-              {/* Text */}
-              <p className="text-[#0f1923] text-[17px] font-extrabold mt-9 tracking-tight">{card.title}</p>
-              <p className="text-gray-500 text-[11px] mt-1 leading-relaxed">{card.sub}</p>
-            </button>
-          ))}
-        </div>
+      {/* 2x2 Grid */}
+      <div className="relative z-10 flex-1 grid grid-cols-2 gap-3 p-3 pb-[calc(68px+12px)]">
+        {CARDS.map((card) => (
+          <button
+            key={card.title}
+            onClick={() => {
+              if (card.path) {
+                navigate(card.path);
+              } else {
+                setActiveGuideTab("잔금·등기");
+                setShowGuide(true);
+              }
+            }}
+            className="bg-white/[0.88] backdrop-blur-md rounded-2xl shadow-lg flex flex-col items-center justify-center gap-3 p-4 active:scale-[0.97] transition-transform cursor-pointer"
+          >
+            <div className={cn("rounded-2xl w-14 h-14 flex items-center justify-center text-3xl", card.iconBg)}>
+              {card.emoji}
+            </div>
+            <div className="text-center">
+              <p className="text-gray-900 font-bold text-base">{card.title}</p>
+              <p className="text-gray-500 text-xs mt-0.5">{card.sub}</p>
+            </div>
+          </button>
+        ))}
       </div>
 
       {/* Bottom Tab Bar */}
