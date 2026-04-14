@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ChevronRight } from "lucide-react";
-import MobileLayout from "@/components/MobileLayout";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import BottomTabBar from "@/components/BottomTabBar";
 
 const GUIDE_TABS = ["잔금·등기", "입주당일", "행정처리", "공과금"];
 
@@ -37,6 +37,19 @@ const GUIDE_DATA: Record<string, { icon: string; title: string; desc: string }[]
   ],
 };
 
+const MOVE_IN_DATE = new Date("2026-05-15");
+
+function getDday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(MOVE_IN_DATE);
+  target.setHours(0, 0, 0, 0);
+  const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  if (diff > 0) return `D-${diff}`;
+  if (diff === 0) return "D-DAY";
+  return `D+${Math.abs(diff)}`;
+}
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [unitInfo, setUnitInfo] = useState<{ unit: string; moveInDate: string } | null>(null);
@@ -56,7 +69,7 @@ const HomePage = () => {
         if (resident) {
           setUnitInfo({
             unit: resident.unit_number || "---동 ---호",
-            moveInDate: "2026.05.15 입주예정",
+            moveInDate: "2026.05.15",
           });
         } else {
           setUnitInfo({ unit: "---동 ---호", moveInDate: "입주일 미정" });
@@ -69,53 +82,93 @@ const HomePage = () => {
     load();
   }, []);
 
+  const dday = getDday();
+
   const cards = [
-    { emoji: "📢", title: "공지사항", sub: "", action: () => navigate("/notice") },
-    { emoji: "🔍", title: "사전점검", sub: "예약 및 현황 확인", action: () => navigate("/reservation") },
-    { emoji: "🏪", title: "제휴업체", sub: "인테리어·이사·대출", action: () => navigate("/services") },
     {
-      emoji: "🏠", title: "입주", sub: "입주 준비 가이드",
+      emoji: "📢", title: "공지사항", sub: "최신 공지 확인",
+      iconBg: "bg-[#FFE8EC]", badge: "NEW 2",
+      action: () => navigate("/notice"),
+    },
+    {
+      emoji: "🔍", title: "사전점검", sub: "정밀 하자 및 예약 관리",
+      iconBg: "bg-[#E8F4FF]",
+      action: () => navigate("/reservation"),
+    },
+    {
+      emoji: "🤝", title: "제휴업체", sub: "인테리어/이사/가전/금융 안내",
+      iconBg: "bg-[#E8FFF0]",
+      action: () => navigate("/services"),
+    },
+    {
+      emoji: "🏠", title: "입주", sub: "입주 준비 가이드 및 정보",
+      iconBg: "bg-[#FFF3E8]",
       action: () => { setActiveGuideTab("잔금·등기"); setShowGuide(true); },
     },
   ];
 
   return (
-    <div className="mx-auto max-w-[390px] min-h-screen bg-background relative flex flex-col">
-      {/* Header */}
-      <div className="h-20 px-5 flex items-center justify-between shrink-0" style={{ backgroundColor: "#1E3A5F" }}>
-        {loading ? (
-          <>
-            <Skeleton className="w-28 h-6 bg-white/20" />
-            <Skeleton className="w-32 h-4 bg-white/20" />
-          </>
-        ) : (
-          <>
-            <span className="text-white font-bold text-lg">{unitInfo?.unit}</span>
-            <span className="text-white/80 text-xs">{unitInfo?.moveInDate}</span>
-          </>
-        )}
+    <div className="mx-auto max-w-[390px] min-h-screen relative flex flex-col bg-gradient-to-b from-[#0a1428] to-[#1a3a5c]">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/40 to-black/70 pointer-events-none" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col flex-1">
+        {/* Header */}
+        <div className="px-5 pt-3 pb-4">
+          {loading ? (
+            <>
+              <Skeleton className="w-32 h-7 bg-white/20 rounded" />
+              <Skeleton className="w-44 h-4 bg-white/20 rounded mt-2" />
+            </>
+          ) : (
+            <>
+              <h1 className="text-white text-xl font-extrabold tracking-tight">
+                {unitInfo?.unit}
+              </h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-white/70 text-xs">
+                  {unitInfo?.moveInDate} 입주예정
+                </span>
+                <span className="bg-white/20 text-[#5BC8FF] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#5BC8FF]/40">
+                  {dday}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* 2x2 Grid */}
+        <div className="flex-1 grid grid-cols-2 gap-3 px-4 pb-[calc(68px+16px)]">
+          {cards.map((card) => (
+            <button
+              key={card.title}
+              onClick={card.action}
+              className="bg-white/90 backdrop-blur-md rounded-[22px] shadow-xl border border-white/60 flex flex-col justify-end p-4 relative overflow-hidden active:scale-[0.97] transition-transform cursor-pointer text-left"
+            >
+              {/* Badge */}
+              {card.badge && (
+                <span className="absolute top-3 left-3 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                  {card.badge}
+                </span>
+              )}
+
+              {/* Icon */}
+              <div className={cn("absolute top-3 right-3 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl", card.iconBg)}>
+                {card.emoji}
+              </div>
+
+              {/* Text */}
+              <p className="text-[#0f1923] text-[17px] font-extrabold mt-9 tracking-tight">{card.title}</p>
+              <p className="text-gray-500 text-[11px] mt-1 leading-relaxed">{card.sub}</p>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* 2x2 Grid — fills remaining space above bottom nav */}
-      <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-3 p-3 pb-[calc(68px+12px)]">
-        {cards.map((card) => (
-          <button
-            key={card.title}
-            onClick={card.action}
-            className="bg-card rounded-2xl shadow-md border border-border flex flex-col items-center justify-center gap-2 transition-transform active:scale-[0.97]"
-          >
-            <span className="text-5xl">{card.emoji}</span>
-            <span className="font-bold text-lg text-foreground">{card.title}</span>
-            {card.sub && (
-              <span className="text-xs text-muted-foreground">{card.sub}</span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Bottom Tab Bar — reuse the shared one */}
+      {/* Bottom Tab Bar */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-40">
-        <BottomTabBarInline />
+        <BottomTabBar />
       </div>
 
       {/* Guide Bottom Sheet */}
@@ -167,9 +220,5 @@ const HomePage = () => {
     </div>
   );
 };
-
-/* Inline bottom tab bar to avoid MobileLayout wrapper (we need custom layout) */
-import BottomTabBar from "@/components/BottomTabBar";
-const BottomTabBarInline = BottomTabBar;
 
 export default HomePage;
